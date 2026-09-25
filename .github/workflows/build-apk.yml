@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -24,21 +24,21 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Project Dependencies
         run: npm install
 
-      - name: Ensure Capacitor Android Platform Exists
+      - name: Sync Public Web Files
         run: |
-          npx cap add android || true
-          npx cap sync android
+          mkdir -p android/app/src/main/assets/public
+          cp -r www/* android/app/src/main/assets/public/ 2>/dev/null || cp -r index.html android/app/src/main/assets/public/ 2>/dev/null || true
 
       - name: Build APK with Gradle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
