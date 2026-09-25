@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseFlow Pro - Executive Dashboard</title>
+    <!-- Google Fonts & Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-sidebar: #1e293b;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+        }
+
+        [data-theme="light"] {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+            --accent-purple: #7c3aed;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .brand h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
+            color: var(--primary);
+            font-size: 0.8rem;
+            background: rgba(59, 130, 246, 0.15);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
+        /* Main Content Layout */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-bar {
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            background-color: var(--bg-sidebar);
+        }
+
+        .top-bar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        button.btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary { background-color: var(--primary); color: #fff; }
+        .btn-secondary { background-color: var(--card-border); color: var(--text-primary); }
+        .btn:hover { opacity: 0.9; }
+
+        .content-body {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Executive KPI Cards */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .kpi-card span {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .kpi-card h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+        .text-purple { color: var(--accent-purple); }
+
+        /* Charts & Forms Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Form Inputs */
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .form-full { grid-column: span 2; }
+
+        .type-toggle-container {
+            grid-column: span 2;
+            display: flex;
+            gap: 12px;
+        }
+
+        .type-toggle-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background-color: var(--bg-main);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .type-toggle-btn input[type="radio"] {
+            display: none;
+        }
+
+        .type-toggle-btn.income-active {
+            background-color: rgba(16, 185, 129, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .type-toggle-btn.expense-active {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        /* Professional Data Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: var(--bg-main);
+            color: var(--text-secondary);
+            padding: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-income { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .badge-expense { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h2>ExpenseFlow</h2>
+                <span>PRO</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Executive Dashboard</li>
+                <li class="nav-item" onclick="switchTab('accounts', this)">💼 Accounts & Wallets</li>
+                <li class="nav-item" onclick="switchTab('tax', this)">📑 Tax Liabilities</li>
+            </ul>
+        </div>
+        <button class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%;">🌓 Switch Theme</button>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <h1 id="page-title">Executive Overview</h1>
+            <div class="actions-group">
+                <button class="btn btn-secondary" onclick="exportToCSV()">📥 Export CSV Report</button>
+            </div>
+        </header>
+
+        <div class="content-body">
+            
+            <!-- TAB 1: EXECUTIVE DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span>Total Net Revenue</span>
+                        <h2 id="kpi-revenue" class="text-green">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Operating Expenses</span>
+                        <h2 id="kpi-expenses" class="text-red">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Estimated Tax (VAT/GST)</span>
+                        <h2 id="kpi-tax" class="text-purple">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Net Margin</span>
+                        <h2 id="kpi-margin">$0.00</h2>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Financial Trend (Income vs. Expenses)</h3>
+                        </div>
+                        <canvas id="trendChart" height="120"></canvas>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Expenses by Category</h3>
+                        </div>
+                        <canvas id="categoryChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Log Business Transaction</h3>
+                        </div>
+                        <form id="txForm" onsubmit="addBusinessTx(event)">
+                            <!-- Clear Income / Expense Toggle -->
+                            <div class="type-toggle-container">
+                                <label class="type-toggle-btn income-active" id="lbl-income" onclick="setTxType('income')">
+                                    <input type="radio" name="txType" value="income" checked> 📈 Income / Revenue
+                                </label>
+                                <label class="type-toggle-btn" id="lbl-expense" onclick="setTxType('expense')">
+                                    <input type="radio" name="txType" value="expense"> 📉 Operating Expense
+                                </label>
+                            </div>
+
+                            <input type="text" id="desc" placeholder="Transaction Description (e.g., Client Invoice / Office Rent)" required class="form-full">
+                            <input type="number" id="amount" placeholder="Amount ($)" step="0.01" required>
+                            <select id="category">
+                                <option value="Sales">Sales Revenue</option>
+                                <option value="Payroll">Payroll / Wages</option>
+                                <option value="Marketing">Marketing & Ads</option>
+                                <option value="Software/SaaS">Software / Subscriptions</option>
+                                <option value="Office & Supplies">Office & Operations</option>
+                            </select>
+                            <select id="account">
+                                <option value="Bank Account">Corporate Bank</option>
+                                <option value="Credit Card">Business Credit Card</option>
+                                <option value="Petty Cash">Petty Cash</option>
+                            </select>
+                            <input type="text" id="vendor" placeholder="Vendor / Client Name">
+                            <input type="text" id="ref" placeholder="Invoice / Ref #">
+                            <input type="number" id="taxRate" placeholder="Tax % (e.g. 5)" step="0.1">
+                            <input type="date" id="date" required>
+                            <button type="submit" class="btn btn-primary form-full">+ Record Transaction Entry</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Filter & Period Controls</h3>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label style="font-size: 0.8rem; color: var(--text-secondary);">Start Date</label>
+                            <input type="date" id="filterStart" onchange="renderApp()">
+                            <label style="font-size: 0.8rem; color: var(--text-secondary);">End Date</label>
+                            <input type="date" id="filterEnd" onchange="renderApp()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Transaction Ledger</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Account</th>
+                                    <th>Client/Vendor</th>
+                                    <th>Ref #</th>
+                                    <th>Type</th>
+                                    <th>Tax</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledgerBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ACCOUNTS & WALLETS -->
+            <div id="tab-accounts" class="tab-content">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span>Corporate Bank Balance</span>
+                        <h2 id="acc-bank" class="text-green">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Credit Card Outstandings</span>
+                        <h2 id="acc-credit" class="text-red">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Petty Cash Hand</span>
+                        <h2 id="acc-cash" class="text-purple">$0.00</h2>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Account Ledger Breakdown</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Account Name</th>
+                                    <th>Total Inflow</th>
+                                    <th>Total Outflow</th>
+                                    <th>Net Account Position</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TAX LIABILITIES -->
+            <div id="tab-tax" class="tab-content">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span>Tax Collected (Sales)</span>
+                        <h2 id="tax-collected" class="text-green">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Tax Paid (Purchases)</span>
+                        <h2 id="tax-paid" class="text-red">$0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Net Tax Payable</span>
+                        <h2 id="tax-payable" class="text-purple">$0.00</h2>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Tax Entry Register</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Ref / Invoice #</th>
+                                    <th>Vendor / Client</th>
+                                    <th>Base Amount</th>
+                                    <th>Calculated Tax</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="taxTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let transactions = JSON.parse(localStorage.getItem('ef_pro_transactions')) || [];
+        let theme = localStorage.getItem('ef_pro_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        let trendChartObj = null;
+        let categoryChartObj = null;
+
+        function setTxType(type) {
+            const lblIncome = document.getElementById('lbl-income');
+            const lblExpense = document.getElementById('lbl-expense');
+
+            if (type === 'income') {
+                lblIncome.classList.add('income-active');
+                lblExpense.classList.remove('expense-active');
+                document.querySelector('input[value="income"]').checked = true;
+            } else {
+                lblExpense.classList.add('expense-active');
+                lblIncome.classList.remove('income-active');
+                document.querySelector('input[value="expense"]').checked = true;
+            }
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+            el.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            const titles = {
+                dashboard: 'Executive Overview',
+                accounts: 'Accounts & Wallets Summary',
+                tax: 'Tax Liabilities & VAT/GST Register'
+            };
+            document.getElementById('page-title').textContent = titles[tabName];
+        }
+
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('ef_pro_theme', theme);
+            renderCharts();
+        }
+
+        function addBusinessTx(e) {
+            e.preventDefault();
+            const taxPct = parseFloat(document.getElementById('taxRate').value) || 0;
+            const rawAmount = parseFloat(document.getElementById('amount').value);
+            const taxVal = rawAmount * (taxPct / 100);
+            const selectedType = document.querySelector('input[name="txType"]:checked').value;
+
+            const tx = {
+                id: Date.now(),
+                desc: document.getElementById('desc').value,
+                amount: rawAmount,
+                tax: taxVal,
+                type: selectedType,
+                category: document.getElementById('category').value,
+                account: document.getElementById('account').value,
+                vendor: document.getElementById('vendor').value || 'N/A',
+                ref: document.getElementById('ref').value || 'N/A',
+                date: document.getElementById('date').value
+            };
+
+            transactions.push(tx);
+            saveAndRender();
+            e.target.reset();
+            setTxType('income');
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function deleteTx(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('ef_pro_transactions', JSON.stringify(transactions));
+            renderApp();
+        }
+
+        function renderApp() {
+            const start = document.getElementById('filterStart').value;
+            const end = document.getElementById('filterEnd').value;
+
+            let filtered = transactions;
+            if (start) filtered = filtered.filter(t => t.date >= start);
+            if (end) filtered = filtered.filter(t => t.date <= end);
+
+            let totalIncome = 0, totalExpense = 0, totalTax = 0;
+
+            filtered.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else totalExpense += t.amount;
+                totalTax += t.tax;
+            });
+
+            document.getElementById('kpi-revenue').textContent = `$${totalIncome.toFixed(2)}`;
+            document.getElementById('kpi-expenses').textContent = `$${totalExpense.toFixed(2)}`;
+            document.getElementById('kpi-tax').textContent = `$${totalTax.toFixed(2)}`;
+            const margin = totalIncome - totalExpense;
+            document.getElementById('kpi-margin').textContent = `$${margin.toFixed(2)}`;
+            document.getElementById('kpi-margin').style.color = margin >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+            // Ledger Render
+            const tbody = document.getElementById('ledgerBody');
+            tbody.innerHTML = filtered.map(t => `
+                <tr>
+                    <td>${t.date}</td>
+                    <td><strong>${t.desc}</strong></td>
+                    <td>${t.category}</td>
+                    <td>${t.account}</td>
+                    <td>${t.vendor}</td>
+                    <td><code>${t.ref}</code></td>
+                    <td><span class="badge ${t.type === 'income' ? 'badge-income' : 'badge-expense'}">${t.type.toUpperCase()}</span></td>
+                    <td>$${t.tax.toFixed(2)}</td>
+                    <td style="font-weight: 600; color: ${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                        $${(t.amount + t.tax).toFixed(2)}
+                    </td>
+                    <td><button class="btn btn-secondary" onclick="deleteTx(${t.id})" style="padding: 2px 8px; font-size: 0.75rem;">Delete</button></td>
+                </tr>
+            `).join('');
+
+            // Render Accounts Tab Data
+            renderAccountsTab(filtered);
+
+            // Render Tax Tab Data
+            renderTaxTab(filtered);
+
+            // Render Charts
+            renderCharts(filtered);
+        }
+
+        function renderAccountsTab(data) {
+            const accounts = {
+                'Bank Account': { in: 0, out: 0 },
+                'Credit Card': { in: 0, out: 0 },
+                'Petty Cash': { in: 0, out: 0 }
+            };
+
+            data.forEach(t => {
+                if (accounts[t.account]) {
+                    if (t.type === 'income') accounts[t.account].in += (t.amount + t.tax);
+                    else accounts[t.account].out += (t.amount + t.tax);
+                }
+            });
+
+            const bankBal = accounts['Bank Account'].in - accounts['Bank Account'].out;
+            const creditBal = accounts['Credit Card'].out - accounts['Credit Card'].in;
+            const cashBal = accounts['Petty Cash'].in - accounts['Petty Cash'].out;
+
+            document.getElementById('acc-bank').textContent = `$${bankBal.toFixed(2)}`;
+            document.getElementById('acc-credit').textContent = `$${creditBal.toFixed(2)}`;
+            document.getElementById('acc-cash').textContent = `$${cashBal.toFixed(2)}`;
+
+            const accBody = document.getElementById('accountsTableBody');
+            accBody.innerHTML = Object.entries(accounts).map(([name, val]) => `
+                <tr>
+                    <td><strong>${name}</strong></td>
+                    <td class="text-green">$${val.in.toFixed(2)}</td>
+                    <td class="text-red">$${val.out.toFixed(2)}</td>
+                    <td style="font-weight: 700;">$${(val.in - val.out).toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTaxTab(data) {
+            let collected = 0;
+            let paid = 0;
+
+            const taxRows = [];
+
+            data.forEach(t => {
+                if (t.tax > 0) {
+                    if (t.type === 'income') collected += t.tax;
+                    else paid += t.tax;
+
+                    taxRows.push(`
+                        <tr>
+                            <td>${t.date}</td>
+                            <td><code>${t.ref}</code></td>
+                            <td>${t.vendor}</td>
+                            <td>$${t.amount.toFixed(2)}</td>
+                            <td style="font-weight: 600;">$${t.tax.toFixed(2)}</td>
+                            <td><span class="badge ${t.type === 'income' ? 'badge-income' : 'badge-expense'}">${t.type.toUpperCase()}</span></td>
+                        </tr>
+                    `);
+                }
+            });
+
+            document.getElementById('tax-collected').textContent = `$${collected.toFixed(2)}`;
+            document.getElementById('tax-paid').textContent = `$${paid.toFixed(2)}`;
+            document.getElementById('tax-payable').textContent = `$${(collected - paid).toFixed(2)}`;
+
+            document.getElementById('taxTableBody').innerHTML = taxRows.length > 0 ? taxRows.join('') : '<tr><td colspan="6" style="text-align:center;">No taxable transactions logged.</td></tr>';
+        }
+
+        function renderCharts(data = transactions) {
+            const isDark = theme === 'dark';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            const inc = data.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const exp = data.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+
+            if (trendChartObj) trendChartObj.destroy();
+            trendChartObj = new Chart(document.getElementById('trendChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Expenses'],
+                    datasets: [{
+                        data: [inc, exp],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor } },
+                        y: { ticks: { color: textColor } }
+                    }
+                }
+            });
+
+            const categories = {};
+            data.filter(t => t.type === 'expense').forEach(t => {
+                categories[t.category] = (categories[t.category] || 0) + t.amount;
+            });
+
+            if (categoryChartObj) categoryChartObj.destroy();
+            categoryChartObj = new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
+            });
+        }
+
+        function exportToCSV() {
+            if (transactions.length === 0) return alert('No transactions recorded to export.');
+            let csv = 'ID,Date,Description,Category,Account,Vendor,Ref,Type,Amount,Tax\n';
+            transactions.forEach(t => {
+                csv += `"${t.id}","${t.date}","${t.desc}","${t.category}","${t.account}","${t.vendor}","${t.ref}","${t.type}",${t.amount},${t.tax}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `ExpenseFlow_Report_${new Date().toISOString().split('T')[0]}.csv`);
+            a.click();
+        }
+
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        renderApp();
+    </script>
+</body>
+</html>

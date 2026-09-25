@@ -1,0 +1,6 @@
+{
+  "appId": "com.expenseflow.app",
+  "appName": "ExpenseFlow",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
