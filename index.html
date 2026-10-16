@@ -273,8 +273,8 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
             <select id="currencySelector" onchange="changeCurrency(this.value)" style="padding: 6px 10px; font-size: 0.8rem;">
-                <option value="$">USD ($)</option>
                 <option value="₹">INR (₹)</option>
+                <option value="$">USD ($)</option>
                 <option value="€">EUR (€)</option>
                 <option value="£">GBP (£)</option>
             </select>
@@ -297,26 +297,26 @@
                 <div class="kpi-container">
                     <div class="kpi-card">
                         <span>Total Income</span>
-                        <h2 id="kpi-revenue" class="text-green">$0.00</h2>
+                        <h2 id="kpi-revenue" class="text-green">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
                         <span>Total Expenses</span>
-                        <h2 id="kpi-expenses" class="text-red">$0.00</h2>
+                        <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
                         <span>Net Savings</span>
-                        <h2 id="kpi-margin">$0.00</h2>
+                        <h2 id="kpi-margin">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
                         <span>Monthly Subscriptions</span>
-                        <h2 id="kpi-subs" class="text-purple">$0.00</h2>
+                        <h2 id="kpi-subs" class="text-purple">₹0.00</h2>
                     </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Month-over-Month Comparison</h3>
+                            <h3>Financial Summary</h3>
                         </div>
                         <canvas id="trendChart" height="120"></canvas>
                     </div>
@@ -336,10 +336,10 @@
                     
                     <div class="presets-row">
                         <span style="font-size: 0.8rem; color: var(--text-secondary); align-self: center;">Quick Add:</span>
-                        <div class="preset-chip" onclick="quickAdd('Coffee', 5, 'Dining Out')">☕ $5 Coffee</div>
-                        <div class="preset-chip" onclick="quickAdd('Lunch', 15, 'Dining Out')">🥗 $15 Lunch</div>
-                        <div class="preset-chip" onclick="quickAdd('Groceries', 50, 'Groceries')">🛒 $50 Groceries</div>
-                        <div class="preset-chip" onclick="quickAdd('Gas Fill-up', 40, 'Utilities')">⛽ $40 Gas</div>
+                        <div class="preset-chip" onclick="quickAdd('Tea/Coffee', 50, 'Dining Out')">☕ ₹50 Chai/Coffee</div>
+                        <div class="preset-chip" onclick="quickAdd('Lunch', 150, 'Dining Out')">🥗 ₹150 Lunch</div>
+                        <div class="preset-chip" onclick="quickAdd('Groceries', 500, 'Groceries')">🛒 ₹500 Groceries</div>
+                        <div class="preset-chip" onclick="quickAdd('Petrol Fill-up', 500, 'Utilities')">⛽ ₹500 Petrol</div>
                     </div>
 
                     <form onsubmit="addPersonalTx(event)">
@@ -353,7 +353,7 @@
                         </div>
 
                         <div><input type="text" id="desc" placeholder="Description" required></div>
-                        <div><input type="number" step="0.01" id="amount" placeholder="Amount" required></div>
+                        <div><input type="number" step="0.01" id="amount" placeholder="Amount (₹)" required></div>
                         <div>
                             <select id="category" required>
                                 <option value="Salary">Salary</option>
@@ -369,6 +369,7 @@
                         <div>
                             <select id="account" required>
                                 <option value="Bank Account">Bank Account</option>
+                                <option value="UPI / Wallet">UPI / Wallet</option>
                                 <option value="Credit Card">Credit Card</option>
                                 <option value="Petty Cash">Cash</option>
                             </select>
@@ -422,7 +423,7 @@
                                 <option value="Health & Fitness">Health & Fitness</option>
                             </select>
                         </div>
-                        <div><input type="number" step="0.01" id="budgetAmount" placeholder="Monthly Cap" required></div>
+                        <div><input type="number" step="0.01" id="budgetAmount" placeholder="Monthly Cap (₹)" required></div>
                         <div class="form-full"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Budget Limit</button></div>
                     </form>
                 </div>
@@ -442,8 +443,8 @@
                         <h3>Add Recurring Bill / Subscription</h3>
                     </div>
                     <form onsubmit="addSubscription(event)">
-                        <div><input type="text" id="subName" placeholder="Service (e.g. Netflix)" required></div>
-                        <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost" required></div>
+                        <div><input type="text" id="subName" placeholder="Service (e.g. Netflix, Wifi)" required></div>
+                        <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost (₹)" required></div>
                         <div class="form-full"><input type="date" id="subDueDate" required></div>
                         <div class="form-full"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Add Subscription</button></div>
                     </form>
@@ -472,8 +473,8 @@
                     </div>
                     <form onsubmit="addGoal(event)">
                         <div><input type="text" id="goalName" placeholder="Goal Name (e.g. Emergency Fund)" required></div>
-                        <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount" required></div>
-                        <div><input type="number" step="0.01" id="goalSaved" placeholder="Already Saved" value="0"></div>
+                        <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount (₹)" required></div>
+                        <div><input type="number" step="0.01" id="goalSaved" placeholder="Already Saved (₹)" value="0"></div>
                         <div><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 100%;">Create Goal</button></div>
                     </form>
                 </div>
@@ -490,9 +491,9 @@
     </div>
 
     <script>
-        let currSym = localStorage.getItem('ef_curr') || '$';
+        let currSym = localStorage.getItem('ef_curr') || '₹';
         let transactions = JSON.parse(localStorage.getItem('ef_personal_transactions')) || [];
-        let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 300, 'Dining Out': 150 };
+        let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 10000, 'Dining Out': 5000 };
         let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
         let goals = JSON.parse(localStorage.getItem('ef_goals')) || [];
         let theme = localStorage.getItem('ef_personal_theme') || 'dark';
@@ -544,7 +545,7 @@
                 amount,
                 type: 'expense',
                 category,
-                account: 'Bank Account',
+                account: 'UPI / Wallet',
                 date: new Date().toISOString().split('T')[0]
             });
             saveAndRender();
