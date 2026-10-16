@@ -160,7 +160,7 @@
                         <span>Dashboard & Ledger</span>
                     </button>
                     <button onclick="switchTab('sms')" id="nav-sms" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-[#fa-envelope] fa-comment-sms text-cyan-400 w-5"></i>
+                        <i class="fa-solid fa-comment-sms text-cyan-400 w-5"></i>
                         <span>SMS Auto-Parser</span>
                         <span class="ml-auto text-[10px] bg-cyan-500/20 text-cyan-300 font-bold px-2 py-0.5 rounded-full border border-cyan-500/30">AI</span>
                     </button>
@@ -439,7 +439,7 @@
                     <div class="pt-4 border-t border-white/10">
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Parser Execution Log</h4>
                         <div id="sms-log-output" class="p-4 rounded-2xl bg-slate-950/80 border border-white/10 font-mono text-xs text-cyan-300 space-y-1">
-                            > Parser ready. Enter or select an SMS text above.
+                            &gt; Parser ready. Enter or select an SMS text above.
                         </div>
                     </div>
                 </div>
@@ -488,196 +488,164 @@
                     </div>
 
                     <div class="lg:col-span-8 glass-panel p-6 rounded-3xl">
-                        <h3 class="font-display font-bold text-lg text-white mb-4">Valuation Ledger</h3>
-                        <div class="overflow-x-auto rounded-2xl border border-white/10">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-900/80 text-slate-400 uppercase border-b border-white/10">
-                                    <tr>
-                                        <th class="p-3">Item</th>
-                                        <th class="p-3">Type</th>
-                                        <th class="p-3">Amount</th>
-                                        <th class="p-3 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="nw-table-body" class="divide-y divide-white/5"></tbody>
-                            </table>
+                        <h3 class="font-display font-bold text-lg text-white mb-4">Balance Sheet Assets &amp; Liabilities</h3>
+                        <div id="nw-items-list" class="space-y-2">
+                            <!-- Dynamic NW items -->
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 4: SIP & INVESTMENT PORTFOLIO -->
+            <!-- TAB 4: SIP INVESTMENTS -->
             <section id="tab-page-sip" class="tab-page hidden space-y-6">
-                <div class="glass-panel p-6 rounded-3xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-display font-bold text-lg text-white">Monthly SIP & Investments Tracker</h3>
-                        <span id="sip-total-monthly" class="text-xs font-bold text-purple-400 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Monthly Commitment: ₹0</span>
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-display font-bold text-lg text-white">SIP &amp; Investment Portfolio</h3>
+                            <p class="text-xs text-slate-400">Track recurring mutual funds, stocks, and assets.</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-purple-400 font-display" id="sip-total-monthly">Monthly Commitment: ₹0.00</h3>
                     </div>
 
-                    <form onsubmit="addSipItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
-                        <input type="text" id="sip-name" placeholder="Fund/Asset Name (e.g. Nifty 50 Index)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="sip-amount" placeholder="Monthly SIP (₹)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="sip-date" min="1" max="31" placeholder="Deduction Day (1-31)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <button type="submit" class="py-2 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-lg shadow-purple-500/20">
-                            Add SIP Plan
-                        </button>
+                    <form onsubmit="addSipItem(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <input type="text" id="sip-name" placeholder="Fund / Asset Name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" step="0.01" id="sip-amount" placeholder="Monthly Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" id="sip-date" placeholder="SIP Date (1-31)" min="1" max="31" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-lg shadow-purple-600/20">Add SIP</button>
                     </form>
 
-                    <div id="sip-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-4">
+                        <!-- Dynamic SIP Cards -->
+                    </div>
                 </div>
             </section>
 
-            <!-- TAB 5: BILL DUE DATE CALENDAR -->
+            <!-- TAB 5: BILL CALENDAR -->
             <section id="tab-page-calendar" class="tab-page hidden space-y-6">
-                <div class="glass-panel p-6 rounded-3xl">
-                    <div class="flex items-center justify-between mb-6">
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
                         <h3 class="font-display font-bold text-lg text-white">Bill Due Date Calendar</h3>
-                        <span class="text-xs text-pink-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Auto-Populates Subscriptions & SIPs</span>
+                        <span class="text-xs font-semibold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-3 py-1 rounded-full">October 2026</span>
                     </div>
-
-                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs text-slate-400 mb-2">
-                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center text-xs">
+                        <!-- Dynamic Calendar -->
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
                 </div>
             </section>
 
-            <!-- TAB 6: EXPENSE SPLITTER & SETTLEMENTS -->
+            <!-- TAB 6: EXPENSE SPLITTER -->
             <section id="tab-page-splitter" class="tab-page hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4">
-                        <h3 class="font-display font-bold text-lg text-white">Add Shared Group Expense</h3>
-                        <form onsubmit="addGroupExpense(event)" class="space-y-3">
-                            <input type="text" id="split-desc" placeholder="Expense description (e.g. Dinner Party)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            <input type="number" step="0.01" id="split-amount" placeholder="Total bill amount" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            <input type="text" id="split-payer" placeholder="Paid by (e.g. You or Rahul)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            <input type="text" id="split-members" placeholder="Comma separated members (e.g. You, Rahul, Priya)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            <button type="submit" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20">
-                                Calculate & Split
-                            </button>
-                        </form>
-                    </div>
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white">Expense Splitter &amp; Group Settlement</h3>
+                    
+                    <form onsubmit="addSplitterExpense(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <input type="text" id="split-title" placeholder="Description (e.g. Dinner)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" step="0.01" id="split-amount" placeholder="Total Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="text" id="split-payer" placeholder="Paid By (e.g. You)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="text" id="split-members" placeholder="Split Between (e.g. You, Rahul, Alex)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="md:col-span-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20">Add Split Expense</button>
+                    </form>
 
-                    <div class="lg:col-span-7 glass-panel p-6 rounded-3xl space-y-4">
-                        <h3 class="font-display font-bold text-lg text-white">Settlement Balance Sheets</h3>
-                        <div id="split-summary-cards" class="space-y-3"></div>
+                    <div id="splitter-list" class="space-y-3 pt-4">
+                        <!-- Dynamic Split Expenses -->
                     </div>
                 </div>
             </section>
 
             <!-- TAB 7: BUDGET CAPS -->
             <section id="tab-page-budgets" class="tab-page hidden space-y-6">
-                <div class="glass-panel p-6 rounded-3xl space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-display font-bold text-lg text-white">Category Budget Limits</h3>
-                        <button onclick="configureDailyCap()" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-indigo-300 hover:text-white">
-                            Set Daily Threshold
-                        </button>
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white">Category Budget Limits</h3>
+                    <div id="budget-caps-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Dynamic Budget Progress Bars -->
                     </div>
-
-                    <div id="budgets-container" class="space-y-4"></div>
                 </div>
             </section>
 
-            <!-- TAB 8: SUBSCRIPTIONS MANAGER -->
+            <!-- TAB 8: SUBSCRIPTIONS -->
             <section id="tab-page-subscriptions" class="tab-page hidden space-y-6">
                 <div class="glass-panel p-6 rounded-3xl space-y-4">
-                    <h3 class="font-display font-bold text-lg text-white">Active Subscriptions</h3>
-                    <form onsubmit="addSubscription(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <input type="text" id="sub-name" placeholder="Service (e.g. Netflix)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="sub-cost" placeholder="Monthly Cost" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="sub-day" min="1" max="31" placeholder="Renewal Day (1-31)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <button type="submit" class="py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20">
-                            Add Subscription
-                        </button>
+                    <h3 class="font-display font-bold text-lg text-white">Recurring Subscriptions</h3>
+                    <form onsubmit="addSubscription(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <input type="text" id="sub-name" placeholder="Service (e.g. Netflix)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" step="0.01" id="sub-cost" placeholder="Cost" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="date" id="sub-due" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs">Add Subscription</button>
                     </form>
-
-                    <div id="subs-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4"></div>
+                    <div id="sub-list" class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4">
+                        <!-- Dynamic Subscriptions -->
+                    </div>
                 </div>
             </section>
 
             <!-- TAB 9: SAVINGS GOALS -->
             <section id="tab-page-goals" class="tab-page hidden space-y-6">
                 <div class="glass-panel p-6 rounded-3xl space-y-4">
-                    <h3 class="font-display font-bold text-lg text-white">Savings Goals Tracker</h3>
-                    <form onsubmit="addGoal(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <input type="text" id="goal-name" placeholder="Goal (e.g. iPhone 18)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="goal-target" placeholder="Target Amount" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <input type="number" id="goal-saved" placeholder="Current Saved" required class="glass-input rounded-2xl px-4 py-2 text-xs">
-                        <button type="submit" class="py-2 rounded-2xl bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20">
-                            Create Goal
-                        </button>
+                    <h3 class="font-display font-bold text-lg text-white">Savings Goals</h3>
+                    <form onsubmit="addSavingsGoal(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input type="text" id="goal-name" placeholder="Goal (e.g. New Phone)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" step="0.01" id="goal-target" placeholder="Target Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-xs">Create Goal</button>
                     </form>
-
-                    <div id="goals-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4"></div>
+                    <div id="goals-list" class="space-y-4 pt-4">
+                        <!-- Dynamic Goals -->
+                    </div>
                 </div>
             </section>
 
         </main>
     </div>
 
-    <!-- APPLICATION LOGIC -->
+    <!-- APPLICATION LOGIC JavaScript -->
     <script>
-        // GLOBAL STATE & LOCAL STORAGE INITIALIZATION
-        let state = {
-            currency: '₹',
-            txType: 'expense',
-            dailyCap: 2000,
-            transactions: JSON.parse(localStorage.getItem('ef_tx')) || [
-                { id: 1, desc: 'Monthly Salary Credit', amount: 85000, type: 'income', category: 'Salary', account: 'Bank Account', date: '2026-10-01' },
-                { id: 2, desc: 'Swiggy Gourmet Order', amount: 450, type: 'expense', category: 'Dining Out', account: 'UPI / Wallet', date: '2026-10-15' },
-                { id: 3, desc: 'Reliance Fresh Groceries', amount: 2300, type: 'expense', category: 'Groceries', account: 'Credit Card', date: '2026-10-16' }
-            ],
-            networth: JSON.parse(localStorage.getItem('ef_nw')) || [
-                { id: 1, name: 'HDFC Savings Account', val: 125000, type: 'asset' },
-                { id: 2, name: 'Mutual Fund Equity Portfolio', val: 340000, type: 'asset' },
-                { id: 3, name: 'Personal Credit Card Bill', val: 18500, type: 'liability' }
-            ],
-            sips: JSON.parse(localStorage.getItem('ef_sips')) || [
-                { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
-                { id: 2, name: 'Parag Parikh Flexi Cap', amount: 7500, date: 15 }
-            ],
-            subscriptions: JSON.parse(localStorage.getItem('ef_subs')) || [
-                { id: 1, name: 'Netflix Premium 4K', cost: 649, day: 10 },
-                { id: 2, name: 'Spotify Duo Plan', cost: 149, day: 22 }
-            ],
-            goals: JSON.parse(localStorage.getItem('ef_goals')) || [
-                { id: 1, name: 'Japan Travel Fund', target: 200000, saved: 115000 },
-                { id: 2, name: 'Emergency Liquid Runway', target: 300000, saved: 210000 }
-            ],
-            splits: JSON.parse(localStorage.getItem('ef_splits')) || [
-                { id: 1, desc: 'Weekend Goa Villa Stay', amount: 12000, payer: 'You', members: ['You', 'Rahul', 'Ananya'] }
-            ],
-            categoryBudgets: {
-                'Groceries': 10000,
-                'Dining Out': 6000,
-                'Transport': 5000,
-                'Utilities': 8000,
-                'Entertainment': 4000
-            }
-        };
+        // Global State
+        let currSym = '₹';
+        let txType = 'expense';
+        let cashflowChart = null;
+        let categoryChart = null;
 
-        let chartCashflowInstance = null;
-        let chartCategoryInstance = null;
+        // Persistent Collections
+        let transactions = JSON.parse(localStorage.getItem('ef_transactions')) || [
+            { id: 1, desc: 'Swiggy Dinner', amount: 320, type: 'expense', category: 'Dining Out', account: 'UPI / Wallet', date: '2026-10-15' },
+            { id: 2, desc: 'Monthly Salary', amount: 85000, type: 'income', category: 'Salary', account: 'Bank Account', date: '2026-10-01' },
+            { id: 3, desc: 'Fuel Refill', amount: 500, type: 'expense', category: 'Transport', account: 'Credit Card', date: '2026-10-14' }
+        ];
 
-        // INITIALIZATION
+        let networthItems = JSON.parse(localStorage.getItem('ef_networth')) || [
+            { id: 1, name: 'Bank Balance', value: 125000, type: 'asset' },
+            { id: 2, name: 'Mutual Funds', value: 340000, type: 'asset' },
+            { id: 3, name: 'Credit Card Loan', value: 15000, type: 'liability' }
+        ];
+
+        let sips = JSON.parse(localStorage.getItem('ef_sips')) || [
+            { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
+            { id: 2, name: 'Smallcap Discovery', amount: 2500, date: 15 }
+        ];
+
+        let splits = JSON.parse(localStorage.getItem('ef_splits')) || [];
+        let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [
+            { id: 1, name: 'Netflix 4K', cost: 649, due: '2026-10-22' },
+            { id: 2, name: 'Spotify Premium', cost: 119, due: '2026-10-28' }
+        ];
+        let goals = JSON.parse(localStorage.getItem('ef_goals')) || [
+            { id: 1, name: 'Emergency Fund', target: 100000, saved: 45000 }
+        ];
+
+        const categoryCaps = { 'Groceries': 15000, 'Dining Out': 8000, 'Transport': 6000, 'Entertainment': 5000 };
+
+        // Initialization
         window.addEventListener('DOMContentLoaded', () => {
-            // Set default date input to today
-            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('tx-date').valueAsDate = new Date();
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
-            renderApp();
             initCharts();
+            renderApp();
+            
+            // Listen for native Capacitor SMS event
+            window.addEventListener('onSMSReceived', (e) => {
+                if (e.detail && e.detail.body) autoParseSMS(e.detail.body);
+            });
         });
-
-        function saveState() {
-            localStorage.setItem('ef_tx', JSON.stringify(state.transactions));
-            localStorage.setItem('ef_nw', JSON.stringify(state.networth));
-            localStorage.setItem('ef_sips', JSON.stringify(state.sips));
-            localStorage.setItem('ef_subs', JSON.stringify(state.subscriptions));
-            localStorage.setItem('ef_goals', JSON.stringify(state.goals));
-            localStorage.setItem('ef_splits', JSON.stringify(state.splits));
-        }
 
         function updateLiveClock() {
             const now = new Date();
@@ -685,33 +653,22 @@
             document.getElementById('live-time-str').innerText = now.toLocaleTimeString('en-US', { hour12: false }) + ' IST';
         }
 
-        function changeCurrency(curr) {
-            state.currency = curr;
-            renderApp();
-        }
-
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-page').forEach(page => page.classList.add('hidden'));
             document.getElementById(`tab-page-${tabId}`).classList.remove('hidden');
 
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('bg-indigo-600/30', 'border', 'border-indigo-500/40', 'text-white', 'shadow-lg');
-                el.classList.add('text-slate-400');
+            document.querySelectorAll('#nav-container button').forEach(btn => {
+                btn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5";
             });
 
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if (activeBtn) {
-                activeBtn.classList.add('bg-indigo-600/30', 'border', 'border-indigo-500/40', 'text-white', 'shadow-lg');
-                activeBtn.classList.remove('text-slate-400');
+                activeBtn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10";
             }
-
-            if (tabId === 'calendar') renderCalendar();
-            if (tabId === 'budgets') renderBudgets();
         }
 
-        // TRANSACTION MANAGEMENT
         function setTxType(type) {
-            state.txType = type;
+            txType = type;
             const expBtn = document.getElementById('tx-type-exp');
             const incBtn = document.getElementById('tx-type-inc');
             if (type === 'expense') {
@@ -738,463 +695,346 @@
             const account = document.getElementById('tx-account').value;
             const date = document.getElementById('tx-date').value;
 
-            state.transactions.unshift({
-                id: Date.now(),
-                desc, amount, type: state.txType, category, account, date
+            transactions.unshift({ id: Date.now(), desc, amount, type: txType, category, account, date });
+            saveAndRender();
+            document.getElementById('tx-form').reset();
+            document.getElementById('tx-date').valueAsDate = new Date();
+        }
+
+        function deleteTx(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        function changeCurrency(val) {
+            currSym = val;
+            renderApp();
+        }
+
+        function renderApp() {
+            localStorage.setItem('ef_transactions', JSON.stringify(transactions));
+            localStorage.setItem('ef_networth', JSON.stringify(networthItems));
+            localStorage.setItem('ef_sips', JSON.stringify(sips));
+            localStorage.setItem('ef_splits', JSON.stringify(splits));
+            localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
+            localStorage.setItem('ef_goals', JSON.stringify(goals));
+
+            // Calculators
+            let inc = transactions.filter(t => t.type === 'income').reduce((a,b) => a + b.amount, 0);
+            let exp = transactions.filter(t => t.type === 'expense').reduce((a,b) => a + b.amount, 0);
+            let assets = networthItems.filter(i => i.type === 'asset').reduce((a,b) => a + b.value, 0);
+            let liab = networthItems.filter(i => i.type === 'liability').reduce((a,b) => a + b.value, 0);
+
+            document.getElementById('kpi-income').innerText = `${currSym}${inc.toLocaleString()}`;
+            document.getElementById('kpi-expense').innerText = `${currSym}${exp.toLocaleString()}`;
+            document.getElementById('kpi-cashflow').innerText = `${currSym}${(inc - exp).toLocaleString()}`;
+            document.getElementById('kpi-networth').innerText = `${currSym}${(assets - liab).toLocaleString()}`;
+
+            // Dynamic Island Status
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayExp = transactions.filter(t => t.type === 'expense' && t.date === todayStr).reduce((a,b) => a + b.amount, 0);
+            document.getElementById('island-spend-status').innerText = `${currSym}${todayExp.toLocaleString()} spent / ${currSym}2,000 Cap`;
+
+            // Ledger Table
+            const tbody = document.getElementById('tx-table-body');
+            const search = document.getElementById('search-tx').value.toLowerCase();
+            const catFilter = document.getElementById('filter-category').value;
+
+            const filtered = transactions.filter(t => {
+                const matchSearch = t.desc.toLowerCase().includes(search);
+                const matchCat = catFilter === 'ALL' || t.category === catFilter;
+                return matchSearch && matchCat;
             });
 
-            document.getElementById('tx-form').reset();
-            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-            saveState();
-            renderApp();
-            updateCharts();
+            tbody.innerHTML = filtered.map(t => `
+                <tr class="hover:bg-white/5 transition-all">
+                    <td class="p-3.5 text-slate-400 font-mono">${t.date}</td>
+                    <td class="p-3.5 font-semibold text-white">${t.desc}</td>
+                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10">${t.category}</span></td>
+                    <td class="p-3.5 text-slate-400">${t.account}</td>
+                    <td class="p-3.5 font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">${t.type === 'income' ? '+' : '-'}${currSym}${t.amount.toLocaleString()}</td>
+                    <td class="p-3.5 text-right"><button onclick="deleteTx(${t.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+
+            renderNetWorth();
+            renderSIPs();
+            renderCalendar();
+            renderSplitter();
+            renderBudgets();
+            renderSubscriptions();
+            renderGoals();
+            updateCharts(inc, exp);
         }
 
-        function deleteTransaction(id) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
-            saveState();
-            renderApp();
-            updateCharts();
-        }
+        function saveAndRender() { renderApp(); }
 
-        // BANK SMS PARSER
-        function loadSampleSMS(type) {
-            const input = document.getElementById('sms-text-input');
-            if (type === 'swiggy') input.value = "Rs 250.00 debited from A/C **1234 on 16-Oct-26 at Swiggy via UPI Ref 883920";
-            if (type === 'fuel') input.value = "Alert: INR 500.00 spent on your Credit Card xx9012 at HP Petrol Pump on 16-Oct-26.";
-            if (type === 'salary') input.value = "Rs 45000.00 credited to A/C **1234 on 01-Oct-26 by Salary Direct Deposit.";
-        }
-
+        // SMS Parser Engine
         function parseAndLogSMS() {
-            const text = document.getElementById('sms-text-input').value;
-            const log = document.getElementById('sms-log-output');
+            const raw = document.getElementById('sms-text-input').value;
+            autoParseSMS(raw);
+        }
 
-            if (!text.trim()) {
-                log.innerText = "> Error: SMS text input is empty.";
-                return;
-            }
+        function autoParseSMS(smsText) {
+            if (!smsText.trim()) return;
+            const logBox = document.getElementById('sms-log-output');
 
-            const isIncome = /credited|received|added|deposited/i.test(text);
-            const isExpense = /debited|spent|paid|withdrawn/i.test(text);
+            const isDebit = /debited|spent|paid|withdrawn|sent/i.test(smsText);
+            const isCredit = /credited|received|deposited/i.test(smsText);
 
-            const amtMatch = text.match(/(?:RS|INR|₹)\s?([\d,]+\.?\d*)/i);
+            const amtMatch = smsText.match(/(?:RS|INR|₹)\s?([\d,]+\.?\d*)/i);
             const amount = amtMatch ? parseFloat(amtMatch[1].replace(/,/g, '')) : 0;
 
-            let merchant = "Bank Alert Transaction";
-            const merchMatch = text.match(/(?:at|to|info)\s+([A-Za-z0-9\s]+?)(?=\s+on|\s+ref|\s+via|\.|$)/i);
-            if (merchMatch) merchant = merchMatch[1].trim();
+            let merchant = "Auto Bank Transaction";
+            const merchMatch = smsText.match(/(?:at|to|info)\s+([A-Za-z0-9\s]+?)(?=\s+on|\s+ref|\s+avail|\.|$)/i);
+            if (merchMatch && merchMatch[1]) merchant = merchMatch[1].trim();
 
             if (amount > 0) {
-                const type = isIncome ? 'income' : 'expense';
-                state.transactions.unshift({
+                const type = isCredit ? 'income' : 'expense';
+                transactions.unshift({
                     id: Date.now(),
                     desc: `[SMS] ${merchant}`,
                     amount: amount,
                     type: type,
-                    category: 'General',
+                    category: isCredit ? 'Salary' : 'General',
                     account: 'UPI / Wallet',
                     date: new Date().toISOString().split('T')[0]
                 });
 
-                saveState();
-                renderApp();
-                updateCharts();
-
-                log.innerHTML = `> SUCCESS: Parsed ${state.currency}${amount} (${type.toUpperCase()}) for '${merchant}'. Logged into ledger.`;
-                triggerNotification(`SMS Logged: ${state.currency}${amount} at ${merchant}`);
+                logBox.innerHTML = `&gt; <span class="text-emerald-400">SUCCESS:</span> Parsed ${type.toUpperCase()} of ${currSym}${amount} at "${merchant}". Saved to ledger.`;
+                saveAndRender();
             } else {
-                log.innerText = "> FAIL: Could not detect valid monetary amount from SMS text.";
+                logBox.innerHTML = `&gt; <span class="text-rose-400">ERROR:</span> Could not extract numeric amount from SMS pattern.`;
             }
         }
 
-        // NET WORTH MANAGEMENT
+        function loadSampleSMS(key) {
+            const samples = {
+                swiggy: "Rs 250.00 debited from A/C **1234 on 16-Oct-26 at Swiggy via UPI Ref 98765.",
+                fuel: "INR 500.00 spent on your Credit Card at BPCL Petrol Pump on 16-Oct-26.",
+                salary: "Rs 85000.00 credited to A/C **5678 on 01-Oct-26 by Salary Deposit."
+            };
+            document.getElementById('sms-text-input').value = samples[key];
+        }
+
+        // Net Worth Balance Sheet
         function addNetWorthItem(e) {
             e.preventDefault();
             const name = document.getElementById('nw-item-name').value;
-            const val = parseFloat(document.getElementById('nw-item-val').value);
+            const value = parseFloat(document.getElementById('nw-item-val').value);
             const type = document.getElementById('nw-item-type').value;
 
-            state.networth.push({ id: Date.now(), name, val, type });
-            e.target.reset();
-            saveState();
-            renderApp();
+            networthItems.push({ id: Date.now(), name, value, type });
+            saveAndRender();
         }
 
-        function deleteNetWorthItem(id) {
-            state.networth = state.networth.filter(i => i.id !== id);
-            saveState();
-            renderApp();
+        function renderNetWorth() {
+            let assets = networthItems.filter(i => i.type === 'asset').reduce((a,b) => a + b.value, 0);
+            let liab = networthItems.filter(i => i.type === 'liability').reduce((a,b) => a + b.value, 0);
+
+            document.getElementById('nw-assets-sum').innerText = `${currSym}${assets.toLocaleString()}`;
+            document.getElementById('nw-liabilities-sum').innerText = `${currSym}${liab.toLocaleString()}`;
+            document.getElementById('nw-position-sum').innerText = `${currSym}${(assets - liab).toLocaleString()}`;
+
+            const list = document.getElementById('nw-items-list');
+            list.innerHTML = networthItems.map(i => `
+                <div class="glass-card p-3 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-white">${i.name}</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">${i.type}</p>
+                    </div>
+                    <span class="font-bold text-xs ${i.type === 'asset' ? 'text-emerald-400' : 'text-rose-400'}">${currSym}${i.value.toLocaleString()}</span>
+                </div>
+            `).join('');
         }
 
-        // SIP MANAGEMENT
+        // SIP Tracker
         function addSipItem(e) {
             e.preventDefault();
             const name = document.getElementById('sip-name').value;
             const amount = parseFloat(document.getElementById('sip-amount').value);
             const date = parseInt(document.getElementById('sip-date').value);
 
-            state.sips.push({ id: Date.now(), name, amount, date });
-            e.target.reset();
-            saveState();
-            renderApp();
+            sips.push({ id: Date.now(), name, amount, date });
+            saveAndRender();
         }
 
-        function deleteSip(id) {
-            state.sips = state.sips.filter(s => s.id !== id);
-            saveState();
-            renderApp();
+        function renderSIPs() {
+            const total = sips.reduce((a,b) => a + b.amount, 0);
+            document.getElementById('sip-total-monthly').innerText = `Monthly Commitment: ${currSym}${total.toLocaleString()}`;
+
+            const container = document.getElementById('sip-list');
+            container.innerHTML = sips.map(s => `
+                <div class="glass-card p-4 rounded-2xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-white">${s.name}</span>
+                        <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full">Date: ${s.date}th</span>
+                    </div>
+                    <p class="text-lg font-bold text-purple-400">${currSym}${s.amount.toLocaleString()} / mo</p>
+                </div>
+            `).join('');
         }
 
-        // EXPENSE SPLITTER
-        function addGroupExpense(e) {
+        // Calendar
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div class="font-bold text-slate-500 py-1">${d}</div>`).join('');
+
+            for (let day = 1; day <= 31; day++) {
+                const hasSip = sips.some(s => s.date === day);
+                html += `
+                    <div class="glass-card p-2 rounded-xl h-16 flex flex-col justify-between items-center relative ${hasSip ? 'border-pink-500/50 bg-pink-500/10' : ''}">
+                        <span class="font-bold ${day === 16 ? 'text-indigo-400' : 'text-slate-300'}">${day}</span>
+                        ${hasSip ? `<span class="w-2 h-2 rounded-full bg-pink-400 animate-ping"></span>` : ''}
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        // Splitter
+        function addSplitterExpense(e) {
             e.preventDefault();
-            const desc = document.getElementById('split-desc').value;
+            const title = document.getElementById('split-title').value;
             const amount = parseFloat(document.getElementById('split-amount').value);
             const payer = document.getElementById('split-payer').value;
             const members = document.getElementById('split-members').value.split(',').map(m => m.trim());
 
-            state.splits.push({ id: Date.now(), desc, amount, payer, members });
-            e.target.reset();
-            saveState();
-            renderApp();
+            splits.unshift({ id: Date.now(), title, amount, payer, members });
+            saveAndRender();
         }
 
-        function deleteSplit(id) {
-            state.splits = state.splits.filter(s => s.id !== id);
-            saveState();
-            renderApp();
+        function renderSplitter() {
+            const list = document.getElementById('splitter-list');
+            list.innerHTML = splits.map(s => {
+                const share = (s.amount / s.members.length).toFixed(2);
+                return `
+                    <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h4 class="text-xs font-bold text-white">${s.title} (${currSym}${s.amount})</h4>
+                            <p class="text-[11px] text-slate-400">Paid by <span class="text-amber-400 font-bold">${s.payer}</span> • Split: ${s.members.join(', ')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-amber-400">${currSym}${share} / person</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        // SUBSCRIPTIONS & GOALS
+        // Budget Caps
+        function renderBudgets() {
+            const container = document.getElementById('budget-caps-container');
+            container.innerHTML = Object.keys(categoryCaps).map(cat => {
+                const limit = categoryCaps[cat];
+                const spent = transactions.filter(t => t.type === 'expense' && t.category === cat).reduce((a,b) => a + b.amount, 0);
+                const pct = Math.min(100, Math.round((spent / limit) * 100));
+
+                return `
+                    <div class="glass-card p-4 rounded-2xl space-y-2">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-white">${cat}</span>
+                            <span class="text-slate-400">${currSym}${spent.toLocaleString()} / ${currSym}${limit.toLocaleString()}</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-rose-500 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Subscriptions
         function addSubscription(e) {
             e.preventDefault();
             const name = document.getElementById('sub-name').value;
             const cost = parseFloat(document.getElementById('sub-cost').value);
-            const day = parseInt(document.getElementById('sub-day').value);
+            const due = document.getElementById('sub-due').value;
 
-            state.subscriptions.push({ id: Date.now(), name, cost, day });
-            e.target.reset();
-            saveState();
-            renderApp();
+            subscriptions.push({ id: Date.now(), name, cost, due });
+            saveAndRender();
         }
 
-        function deleteSub(id) {
-            state.subscriptions = state.subscriptions.filter(s => s.id !== id);
-            saveState();
-            renderApp();
+        function renderSubscriptions() {
+            const container = document.getElementById('sub-list');
+            container.innerHTML = subscriptions.map(s => `
+                <div class="glass-card p-4 rounded-2xl space-y-1">
+                    <h4 class="text-xs font-bold text-white">${s.name}</h4>
+                    <p class="text-base font-bold text-blue-400">${currSym}${s.cost} / mo</p>
+                    <p class="text-[10px] text-slate-400">Next Due: ${s.due}</p>
+                </div>
+            `).join('');
         }
 
-        function addGoal(e) {
+        // Savings Goals
+        function addSavingsGoal(e) {
             e.preventDefault();
             const name = document.getElementById('goal-name').value;
             const target = parseFloat(document.getElementById('goal-target').value);
-            const saved = parseFloat(document.getElementById('goal-saved').value);
 
-            state.goals.push({ id: Date.now(), name, target, saved });
-            e.target.reset();
-            saveState();
-            renderApp();
+            goals.push({ id: Date.now(), name, target, saved: 0 });
+            saveAndRender();
         }
 
-        function configureDailyCap() {
-            const cap = prompt("Enter daily spending limit threshold:", state.dailyCap);
-            if (cap && !isNaN(cap)) {
-                state.dailyCap = parseFloat(cap);
-                renderApp();
-            }
-        }
-
-        // RENDER CORE APPLICATION UI
-        function renderApp() {
-            const sym = state.currency;
-
-            // Calculations
-            const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-            const netCashflow = totalIncome - totalExpense;
-
-            const assetsSum = state.networth.filter(i => i.type === 'asset').reduce((acc, i) => acc + i.val, 0);
-            const liabilitiesSum = state.networth.filter(i => i.type === 'liability').reduce((acc, i) => acc + i.val, 0);
-            const netWorthPos = assetsSum - liabilitiesSum;
-
-            // Daily Spend Check
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todaySpent = state.transactions
-                .filter(t => t.type === 'expense' && t.date === todayStr)
-                .reduce((acc, t) => acc + t.amount, 0);
-
-            // Update Dynamic Island
-            const islandStatus = document.getElementById('island-spend-status');
-            islandStatus.innerText = `${sym}${todaySpent} spent / ${sym}${state.dailyCap} Cap`;
-            if (todaySpent > state.dailyCap) {
-                islandStatus.className = "font-bold text-rose-400";
-            } else {
-                islandStatus.className = "font-bold text-emerald-400";
-            }
-
-            // Update Dashboard KPIs
-            document.getElementById('kpi-income').innerText = `${sym}${totalIncome.toLocaleString()}`;
-            document.getElementById('kpi-expense').innerText = `${sym}${totalExpense.toLocaleString()}`;
-            document.getElementById('kpi-cashflow').innerText = `${sym}${netCashflow.toLocaleString()}`;
-            document.getElementById('kpi-networth').innerText = `${sym}${netWorthPos.toLocaleString()}`;
-
-            // Render Transactions Table
-            const searchVal = document.getElementById('search-tx').value.toLowerCase();
-            const categoryFilter = document.getElementById('filter-category').value;
-            const tableBody = document.getElementById('tx-table-body');
-            tableBody.innerHTML = '';
-
-            const filteredTx = state.transactions.filter(t => {
-                const matchSearch = t.desc.toLowerCase().includes(searchVal);
-                const matchCat = categoryFilter === 'ALL' || t.category === categoryFilter;
-                return matchSearch && matchCat;
-            });
-
-            filteredTx.forEach(t => {
-                const isInc = t.type === 'income';
-                const row = document.createElement('tr');
-                row.className = "hover:bg-white/5 transition-all";
-                row.innerHTML = `
-                    <td class="p-3.5 text-slate-400 font-mono text-[11px]">${t.date}</td>
-                    <td class="p-3.5 font-semibold text-white">${t.desc}</td>
-                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10 text-slate-300">${t.category}</span></td>
-                    <td class="p-3.5 text-slate-400">${t.account}</td>
-                    <td class="p-3.5 font-bold ${isInc ? 'text-emerald-400' : 'text-rose-400'}">${isInc ? '+' : '-'}${sym}${t.amount.toLocaleString()}</td>
-                    <td class="p-3.5 text-right">
-                        <button onclick="deleteTransaction(${t.id})" class="text-slate-500 hover:text-rose-400 px-2 py-1 transition-all"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Render Net Worth Page
-            document.getElementById('nw-assets-sum').innerText = `${sym}${assetsSum.toLocaleString()}`;
-            document.getElementById('nw-liabilities-sum').innerText = `${sym}${liabilitiesSum.toLocaleString()}`;
-            document.getElementById('nw-position-sum').innerText = `${sym}${netWorthPos.toLocaleString()}`;
-
-            const nwBody = document.getElementById('nw-table-body');
-            nwBody.innerHTML = '';
-            state.networth.forEach(item => {
-                const isAsset = item.type === 'asset';
-                const row = document.createElement('tr');
-                row.className = "hover:bg-white/5";
-                row.innerHTML = `
-                    <td class="p-3 font-semibold text-white">${item.name}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isAsset ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${isAsset ? 'Asset' : 'Liability'}</span></td>
-                    <td class="p-3 font-bold text-white">${sym}${item.val.toLocaleString()}</td>
-                    <td class="p-3 text-right"><button onclick="deleteNetWorthItem(${item.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></td>
-                `;
-                nwBody.appendChild(row);
-            });
-
-            // Render SIP Tracker
-            const sipGrid = document.getElementById('sip-grid');
-            sipGrid.innerHTML = '';
-            const totalSip = state.sips.reduce((acc, s) => acc + s.amount, 0);
-            document.getElementById('sip-total-monthly').innerText = `Monthly Commitment: ${sym}${totalSip.toLocaleString()}`;
-
-            state.sips.forEach(s => {
-                const card = document.createElement('div');
-                card.className = "glass-card p-4 rounded-2xl flex items-center justify-between";
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-sm text-white">${s.name}</p>
-                        <p class="text-xs text-slate-400 mt-1">Due on day ${s.date} of month</p>
-                        <p class="text-base font-display font-bold text-purple-400 mt-2">${sym}${s.amount.toLocaleString()}</p>
-                    </div>
-                    <button onclick="deleteSip(${s.id})" class="text-slate-500 hover:text-rose-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                sipGrid.appendChild(card);
-            });
-
-            // Render Expense Splitter
-            const splitContainer = document.getElementById('split-summary-cards');
-            splitContainer.innerHTML = '';
-            state.splits.forEach(sp => {
-                const perPerson = (sp.amount / sp.members.length).toFixed(2);
-                const card = document.createElement('div');
-                card.className = "glass-card p-4 rounded-2xl space-y-2";
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-white text-sm">${sp.desc}</h4>
-                        <span class="text-xs font-bold text-amber-400">${sym}${sp.amount}</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Paid by <span class="text-white font-semibold">${sp.payer}</span> • Share per member: <span class="text-white font-semibold">${sym}${perPerson}</span></p>
-                    <div class="text-[11px] text-slate-300 pt-2 border-t border-white/5 flex items-center justify-between">
-                        <span>Members: ${sp.members.join(', ')}</span>
-                        <button onclick="deleteSplit(${sp.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i> Settle</button>
-                    </div>
-                `;
-                splitContainer.appendChild(card);
-            });
-
-            // Render Subscriptions
-            const subsList = document.getElementById('subs-list');
-            subsList.innerHTML = '';
-            state.subscriptions.forEach(sub => {
-                const card = document.createElement('div');
-                card.className = "glass-card p-4 rounded-2xl flex items-center justify-between";
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-sm text-white">${sub.name}</p>
-                        <p class="text-xs text-slate-400">Renews on day ${sub.day}</p>
-                        <p class="text-sm font-bold text-blue-400 mt-1">${sym}${sub.cost}/mo</p>
-                    </div>
-                    <button onclick="deleteSub(${sub.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                subsList.appendChild(card);
-            });
-
-            // Render Goals
-            const goalsContainer = document.getElementById('goals-container');
-            goalsContainer.innerHTML = '';
-            state.goals.forEach(g => {
+        function renderGoals() {
+            const container = document.getElementById('goals-list');
+            container.innerHTML = goals.map(g => {
                 const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
-                const card = document.createElement('div');
-                card.className = "glass-card p-5 rounded-3xl space-y-3";
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-white text-sm">${g.name}</h4>
-                        <span class="text-xs font-bold text-teal-400">${pct}%</span>
-                    </div>
-                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-white/10">
-                        <div class="bg-gradient-to-r from-teal-400 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-400">
-                        <span>Saved: ${sym}${g.saved.toLocaleString()}</span>
-                        <span>Target: ${sym}${g.target.toLocaleString()}</span>
+                return `
+                    <div class="glass-card p-4 rounded-2xl space-y-2">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-white">${g.name}</span>
+                            <span class="text-teal-400">${currSym}${g.saved.toLocaleString()} / ${currSym}${g.target.toLocaleString()} (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden">
+                            <div class="h-full bg-teal-400 rounded-full" style="width: ${pct}%"></div>
+                        </div>
                     </div>
                 `;
-                goalsContainer.appendChild(card);
-            });
+            }).join('');
         }
 
-        // RENDER CALENDAR GRID
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-
-            for (let day = 1; day <= 30; day++) {
-                const sipsOnDay = state.sips.filter(s => s.date === day);
-                const subsOnDay = state.subscriptions.filter(s => s.day === day);
-
-                const cell = document.createElement('div');
-                cell.className = "glass-card min-h-[75px] p-2 rounded-2xl flex flex-col justify-between";
-                
-                let eventsHTML = '';
-                sipsOnDay.forEach(s => {
-                    eventsHTML += `<div class="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] px-1.5 py-0.5 rounded-md truncate">SIP: ${s.name}</div>`;
-                });
-                subsOnDay.forEach(sub => {
-                    eventsHTML += `<div class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[9px] px-1.5 py-0.5 rounded-md truncate">Sub: ${sub.name}</div>`;
-                });
-
-                cell.innerHTML = `
-                    <span class="text-xs font-bold text-slate-400">${day}</span>
-                    <div class="space-y-1 mt-1">${eventsHTML}</div>
-                `;
-                grid.appendChild(cell);
-            }
-        }
-
-        // RENDER BUDGET PROGRESS
-        function renderBudgets() {
-            const container = document.getElementById('budgets-container');
-            container.innerHTML = '';
-
-            Object.keys(state.categoryBudgets).forEach(cat => {
-                const cap = state.categoryBudgets[cat];
-                const spent = state.transactions
-                    .filter(t => t.type === 'expense' && t.category === cat)
-                    .reduce((acc, t) => acc + t.amount, 0);
-
-                const pct = Math.min(100, Math.round((spent / cap) * 100));
-                const isOver = spent > cap;
-
-                const item = document.createElement('div');
-                item.className = "glass-card p-4 rounded-2xl space-y-2";
-                item.innerHTML = `
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-bold text-white">${cat}</span>
-                        <span class="${isOver ? 'text-rose-400 font-bold' : 'text-slate-400'}">${state.currency}${spent.toLocaleString()} / ${state.currency}${cap.toLocaleString()}</span>
-                    </div>
-                    <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-white/10">
-                        <div class="${isOver ? 'bg-rose-500' : 'bg-indigo-500'} h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // CHART.JS INITIALIZATION & UPDATES
+        // Charts
         function initCharts() {
             const ctx1 = document.getElementById('chart-cashflow').getContext('2d');
-            chartCashflowInstance = new Chart(ctx1, {
+            cashflowChart = new Chart(ctx1, {
                 type: 'bar',
                 data: {
                     labels: ['Income', 'Expense'],
                     datasets: [{
                         data: [0, 0],
-                        backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(244, 63, 94, 0.6)'],
-                        borderColor: ['#10b981', '#f43f5e'],
-                        borderWidth: 1.5,
+                        backgroundColor: ['#10b981', '#f43f5e'],
                         borderRadius: 12
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
             const ctx2 = document.getElementById('chart-categories').getContext('2d');
-            chartCategoryInstance = new Chart(ctx2, {
+            categoryChart = new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
                     labels: ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'General'],
                     datasets: [{
-                        data: [1, 1, 1, 1, 1],
-                        backgroundColor: ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981'],
-                        borderWidth: 0
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981']
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
             });
-
-            updateCharts();
         }
 
-        function updateCharts() {
-            if (!chartCashflowInstance || !chartCategoryInstance) return;
-
-            const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-
-            chartCashflowInstance.data.datasets[0].data = [totalIncome, totalExpense];
-            chartCashflowInstance.update();
-
-            const categories = ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'General'];
-            const catTotals = categories.map(cat => {
-                return state.transactions
-                    .filter(t => t.type === 'expense' && t.category === cat)
-                    .reduce((acc, t) => acc + t.amount, 0);
-            });
-
-            chartCategoryInstance.data.datasets[0].data = catTotals;
-            chartCategoryInstance.update();
+        function updateCharts(inc, exp) {
+            if (cashflowChart) {
+                cashflowChart.data.datasets[0].data = [inc, exp];
+                cashflowChart.update();
+            }
         }
 
-        // CSV EXPORT FUNCTION
         function exportToCSV() {
-            let csv = "ID,Date,Description,Category,Account,Type,Amount\n";
-            state.transactions.forEach(t => {
-                csv += `"${t.id}","${t.date}","${t.desc}","${t.category}","${t.account}","${t.type}","${t.amount}"\n`;
+            let csv = 'ID,Date,Description,Category,Account,Type,Amount\n';
+            transactions.forEach(t => {
+                csv += `${t.id},${t.date},"${t.desc}",${t.category},${t.account},${t.type},${t.amount}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -1205,20 +1045,11 @@
             a.click();
         }
 
-        // BROWSER NOTIFICATION HELPER
         function requestNotificationPermission() {
             if ("Notification" in window) {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        triggerNotification("Notifications activated for ExpenseFlow Pro.");
-                    }
+                Notification.requestPermission().then(perm => {
+                    alert(`Notification permission status: ${perm}`);
                 });
-            }
-        }
-
-        function triggerNotification(msg) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("ExpenseFlow Pro", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/2382/2382461.png" });
             }
         }
     </script>
