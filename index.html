@@ -18,6 +18,7 @@
             --accent-red: #ff453a;
             --accent-purple: #bf5af2;
             --accent-orange: #ff9f0a;
+            --accent-teal: #64d2ff;
             --input-bg: rgba(44, 44, 46, 0.6);
             --radius-large: 20px;
             --radius-medium: 12px;
@@ -36,6 +37,7 @@
             --accent-red: #ff3b30;
             --accent-purple: #af52de;
             --accent-orange: #ff9500;
+            --accent-teal: #00c7be;
             --input-bg: rgba(238, 238, 240, 0.8);
         }
 
@@ -166,6 +168,17 @@
         .text-purple { color: var(--accent-purple); }
         .text-orange { color: var(--accent-orange); }
         .text-blue { color: var(--accent-blue); }
+        .text-teal { color: var(--accent-teal); }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
@@ -267,6 +280,7 @@
             </div>
             <ul class="nav-links">
                 <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Dashboard</li>
+                <li class="nav-item" onclick="switchTab('sips', this)">📈 SIP & Investments</li>
                 <li class="nav-item" onclick="switchTab('budgets', this)">🎯 Budgets & Caps</li>
                 <li class="nav-item" onclick="switchTab('subscriptions', this)">🔄 Subscriptions</li>
                 <li class="nav-item" onclick="switchTab('goals', this)">🐷 Savings Goals</li>
@@ -287,6 +301,9 @@
         <header class="top-bar">
             <h1 id="page-title">Personal Overview</h1>
             <div class="actions-group">
+                <div id="dailyStatusBadge" class="status-badge" style="background: rgba(48, 209, 88, 0.15); color: var(--accent-green);">
+                    🟢 Within Daily Limit
+                </div>
                 <button class="btn btn-secondary" onclick="exportToCSV()">Export</button>
             </div>
         </header>
@@ -305,12 +322,12 @@
                         <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Net Savings</span>
-                        <h2 id="kpi-margin">₹0.00</h2>
+                        <span>Monthly Investments</span>
+                        <h2 id="kpi-investments" class="text-teal">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Subscriptions</span>
-                        <h2 id="kpi-subs" class="text-purple">₹0.00</h2>
+                        <span>Net Savings</span>
+                        <h2 id="kpi-margin">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
                         <span>Projected EOM Balance</span>
@@ -411,12 +428,74 @@
                 </div>
             </div>
 
+            <!-- SIP & INVESTMENTS TAB -->
+            <div id="tab-sips" class="tab-content">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span>Total Monthly Investment</span>
+                        <h2 id="sip-total-kpi" class="text-teal">₹0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Wealth Rate (% of Income)</span>
+                        <h2 id="sip-rate-kpi" class="text-green">0%</h2>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Add SIP / Investment Record</h3>
+                    </div>
+                    <form onsubmit="addSip(event)">
+                        <div><input type="text" id="sipName" placeholder="Fund/Asset Name (e.g. Nifty 50 Index)" required></div>
+                        <div><input type="number" step="0.01" id="sipAmount" placeholder="Monthly Amount (₹)" required></div>
+                        <div>
+                            <select id="sipCategory" required>
+                                <option value="Equity Mutual Fund">Equity Mutual Fund</option>
+                                <option value="Direct Stocks">Direct Stocks</option>
+                                <option value="Digital Gold / Sovereign Gold">Digital / SGB Gold</option>
+                                <option value="PPF / NPS">PPF / NPS</option>
+                                <option value="Crypto">Crypto</option>
+                            </select>
+                        </div>
+                        <div><input type="date" id="sipDate" required></div>
+                        <div class="form-full">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Log Investment</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Active SIP Portfolio</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Asset / Fund Name</th>
+                                    <th>Type</th>
+                                    <th>SIP Date</th>
+                                    <th>Monthly Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sipsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- BUDGETS & CAPS -->
             <div id="tab-budgets" class="tab-content">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Set Category Monthly Cap</h3>
+                        <h3>Set Daily Limit & Category Monthly Caps</h3>
                     </div>
+                    <form onsubmit="setDailyLimit(event)" style="margin-bottom: 20px;">
+                        <div><input type="number" step="0.01" id="dailyLimitInput" placeholder="Daily Spending Limit (₹)" required></div>
+                        <div><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 100%;">Set Daily Limit</button></div>
+                    </form>
+
                     <form onsubmit="setBudgetCap(event)">
                         <div>
                             <select id="budgetCategory" required>
@@ -429,7 +508,7 @@
                             </select>
                         </div>
                         <div><input type="number" step="0.01" id="budgetAmount" placeholder="Monthly Cap (₹)" required></div>
-                        <div class="form-full"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Budget Limit</button></div>
+                        <div class="form-full"><button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center;">Save Category Cap</button></div>
                     </form>
                 </div>
                 
@@ -498,13 +577,16 @@
     <script>
         let currSym = localStorage.getItem('ef_curr') || '₹';
         let transactions = JSON.parse(localStorage.getItem('ef_personal_transactions')) || [];
+        let sips = JSON.parse(localStorage.getItem('ef_sips')) || [];
         let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 10000, 'Dining Out': 5000 };
+        let dailyLimit = parseFloat(localStorage.getItem('ef_daily_limit')) || 1000;
         let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
         let goals = JSON.parse(localStorage.getItem('ef_goals')) || [];
         let theme = localStorage.getItem('ef_personal_theme') || 'dark';
 
         document.documentElement.setAttribute('data-theme', theme);
         document.getElementById('currencySelector').value = currSym;
+        document.getElementById('dailyLimitInput').value = dailyLimit;
 
         let trendChartObj = null;
         let categoryChartObj = null;
@@ -543,6 +625,14 @@
             renderCharts();
         }
 
+        function setDailyLimit(e) {
+            e.preventDefault();
+            dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value);
+            localStorage.setItem('ef_daily_limit', dailyLimit);
+            renderApp();
+            alert('Daily limit updated successfully!');
+        }
+
         function quickAdd(desc, amount, category) {
             transactions.push({
                 id: Date.now(),
@@ -571,6 +661,27 @@
             e.target.reset();
             setTxType('income');
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function addSip(e) {
+            e.preventDefault();
+            sips.push({
+                id: Date.now(),
+                name: document.getElementById('sipName').value,
+                amount: parseFloat(document.getElementById('sipAmount').value),
+                category: document.getElementById('sipCategory').value,
+                date: document.getElementById('sipDate').value
+            });
+            localStorage.setItem('ef_sips', JSON.stringify(sips));
+            renderApp();
+            e.target.reset();
+            document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function deleteSip(id) {
+            sips = sips.filter(s => s.id !== id);
+            localStorage.setItem('ef_sips', JSON.stringify(sips));
+            renderApp();
         }
 
         function setBudgetCap(e) {
@@ -635,20 +746,41 @@
                 else totalExpense += t.amount;
             });
 
-            const netSavings = totalIncome - totalExpense;
+            const totalInvested = sips.reduce((acc, s) => acc + s.amount, 0);
+            const netSavings = totalIncome - totalExpense - totalInvested;
             const totalSubCost = subscriptions.reduce((acc, s) => acc + s.cost, 0);
-
-            // Cash Flow Forecasting Logic (Current Net Savings - Upcoming Active Subscriptions)
             const projectedEOM = netSavings - totalSubCost;
+
+            // Daily Limit Checking Logic
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todaySpent = transactions
+                .filter(t => t.type === 'expense' && t.date === todayStr)
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            const badgeEl = document.getElementById('dailyStatusBadge');
+            if (todaySpent > dailyLimit) {
+                badgeEl.style.background = 'rgba(255, 69, 58, 0.15)';
+                badgeEl.style.color = 'var(--accent-red)';
+                badgeEl.textContent = `🔴 Daily Exceeded (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
+            } else {
+                badgeEl.style.background = 'rgba(48, 209, 88, 0.15)';
+                badgeEl.style.color = 'var(--accent-green)';
+                badgeEl.textContent = `🟢 Within Daily Limit (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
+            }
 
             document.getElementById('kpi-revenue').textContent = `${currSym}${totalIncome.toFixed(2)}`;
             document.getElementById('kpi-expenses').textContent = `${currSym}${totalExpense.toFixed(2)}`;
+            document.getElementById('kpi-investments').textContent = `${currSym}${totalInvested.toFixed(2)}`;
             document.getElementById('kpi-margin').textContent = `${currSym}${netSavings.toFixed(2)}`;
-            document.getElementById('kpi-subs').textContent = `${currSym}${totalSubCost.toFixed(2)}`;
             
             const forecastEl = document.getElementById('kpi-forecast');
             forecastEl.textContent = `${currSym}${projectedEOM.toFixed(2)}`;
             forecastEl.className = projectedEOM >= 0 ? 'text-blue' : 'text-red';
+
+            // SIP Metrics
+            document.getElementById('sip-total-kpi').textContent = `${currSym}${totalInvested.toFixed(2)}`;
+            const wealthRate = totalIncome > 0 ? ((totalInvested / totalIncome) * 100).toFixed(1) : 0;
+            document.getElementById('sip-rate-kpi').textContent = `${wealthRate}%`;
 
             // Recent Transactions Table
             const tbody = document.getElementById('ledgerBody');
@@ -666,10 +798,24 @@
                 </tr>
             `).join('');
 
+            renderSips();
             renderBudgets();
             renderSubscriptions();
             renderGoals();
             renderCharts(filtered);
+        }
+
+        function renderSips() {
+            const tbody = document.getElementById('sipsTableBody');
+            tbody.innerHTML = sips.map(s => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td><span class="badge badge-income">${s.category}</span></td>
+                    <td>Day ${s.date ? s.date.split('-')[2] : '1'}</td>
+                    <td style="font-weight: 600; color: var(--accent-teal);">${currSym}${s.amount.toFixed(2)}</td>
+                    <td><button class="btn btn-secondary" onclick="deleteSip(${s.id})" style="padding: 2px 8px; font-size: 0.75rem;">Delete</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">No SIP or investment positions recorded.</td></tr>';
         }
 
         function renderBudgets() {
@@ -792,6 +938,7 @@
         }
 
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
         renderApp();
     </script>
 </body>
