@@ -1,585 +1,514 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="classic">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenseFlow Pro v1.0 - [Personal Financial Management System]</title>
+    <title>ExpenseFlow - Dynamic OS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --win-bg: #c0c0c0;
-            --win-dark: #808080;
-            --win-light: #ffffff;
-            --win-border-dark: #404040;
-            --text-main: #000000;
-            --title-bg: #000080;
-            --title-text: #ffffff;
-            --field-bg: #ffffff;
-            --accent-green: #008000;
-            --accent-red: #800000;
-            --accent-blue: #000080;
-            --accent-teal: #008080;
+            --bg-gradient: linear-gradient(135deg, #0b0d19 0%, #06070c 50%, #110d1f 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-card: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-blur: blur(25px) saturate(190%);
+            --text-primary: #f5f5f7;
+            --text-secondary: rgba(235, 235, 245, 0.6);
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-purple: #bf5af2;
+            --accent-teal: #64d2ff;
+            --accent-orange: #ff9f0a;
+            --radius-xl: 28px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
-            font-size: 12px;
-            -webkit-font-smoothing: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background-color: #008080;
-            color: var(--text-main);
+            background: var(--bg-gradient);
+            color: var(--text-primary);
             display: flex;
             height: 100vh;
             overflow: hidden;
-            padding: 8px;
         }
 
-        .main-window {
-            background-color: var(--win-bg);
-            border: 2px solid var(--win-light);
-            border-right-color: var(--win-border-dark);
-            border-bottom-color: var(--win-border-dark);
-            box-shadow: inset -1px -1px var(--win-dark), inset 1px 1px var(--win-light);
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
-            width: 100%;
-            height: 100%;
-        }
-
-        .title-bar {
-            background-color: var(--title-bg);
-            color: var(--title-text);
-            padding: 3px 6px;
-            display: flex;
+            padding: 32px 16px 24px 16px;
             justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 13px;
         }
 
-        .title-bar-controls {
+        .brand {
             display: flex;
-            gap: 2px;
+            align-items: center;
+            gap: 10px;
+            padding-left: 10px;
+            margin-bottom: 28px;
         }
 
-        .win-btn {
-            background: var(--win-bg);
-            border: 1px solid var(--win-light);
-            border-right-color: var(--win-border-dark);
-            border-bottom-color: var(--win-border-dark);
-            width: 16px;
-            height: 14px;
-            font-size: 9px;
-            font-weight: bold;
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
         }
 
-        .menu-bar {
-            background-color: var(--win-bg);
-            border-bottom: 1px solid var(--win-dark);
+        .brand h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.4px; }
+
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .nav-item {
             display: flex;
+            align-items: center;
             gap: 12px;
-            padding: 3px 8px;
-        }
-
-        .menu-item {
+            padding: 12px 14px;
+            color: var(--text-secondary);
+            border-radius: var(--radius-lg);
             cursor: pointer;
-        }
-        .menu-item span { text-decoration: underline; }
-
-        .app-workspace {
-            flex: 1;
-            display: flex;
-            padding: 8px;
-            gap: 8px;
-            overflow: hidden;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .sidebar-panel {
-            width: 200px;
-            background: var(--win-bg);
-            border: 2px solid var(--win-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-            padding: 6px;
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .top-bar {
+            padding: 28px 40px 16px 40px;
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
+            align-items: center;
         }
 
-        .tab-button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .top-bar h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.6px; }
+
+        .dynamic-island-badge {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .tab-btn {
-            background-color: var(--win-bg);
-            border: 2px solid var(--win-light);
-            border-right-color: var(--win-border-dark);
-            border-bottom-color: var(--win-border-dark);
-            padding: 6px 10px;
-            text-align: left;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background-color: #dfdfdf;
-            border: 2px solid var(--win-border-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-        }
-
-        .content-panel {
-            flex: 1;
-            background: var(--win-bg);
-            border: 2px solid var(--win-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-            padding: 10px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .tab-content { display: none; flex-direction: column; gap: 12px; }
+        .content-body { padding: 0 40px 40px 40px; display: flex; flex-direction: column; gap: 24px; }
+        .tab-content { display: none; flex-direction: column; gap: 24px; }
         .tab-content.active { display: flex; }
 
-        .sunken-panel {
-            background-color: var(--field-bg);
-            border: 2px solid var(--win-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-            padding: 10px;
-        }
-
-        .group-box {
-            border: 2px solid var(--win-light);
-            border-right-color: var(--win-dark);
-            border-bottom-color: var(--win-dark);
-            padding: 10px;
-            position: relative;
-            margin-top: 6px;
-        }
-
-        .group-title {
-            position: absolute;
-            top: -9px;
-            left: 10px;
-            background: var(--win-bg);
-            padding: 0 4px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .kpi-row {
+        /* KPI Cards */
+        .kpi-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
         }
 
-        .kpi-box {
-            background: var(--win-bg);
-            border: 2px solid var(--win-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-            padding: 8px;
+        .kpi-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            padding: 22px;
+            border-radius: var(--radius-xl);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        .kpi-box span { font-weight: bold; color: var(--win-border-dark); }
-        .kpi-box h2 { font-size: 16px; font-weight: bold; }
+        .kpi-card span { font-size: 0.78rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-card h2 { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.5px; }
 
         .text-green { color: var(--accent-green); }
         .text-red { color: var(--accent-red); }
         .text-blue { color: var(--accent-blue); }
         .text-teal { color: var(--accent-teal); }
 
-        form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
-        .form-full { grid-column: span 2; }
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
-        input, select, button {
-            padding: 4px 6px;
-            background: var(--field-bg);
-            border: 2px solid var(--win-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-            outline: none;
+        .glass-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        button.btn-cmd {
-            background-color: var(--win-bg);
-            border: 2px solid var(--win-light);
-            border-right-color: var(--win-border-dark);
-            border-bottom-color: var(--win-border-dark);
-            font-weight: bold;
-            cursor: pointer;
-            padding: 6px 12px;
-        }
-
-        button.btn-cmd:active {
-            border: 2px solid var(--win-border-dark);
-            border-right-color: var(--win-light);
-            border-bottom-color: var(--win-light);
-        }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #dfdfdf; border: 1px solid var(--win-dark); padding: 5px; font-weight: bold; }
-        td { border: 1px solid var(--win-dark); padding: 5px; background: var(--field-bg); }
-
-        .type-toggle-container {
-            grid-column: span 2;
-            display: flex;
-            gap: 8px;
-        }
-
-        .status-bar {
-            background-color: var(--win-bg);
-            border-top: 1px solid var(--win-dark);
-            padding: 3px 8px;
+        .card-header {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .dashboard-charts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        .card-header h3 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+
+        /* Modern Form Inputs */
+        form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .form-full { grid-column: span 2; }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            outline: none;
+            transition: all 0.2s;
         }
 
-        @media (max-width: 900px) {
-            .app-workspace { flex-direction: column; }
-            .sidebar-panel { width: 100%; }
-            .dashboard-charts { grid-template-columns: 1fr; }
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-blue);
+        }
+
+        button.btn-ios {
+            background: linear-gradient(135deg, var(--accent-blue), #0056b3);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35);
+        }
+
+        button.btn-ios:active { transform: scale(0.97); }
+
+        .btn-subtle {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        /* Glass Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th { color: var(--text-secondary); padding: 14px 16px; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid var(--glass-border); }
+        td { padding: 16px; border-bottom: 1px solid var(--glass-border); }
+
+        .badge-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-income { background: rgba(48, 209, 88, 0.18); color: var(--accent-green); }
+        .badge-expense { background: rgba(255, 69, 58, 0.18); color: var(--accent-red); }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .content-body { padding: 0 20px 20px 20px; }
+            .top-bar { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="main-window">
-        <div class="title-bar">
-            <span>💻 ExpenseFlow Pro v1.0 - Personal Ledger System</span>
-            <div class="title-bar-controls">
-                <div class="win-btn">_</div>
-                <div class="win-btn">□</div>
-                <div class="win-btn">X</div>
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <div class="brand-logo"></div>
+                <h2>ExpenseFlow</h2>
             </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Main Ledger</li>
+                <li class="nav-item" onclick="switchTab('networth', this)">🏛️ Net Worth</li>
+                <li class="nav-item" onclick="switchTab('sips', this)">📈 SIP Portfolio</li>
+                <li class="nav-item" onclick="switchTab('budgets', this)">🎯 Budget Caps</li>
+                <li class="nav-item" onclick="switchTab('subscriptions', this)">🔄 Subscriptions</li>
+                <li class="nav-item" onclick="switchTab('goals', this)">🐷 Savings Goals</li>
+            </ul>
         </div>
-
-        <div class="menu-bar">
-            <div class="menu-item"><span>F</span>ile</div>
-            <div class="menu-item"><span>E</span>dit</div>
-            <div class="menu-item"><span>V</span>iew</div>
-            <div class="menu-item" onclick="exportToCSV()"><span>X</span>port CSV</div>
-            <div class="menu-item"><span>H</span>elp</div>
+        <div>
+            <select id="currencySelector" onchange="changeCurrency(this.value)" style="padding: 10px; font-size: 0.85rem;">
+                <option value="₹">INR (₹)</option>
+                <option value="$">USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+            </select>
         </div>
+    </aside>
 
-        <div class="app-workspace">
-            <aside class="sidebar-panel">
-                <div class="tab-button-group">
-                    <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 1. Main Ledger</button>
-                    <button class="tab-btn" onclick="switchTab('networth', this)">🏛️ 2. Net Worth</button>
-                    <button class="tab-btn" onclick="switchTab('sips', this)">📈 3. SIP Portfolio</button>
-                    <button class="tab-btn" onclick="switchTab('budgets', this)">🎯 4. Budget Caps</button>
-                    <button class="tab-btn" onclick="switchTab('subscriptions', this)">🔄 5. Subscriptions</button>
-                    <button class="tab-btn" onclick="switchTab('goals', this)">🐷 6. Savings Goals</button>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <h1>Financial Hub</h1>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <div id="dailyStatusBadge" class="dynamic-island-badge">
+                    🟢 Checking Daily Limit...
                 </div>
+                <button class="btn-subtle" onclick="exportToCSV()">Export CSV</button>
+            </div>
+        </header>
 
-                <div class="group-box">
-                    <span class="group-title">Currency</span>
-                    <select id="currencySelector" onchange="changeCurrency(this.value)" style="width: 100%;">
-                        <option value="₹">INR (₹)</option>
-                        <option value="$">USD ($)</option>
-                        <option value="€">EUR (€)</option>
-                        <option value="£">GBP (£)</option>
-                    </select>
-                </div>
-            </aside>
-
-            <main class="content-panel">
-
-                <!-- DASHBOARD TAB -->
-                <div id="tab-dashboard" class="tab-content active">
-                    <div class="kpi-row">
-                        <div class="kpi-box">
-                            <span>TOTAL REVENUE</span>
-                            <h2 id="kpi-revenue" class="text-green">₹0.00</h2>
-                        </div>
-                        <div class="kpi-box">
-                            <span>TOTAL EXPENSE</span>
-                            <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
-                        </div>
-                        <div class="kpi-box">
-                            <span>NET CASHFLOW</span>
-                            <h2 id="kpi-margin">₹0.00</h2>
-                        </div>
-                        <div class="kpi-box">
-                            <span>NET WORTH</span>
-                            <h2 id="kpi-networth-quick" class="text-teal">₹0.00</h2>
-                        </div>
+        <div class="content-body">
+            
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span>Total Income</span>
+                        <h2 id="kpi-revenue" class="text-green">₹0.00</h2>
                     </div>
-
-                    <div class="dashboard-charts">
-                        <div class="group-box">
-                            <span class="group-title">Cashflow Distribution</span>
-                            <canvas id="trendChart" height="140"></canvas>
-                        </div>
-                        <div class="group-box">
-                            <span class="group-title">Expense Categories</span>
-                            <canvas id="categoryChart" height="140"></canvas>
-                        </div>
+                    <div class="kpi-card">
+                        <span>Total Expenses</span>
+                        <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
                     </div>
-
-                    <div class="group-box">
-                        <span class="group-title">New Entry Input</span>
-                        <form onsubmit="addPersonalTx(event)">
-                            <div class="type-toggle-container">
-                                <label><input type="radio" name="txType" value="income" checked onclick="setTxType('income')"> Income (+)</label>
-                                <label><input type="radio" name="txType" value="expense" onclick="setTxType('expense')"> Expense (-)</label>
-                            </div>
-                            <div><input type="text" id="desc" placeholder="Transaction Description" required></div>
-                            <div><input type="number" step="0.01" id="amount" placeholder="Amount (₹)" required></div>
-                            <div>
-                                <select id="category" required>
-                                    <option value="Salary">Salary</option>
-                                    <option value="Groceries">Groceries</option>
-                                    <option value="Utilities">Utilities</option>
-                                    <option value="Dining Out">Dining Out</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Health & Fitness">Health & Fitness</option>
-                                    <option value="General">General</option>
-                                </select>
-                            </div>
-                            <div>
-                                <select id="account" required>
-                                    <option value="Bank Account">Bank Account</option>
-                                    <option value="UPI / Wallet">UPI / Wallet</option>
-                                    <option value="Credit Card">Credit Card</option>
-                                    <option value="Petty Cash">Cash</option>
-                                </select>
-                            </div>
-                            <div class="form-full"><input type="date" id="date" required></div>
-                            <div class="form-full"><button type="submit" class="btn-cmd" style="width: 100%;">POST ENTRY TO LEDGER</button></div>
-                        </form>
+                    <div class="kpi-card">
+                        <span>Net Cashflow</span>
+                        <h2 id="kpi-margin">₹0.00</h2>
                     </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Recorded Transactions Ledger</span>
-                        <div style="margin-bottom: 6px; text-align: right;">
-                            <input type="text" id="searchInput" placeholder="Filter descriptions..." oninput="renderApp()" style="width: 200px;">
-                        </div>
-                        <div class="sunken-panel" style="padding: 0;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Account</th>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ledgerBody"></tbody>
-                            </table>
-                        </div>
+                    <div class="kpi-card">
+                        <span>Current Net Worth</span>
+                        <h2 id="kpi-networth-quick" class="text-teal">₹0.00</h2>
                     </div>
                 </div>
 
-                <!-- NET WORTH TAB -->
-                <div id="tab-networth" class="tab-content">
-                    <div class="kpi-row">
-                        <div class="kpi-box">
-                            <span>TOTAL ASSETS</span>
-                            <h2 id="nw-assets-kpi" class="text-green">₹0.00</h2>
-                        </div>
-                        <div class="kpi-box">
-                            <span>TOTAL LIABILITIES</span>
-                            <h2 id="nw-liabilities-kpi" class="text-red">₹0.00</h2>
-                        </div>
-                        <div class="kpi-box">
-                            <span>BALANCE POSITION</span>
-                            <h2 id="nw-position-kpi" class="text-teal">₹0.00</h2>
-                        </div>
+                <div class="dashboard-grid">
+                    <div class="glass-card">
+                        <div class="card-header"><h3>Cashflow Trends</h3></div>
+                        <canvas id="trendChart" height="130"></canvas>
                     </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Add Balance Sheet Position</span>
-                        <form onsubmit="addNetWorthItem(event)">
-                            <div><input type="text" id="nwName" placeholder="Item Name (e.g. Bank Savings, Loan)" required></div>
-                            <div><input type="number" step="0.01" id="nwValue" placeholder="Current Value (₹)" required></div>
-                            <div>
-                                <select id="nwType" required>
-                                    <option value="asset">Asset (+)</option>
-                                    <option value="liability">Liability (-)</option>
-                                </select>
-                            </div>
-                            <div><button type="submit" class="btn-cmd" style="width: 100%; height: 100%;">Save Item</button></div>
-                        </form>
-                    </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Balance Sheet Table</span>
-                        <div class="sunken-panel" style="padding: 0;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Item Description</th>
-                                        <th>Classification</th>
-                                        <th>Valuation</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="netWorthTableBody"></tbody>
-                            </table>
-                        </div>
+                    <div class="glass-card">
+                        <div class="card-header"><h3>Expense Distribution</h3></div>
+                        <canvas id="categoryChart" height="200"></canvas>
                     </div>
                 </div>
 
-                <!-- SIP TAB -->
-                <div id="tab-sips" class="tab-content">
-                    <div class="kpi-row">
-                        <div class="kpi-box">
-                            <span>MONTHLY SIP INVESTMENT</span>
-                            <h2 id="sip-total-kpi" class="text-teal">₹0.00</h2>
+                <div class="glass-card">
+                    <div class="card-header"><h3>Quick Log Entry</h3></div>
+                    <form onsubmit="addPersonalTx(event)">
+                        <div class="form-full" style="display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 20px;">
+                            <button type="button" id="btn-inc-toggle" class="btn-ios" style="flex: 1; padding: 10px;" onclick="setTxType('income')">Income (+)</button>
+                            <button type="button" id="btn-exp-toggle" class="btn-subtle" style="flex: 1; border: none;" onclick="setTxType('expense')">Expense (-)</button>
                         </div>
-                        <div class="kpi-box">
-                            <span>WEALTH RATE (% OF INCOME)</span>
-                            <h2 id="sip-rate-kpi" class="text-green">0%</h2>
-                        </div>
-                    </div>
 
-                    <div class="group-box">
-                        <span class="group-title">Log SIP / Investment Entry</span>
-                        <form onsubmit="addSip(event)">
-                            <div><input type="text" id="sipName" placeholder="Asset Name (e.g. Nifty 50 Index)" required></div>
-                            <div><input type="number" step="0.01" id="sipAmount" placeholder="Monthly Contribution (₹)" required></div>
-                            <div>
-                                <select id="sipCategory" required>
-                                    <option value="Equity Mutual Fund">Equity Mutual Fund</option>
-                                    <option value="Direct Stocks">Direct Stocks</option>
-                                    <option value="Digital Gold / Sovereign Gold">Digital / SGB Gold</option>
-                                    <option value="PPF / NPS">PPF / NPS</option>
-                                </select>
-                            </div>
-                            <div><input type="date" id="sipDate" required></div>
-                            <div class="form-full"><button type="submit" class="btn-cmd" style="width: 100%;">Log Position</button></div>
-                        </form>
-                    </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Investment Positions</span>
-                        <div class="sunken-panel" style="padding: 0;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Asset Name</th>
-                                        <th>Type</th>
-                                        <th>Execution Day</th>
-                                        <th>Monthly Commitment</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="sipsTableBody"></tbody>
-                            </table>
+                        <div><input type="text" id="desc" placeholder="Transaction Description" required></div>
+                        <div><input type="number" step="0.01" id="amount" placeholder="Amount (₹)" required></div>
+                        <div>
+                            <select id="category" required>
+                                <option value="Salary">Salary</option>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Dining Out">Dining Out</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Rent">Rent</option>
+                                <option value="Health & Fitness">Health & Fitness</option>
+                            </select>
                         </div>
-                    </div>
+                        <div>
+                            <select id="account" required>
+                                <option value="Bank Account">Bank Account</option>
+                                <option value="UPI / Wallet">UPI / Wallet</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Petty Cash">Cash</option>
+                            </select>
+                        </div>
+                        <div class="form-full"><input type="date" id="date" required></div>
+                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Post Transaction</button></div>
+                    </form>
                 </div>
 
-                <!-- BUDGET CAPS TAB -->
-                <div id="tab-budgets" class="tab-content">
-                    <div class="group-box">
-                        <span class="group-title">Configure Spending Thresholds</span>
-                        <form onsubmit="setDailyLimit(event)" style="margin-bottom: 12px;">
-                            <div><input type="number" step="0.01" id="dailyLimitInput" placeholder="Max Daily Limit (₹)" required></div>
-                            <div><button type="submit" class="btn-cmd" style="width: 100%; height: 100%;">Set Daily Target</button></div>
-                        </form>
-
-                        <form onsubmit="setBudgetCap(event)">
-                            <div>
-                                <select id="budgetCategory" required>
-                                    <option value="Groceries">Groceries</option>
-                                    <option value="Dining Out">Dining Out</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Utilities">Utilities</option>
-                                    <option value="Rent">Rent</option>
-                                </select>
-                            </div>
-                            <div><input type="number" step="0.01" id="budgetAmount" placeholder="Category Cap (₹)" required></div>
-                            <div class="form-full"><button type="submit" class="btn-cmd" style="width: 100%;">Set Category Limit</button></div>
-                        </form>
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h3>Recent Transactions</h3>
+                        <input type="text" id="searchInput" placeholder="🔍 Search..." oninput="renderApp()" style="width: 180px; padding: 8px 14px;">
                     </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Budget Allocation Status</span>
-                        <div id="budgetProgressList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Type</th><th>Amount</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="ledgerBody"></tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SUBSCRIPTIONS TAB -->
-                <div id="tab-subscriptions" class="tab-content">
-                    <div class="group-box">
-                        <span class="group-title">Add Recurring Expense</span>
-                        <form onsubmit="addSubscription(event)">
-                            <div><input type="text" id="subName" placeholder="Service Name" required></div>
-                            <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost (₹)" required></div>
-                            <div class="form-full"><input type="date" id="subDueDate" required></div>
-                            <div class="form-full"><button type="submit" class="btn-cmd" style="width: 100%;">Save Subscription</button></div>
-                        </form>
-                    </div>
+            <!-- NET WORTH TAB -->
+            <div id="tab-networth" class="tab-content">
+                <div class="kpi-container">
+                    <div class="kpi-card"><span>Total Assets</span><h2 id="nw-assets-kpi" class="text-green">₹0.00</h2></div>
+                    <div class="kpi-card"><span>Total Liabilities</span><h2 id="nw-liabilities-kpi" class="text-red">₹0.00</h2></div>
+                    <div class="kpi-card"><span>Net Position</span><h2 id="nw-position-kpi" class="text-teal">₹0.00</h2></div>
+                </div>
 
-                    <div class="group-box">
-                        <span class="group-title">Active Recurring Bills</span>
-                        <div class="sunken-panel" style="padding: 0;">
-                            <table>
-                                <thead>
-                                    <tr><th>Subscription</th><th>Monthly Cost</th><th>Due Date</th><th>Action</th></tr>
-                                </thead>
-                                <tbody id="subsTableBody"></tbody>
-                            </table>
+                <div class="glass-card">
+                    <div class="card-header"><h3>Add Asset or Liability</h3></div>
+                    <form onsubmit="addNetWorthItem(event)">
+                        <div><input type="text" id="nwName" placeholder="Item Name (e.g. Savings, Loan)" required></div>
+                        <div><input type="number" step="0.01" id="nwValue" placeholder="Current Value (₹)" required></div>
+                        <div>
+                            <select id="nwType" required>
+                                <option value="asset">Asset (+)</option>
+                                <option value="liability">Liability (-)</option>
+                            </select>
                         </div>
-                    </div>
+                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Save Position</button></div>
+                    </form>
                 </div>
 
-                <!-- GOALS TAB -->
-                <div id="tab-goals" class="tab-content">
-                    <div class="group-box">
-                        <span class="group-title">Configure Savings Goal</span>
-                        <form onsubmit="addGoal(event)">
-                            <div><input type="text" id="goalName" placeholder="Goal Name" required></div>
-                            <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount (₹)" required></div>
-                            <div><input type="number" step="0.01" id="goalSaved" placeholder="Saved Amount (₹)" value="0"></div>
-                            <div><button type="submit" class="btn-cmd" style="width: 100%; height: 100%;">Create Goal</button></div>
-                        </form>
-                    </div>
-
-                    <div class="group-box">
-                        <span class="group-title">Savings Goals Progress</span>
-                        <div id="goalsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                <div class="glass-card">
+                    <div class="card-header"><h3>Balance Sheet Ledger</h3></div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Item</th><th>Type</th><th>Value</th><th>Action</th></tr></thead>
+                            <tbody id="netWorthTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
 
-            </main>
-        </div>
+            <!-- SIP TAB -->
+            <div id="tab-sips" class="tab-content">
+                <div class="kpi-container">
+                    <div class="kpi-card"><span>Total Monthly SIP</span><h2 id="sip-total-kpi" class="text-teal">₹0.00</h2></div>
+                </div>
 
-        <div class="status-bar">
-            <span id="dailyStatusText">System Ready. Daily Limit Status: Checking...</span>
-            <span>Local Database Connected</span>
+                <div class="glass-card">
+                    <div class="card-header"><h3>Log Investment Entry</h3></div>
+                    <form onsubmit="addSip(event)">
+                        <div><input type="text" id="sipName" placeholder="Fund/Asset Name" required></div>
+                        <div><input type="number" step="0.01" id="sipAmount" placeholder="Monthly Contribution (₹)" required></div>
+                        <div>
+                            <select id="sipCategory" required>
+                                <option value="Equity Mutual Fund">Equity Mutual Fund</option>
+                                <option value="Direct Stocks">Direct Stocks</option>
+                                <option value="Digital Gold">Digital Gold</option>
+                                <option value="PPF / NPS">PPF / NPS</option>
+                            </select>
+                        </div>
+                        <div><input type="date" id="sipDate" required></div>
+                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Save Position</button></div>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header"><h3>Active Portfolios</h3></div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Asset Name</th><th>Category</th><th>Day</th><th>Monthly Amount</th><th>Action</th></tr></thead>
+                            <tbody id="sipsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUDGET CAPS TAB -->
+            <div id="tab-budgets" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-header"><h3>Daily Limit & Category Caps</h3></div>
+                    <form onsubmit="setDailyLimit(event)" style="margin-bottom: 16px;">
+                        <div><input type="number" step="0.01" id="dailyLimitInput" placeholder="Max Daily Limit (₹)" required></div>
+                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Set Daily Target</button></div>
+                    </form>
+
+                    <form onsubmit="setBudgetCap(event)">
+                        <div>
+                            <select id="budgetCategory" required>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Dining Out">Dining Out</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Rent">Rent</option>
+                            </select>
+                        </div>
+                        <div><input type="number" step="0.01" id="budgetAmount" placeholder="Category Cap (₹)" required></div>
+                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Set Limit</button></div>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header"><h3>Monthly Progress</h3></div>
+                    <div id="budgetProgressList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+            </div>
+
+            <!-- SUBSCRIPTIONS TAB -->
+            <div id="tab-subscriptions" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-header"><h3>Add Recurring Subscription</h3></div>
+                    <form onsubmit="addSubscription(event)">
+                        <div><input type="text" id="subName" placeholder="Service Name" required></div>
+                        <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost (₹)" required></div>
+                        <div class="form-full"><input type="date" id="subDueDate" required></div>
+                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Add Subscription</button></div>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header"><h3>Active Subscriptions</h3></div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Service</th><th>Monthly Cost</th><th>Due Date</th><th>Action</th></tr></thead>
+                            <tbody id="subsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAVINGS GOALS TAB -->
+            <div id="tab-goals" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-header"><h3>Configure Savings Goal</h3></div>
+                    <form onsubmit="addGoal(event)">
+                        <div><input type="text" id="goalName" placeholder="Goal Name" required></div>
+                        <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount (₹)" required></div>
+                        <div><input type="number" step="0.01" id="goalSaved" placeholder="Saved Amount (₹)" value="0"></div>
+                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Create Goal</button></div>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header"><h3>Savings Progress</h3></div>
+                    <div id="goalsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -592,12 +521,26 @@
         let dailyLimit = parseFloat(localStorage.getItem('ef_daily_limit')) || 1000;
         let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
         let goals = JSON.parse(localStorage.getItem('ef_goals')) || [];
+        let activeTxType = 'income';
 
         document.getElementById('currencySelector').value = currSym;
         document.getElementById('dailyLimitInput').value = dailyLimit;
 
         let trendChartObj = null;
         let categoryChartObj = null;
+
+        function setTxType(type) {
+            activeTxType = type;
+            const btnInc = document.getElementById('btn-inc-toggle');
+            const btnExp = document.getElementById('btn-exp-toggle');
+            if (type === 'income') {
+                btnInc.className = 'btn-ios';
+                btnExp.className = 'btn-subtle';
+            } else {
+                btnExp.className = 'btn-ios';
+                btnInc.className = 'btn-subtle';
+            }
+        }
 
         function changeCurrency(sym) {
             currSym = sym;
@@ -606,7 +549,7 @@
         }
 
         function switchTab(tabName, el) {
-            document.querySelectorAll('.tab-btn').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             el.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
@@ -617,7 +560,7 @@
             dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value);
             localStorage.setItem('ef_daily_limit', dailyLimit);
             renderApp();
-            alert('Daily Limit Updated.');
+            alert('Daily Target Saved!');
         }
 
         function addPersonalTx(e) {
@@ -626,7 +569,7 @@
                 id: Date.now(),
                 desc: document.getElementById('desc').value,
                 amount: parseFloat(document.getElementById('amount').value),
-                type: document.querySelector('input[name="txType"]:checked').value,
+                type: activeTxType,
                 category: document.getElementById('category').value,
                 account: document.getElementById('account').value,
                 date: document.getElementById('date').value
@@ -740,22 +683,24 @@
 
             const netSavings = totalIncome - totalExpense;
 
-            // Daily Limit Checking Logic
+            // Daily Limit Indicator
             const todayStr = new Date().toISOString().split('T')[0];
             const todaySpent = transactions
                 .filter(t => t.type === 'expense' && t.date === todayStr)
                 .reduce((acc, t) => acc + t.amount, 0);
 
-            const statusTextEl = document.getElementById('dailyStatusText');
+            const badgeEl = document.getElementById('dailyStatusBadge');
             if (todaySpent > dailyLimit) {
-                statusTextEl.textContent = `ALERT: Daily Limit Exceeded (${currSym}${todaySpent} / ${currSym}${dailyLimit})`;
-                statusTextEl.style.color = 'var(--accent-red)';
+                badgeEl.style.background = 'rgba(255, 69, 58, 0.25)';
+                badgeEl.style.color = 'var(--accent-red)';
+                badgeEl.textContent = `🔴 Daily Exceeded (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
             } else {
-                statusTextEl.textContent = `Daily Spending Status: Normal (${currSym}${todaySpent} / ${currSym}${dailyLimit})`;
-                statusTextEl.style.color = '#000';
+                badgeEl.style.background = 'rgba(48, 209, 88, 0.2)';
+                badgeEl.style.color = 'var(--accent-green)';
+                badgeEl.textContent = `🟢 Within Daily Limit (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
             }
 
-            // Net Worth Calculation
+            // Net Worth
             let totalAssets = netSavings;
             let totalLiabilities = 0;
             netWorthItems.forEach(i => {
@@ -773,7 +718,7 @@
             document.getElementById('nw-liabilities-kpi').textContent = `${currSym}${totalLiabilities.toFixed(2)}`;
             document.getElementById('nw-position-kpi').textContent = `${currSym}${netWorthPosition.toFixed(2)}`;
 
-            // Recent Transactions Table
+            // Render Table
             const tbody = document.getElementById('ledgerBody');
             tbody.innerHTML = filtered.map(t => `
                 <tr>
@@ -781,13 +726,13 @@
                     <td><strong>${t.desc}</strong></td>
                     <td>${t.category}</td>
                     <td>${t.account}</td>
-                    <td>${t.type.toUpperCase()}</td>
-                    <td style="font-weight: bold; color: ${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                    <td><span class="badge-pill ${t.type === 'income' ? 'badge-income' : 'badge-expense'}">${t.type.toUpperCase()}</span></td>
+                    <td style="font-weight: 700; color: ${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
                         ${currSym}${t.amount.toFixed(2)}
                     </td>
-                    <td><button class="btn-cmd" onclick="deleteTx(${t.id})" style="padding: 1px 4px;">Delete</button></td>
+                    <td><button class="btn-subtle" onclick="deleteTx(${t.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="7" style="text-align:center;">No entries logged.</td></tr>';
+            `).join('') || '<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">No entries logged.</td></tr>';
 
             renderNetWorthTable();
             renderSips();
@@ -802,13 +747,13 @@
             tbody.innerHTML = netWorthItems.map(i => `
                 <tr>
                     <td><strong>${i.name}</strong></td>
-                    <td>${i.type.toUpperCase()}</td>
-                    <td style="font-weight: bold; color: ${i.type === 'asset' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                    <td><span class="badge-pill ${i.type === 'asset' ? 'badge-income' : 'badge-expense'}">${i.type.toUpperCase()}</span></td>
+                    <td style="font-weight: 700; color: ${i.type === 'asset' ? 'var(--accent-green)' : 'var(--accent-red)'}">
                         ${currSym}${i.value.toFixed(2)}
                     </td>
-                    <td><button class="btn-cmd" onclick="deleteNetWorthItem(${i.id})" style="padding: 1px 4px;">Delete</button></td>
+                    <td><button class="btn-subtle" onclick="deleteNetWorthItem(${i.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="4" style="text-align:center;">No assets or liabilities logged.</td></tr>';
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No assets or liabilities logged.</td></tr>';
         }
 
         function renderSips() {
@@ -818,12 +763,12 @@
             tbody.innerHTML = sips.map(s => `
                 <tr>
                     <td><strong>${s.name}</strong></td>
-                    <td>${s.category}</td>
+                    <td><span class="badge-pill badge-income">${s.category}</span></td>
                     <td>Day ${s.date ? s.date.split('-')[2] : '1'}</td>
-                    <td style="font-weight: bold; color: var(--accent-teal);">${currSym}${s.amount.toFixed(2)}</td>
-                    <td><button class="btn-cmd" onclick="deleteSip(${s.id})" style="padding: 1px 4px;">Delete</button></td>
+                    <td style="font-weight: 700; color: var(--accent-teal);">${currSym}${s.amount.toFixed(2)}</td>
+                    <td><button class="btn-subtle" onclick="deleteSip(${s.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" style="text-align:center;">No SIP entries recorded.</td></tr>';
+            `).join('') || '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">No SIP entries recorded.</td></tr>';
         }
 
         function renderBudgets() {
@@ -838,13 +783,16 @@
                 const pct = Math.min(100, (spent / cap) * 100);
                 return `
                     <div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500;">
                             <span>${cat}</span>
-                            <span>${currSym}${spent.toFixed(2)} / ${currSym}${cap.toFixed(2)} (${pct.toFixed(0)}%)</span>
+                            <span>${currSym}${spent.toFixed(2)} / ${currSym}${cap.toFixed(2)}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px;">
+                            <div style="width: ${pct}%; height: 100%; background: ${pct >= 100 ? 'var(--accent-red)' : 'var(--accent-blue)'};"></div>
                         </div>
                     </div>
                 `;
-            }).join('') || '<p>No budget limits configured.</p>';
+            }).join('') || '<p style="color: var(--text-secondary);">No caps configured.</p>';
         }
 
         function renderSubscriptions() {
@@ -854,9 +802,9 @@
                     <td><strong>${s.name}</strong></td>
                     <td>${currSym}${s.cost.toFixed(2)}</td>
                     <td>${s.dueDate}</td>
-                    <td><button class="btn-cmd" onclick="deleteSubscription(${s.id})" style="padding: 1px 4px;">Cancel</button></td>
+                    <td><button class="btn-subtle" onclick="deleteSubscription(${s.id})" style="padding: 4px 10px; font-size: 0.75rem;">Cancel</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="4" style="text-align:center;">No active subscriptions.</td></tr>';
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No active subscriptions.</td></tr>';
         }
 
         function renderGoals() {
@@ -865,13 +813,16 @@
                 const pct = Math.min(100, (g.saved / g.target) * 100);
                 return `
                     <div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500;">
                             <span>${g.name}</span>
-                            <span>${currSym}${g.saved.toFixed(2)} / ${currSym}${g.target.toFixed(2)} (${pct.toFixed(0)}%)</span>
+                            <span>${currSym}${g.saved.toFixed(2)} / ${currSym}${g.target.toFixed(2)}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px;">
+                            <div style="width: ${pct}%; height: 100%; background: var(--accent-teal);"></div>
                         </div>
                     </div>
                 `;
-            }).join('') || '<p>No active savings goals.</p>';
+            }).join('') || '<p style="color: var(--text-secondary);">No active goals.</p>';
         }
 
         function renderCharts(data = transactions) {
@@ -885,10 +836,11 @@
                     labels: ['Income', 'Expenses'],
                     datasets: [{
                         data: [inc, exp],
-                        backgroundColor: ['#008000', '#800000']
+                        backgroundColor: ['#30d158', '#ff453a'],
+                        borderRadius: 12
                     }]
                 },
-                options: { plugins: { legend: { display: false } } }
+                options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
             });
 
             const categories = {};
@@ -898,14 +850,16 @@
 
             if (categoryChartObj) categoryChartObj.destroy();
             categoryChartObj = new Chart(document.getElementById('categoryChart'), {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: Object.keys(categories),
                     datasets: [{
                         data: Object.values(categories),
-                        backgroundColor: ['#000080', '#008080', '#800080', '#808000', '#800000', '#008000']
+                        backgroundColor: ['#0a84ff', '#bf5af2', '#ff9f0a', '#30d158', '#ff453a', '#64d2ff'],
+                        borderWidth: 0
                     }]
-                }
+                },
+                options: { plugins: { legend: { labels: { color: '#86868b' } } }, cutout: '75%' }
             });
         }
 
