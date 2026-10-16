@@ -143,7 +143,7 @@
 
         .kpi-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
         }
 
@@ -159,12 +159,13 @@
         }
 
         .kpi-card span { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; }
-        .kpi-card h2 { font-size: 1.7rem; font-weight: 700; }
+        .kpi-card h2 { font-size: 1.6rem; font-weight: 700; }
 
         .text-green { color: var(--accent-green); }
         .text-red { color: var(--accent-red); }
         .text-purple { color: var(--accent-purple); }
         .text-orange { color: var(--accent-orange); }
+        .text-blue { color: var(--accent-blue); }
 
         .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
@@ -308,8 +309,12 @@
                         <h2 id="kpi-margin">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Monthly Subscriptions</span>
+                        <span>Subscriptions</span>
                         <h2 id="kpi-subs" class="text-purple">₹0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Projected EOM Balance</span>
+                        <h2 id="kpi-forecast" class="text-blue">₹0.00</h2>
                     </div>
                 </div>
 
@@ -630,12 +635,20 @@
                 else totalExpense += t.amount;
             });
 
+            const netSavings = totalIncome - totalExpense;
+            const totalSubCost = subscriptions.reduce((acc, s) => acc + s.cost, 0);
+
+            // Cash Flow Forecasting Logic (Current Net Savings - Upcoming Active Subscriptions)
+            const projectedEOM = netSavings - totalSubCost;
+
             document.getElementById('kpi-revenue').textContent = `${currSym}${totalIncome.toFixed(2)}`;
             document.getElementById('kpi-expenses').textContent = `${currSym}${totalExpense.toFixed(2)}`;
-            document.getElementById('kpi-margin').textContent = `${currSym}${(totalIncome - totalExpense).toFixed(2)}`;
-
-            const totalSubCost = subscriptions.reduce((acc, s) => acc + s.cost, 0);
+            document.getElementById('kpi-margin').textContent = `${currSym}${netSavings.toFixed(2)}`;
             document.getElementById('kpi-subs').textContent = `${currSym}${totalSubCost.toFixed(2)}`;
+            
+            const forecastEl = document.getElementById('kpi-forecast');
+            forecastEl.textContent = `${currSym}${projectedEOM.toFixed(2)}`;
+            forecastEl.className = projectedEOM >= 0 ? 'text-blue' : 'text-red';
 
             // Recent Transactions Table
             const tbody = document.getElementById('ledgerBody');
