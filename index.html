@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenseFlow</title>
-    <!-- SF Pro System Fonts & Chart.js -->
+    <title>ExpenseFlow Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -18,10 +17,10 @@
             --accent-green: #30d158;
             --accent-red: #ff453a;
             --accent-purple: #bf5af2;
+            --accent-orange: #ff9f0a;
             --input-bg: rgba(44, 44, 46, 0.6);
             --radius-large: 20px;
             --radius-medium: 12px;
-            --radius-small: 8px;
             --blur: blur(20px);
         }
 
@@ -36,6 +35,7 @@
             --accent-green: #34c759;
             --accent-red: #ff3b30;
             --accent-purple: #af52de;
+            --accent-orange: #ff9500;
             --input-bg: rgba(238, 238, 240, 0.8);
         }
 
@@ -56,7 +56,6 @@
             transition: background 0.4s ease;
         }
 
-        /* Apple Glass Sidebar */
         .sidebar {
             width: 250px;
             background-color: var(--bg-sidebar);
@@ -74,15 +73,10 @@
             align-items: center;
             gap: 10px;
             padding-left: 8px;
-            margin-bottom: 36px;
+            margin-bottom: 32px;
         }
 
-        .brand h2 {
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: -0.4px;
-        }
-
+        .brand h2 { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.4px; }
         .brand span {
             color: var(--accent-blue);
             font-size: 0.7rem;
@@ -90,16 +84,9 @@
             padding: 3px 8px;
             border-radius: 20px;
             font-weight: 600;
-            letter-spacing: 0.3px;
         }
 
-        .nav-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 4px; }
         .nav-item {
             display: flex;
             align-items: center;
@@ -109,15 +96,11 @@
             border-radius: var(--radius-medium);
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
         }
 
-        .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-        }
-
+        .nav-item:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
         .nav-item.active {
             background-color: var(--accent-blue);
             color: #ffffff;
@@ -125,27 +108,16 @@
             box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
         }
 
-        /* Main Workspace */
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         .top-bar {
             padding: 28px 40px 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: transparent;
         }
 
-        .top-bar h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
+        .top-bar h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+        .actions-group { display: flex; gap: 10px; align-items: center; }
 
         button.btn {
             padding: 8px 16px;
@@ -161,117 +133,71 @@
             backdrop-filter: var(--blur);
         }
 
-        .btn-primary { 
-            background-color: var(--accent-blue); 
-            color: #fff; 
-            border: none;
-            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
-        }
-        .btn-secondary { 
-            background-color: var(--card-bg); 
-            color: var(--text-primary); 
-        }
-        .btn:hover { 
-            opacity: 0.9; 
-            transform: scale(0.98);
-        }
+        .btn-primary { background-color: var(--accent-blue); color: #fff; border: none; }
+        .btn-secondary { background-color: var(--card-bg); color: var(--text-primary); }
+        .btn:hover { opacity: 0.9; transform: scale(0.98); }
 
-        .content-body {
-            padding: 0 40px 40px 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+        .content-body { padding: 0 40px 40px 40px; display: flex; flex-direction: column; gap: 24px; }
+        .tab-content { display: none; flex-direction: column; gap: 24px; }
+        .tab-content.active { display: flex; }
 
-        .tab-content {
-            display: none;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        /* Minimalist Apple Metric Cards */
         .kpi-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
         }
 
         .kpi-card {
             background-color: var(--card-bg);
             backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--card-border);
-            padding: 22px 24px;
+            padding: 20px 22px;
             border-radius: var(--radius-large);
             display: flex;
             flex-direction: column;
             gap: 6px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            transition: transform 0.2s ease;
         }
 
-        .kpi-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .kpi-card span {
-            font-size: 0.78rem;
-            letter-spacing: -0.1px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .kpi-card h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
+        .kpi-card span { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; }
+        .kpi-card h2 { font-size: 1.7rem; font-weight: 700; }
 
         .text-green { color: var(--accent-green); }
         .text-red { color: var(--accent-red); }
         .text-purple { color: var(--accent-purple); }
+        .text-orange { color: var(--accent-orange); }
 
-        /* Dashboard Cards & Layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
         .card {
             background-color: var(--card-bg);
             backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-large);
             padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
-        .card-header h3 {
-            font-size: 1.05rem;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
+        .card-header h3 { font-size: 1.05rem; font-weight: 600; }
 
-        /* Form Inputs - Apple iOS Style */
-        form {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
+        .presets-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .preset-chip {
+            background-color: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+        .preset-chip:hover { background-color: var(--accent-blue); color: #fff; }
 
+        form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
         .form-full { grid-column: span 2; }
 
         .type-toggle-container {
@@ -294,24 +220,11 @@
             font-weight: 500;
             font-size: 0.85rem;
             color: var(--text-secondary);
-            transition: all 0.2s ease;
         }
 
-        .type-toggle-btn input[type="radio"] {
-            display: none;
-        }
-
-        .type-toggle-btn.income-active {
-            background-color: var(--card-bg);
-            color: var(--accent-green);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        .type-toggle-btn.expense-active {
-            background-color: var(--card-bg);
-            color: var(--accent-red);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-        }
+        .type-toggle-btn input { display: none; }
+        .type-toggle-btn.income-active { background-color: var(--card-bg); color: var(--accent-green); }
+        .type-toggle-btn.expense-active { background-color: var(--card-bg); color: var(--accent-red); }
 
         input, select {
             width: 100%;
@@ -322,50 +235,17 @@
             color: var(--text-primary);
             font-size: 0.9rem;
             outline: none;
-            transition: border 0.2s ease;
         }
 
-        input:focus, select:focus {
-            border-color: var(--accent-blue);
-        }
+        .progress-bar-container { background: var(--input-bg); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px; }
+        .progress-bar-fill { height: 100%; border-radius: 10px; transition: width 0.3s ease; }
 
-        /* Apple Data Table */
-        .table-container {
-            overflow-x: auto;
-        }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        th { color: var(--text-secondary); padding: 12px 16px; font-weight: 500; font-size: 0.8rem; border-bottom: 1px solid var(--card-border); }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--card-border); }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.88rem;
-        }
-
-        th {
-            color: var(--text-secondary);
-            padding: 12px 16px;
-            font-weight: 500;
-            font-size: 0.8rem;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
         .badge-income { background: rgba(48, 209, 88, 0.15); color: var(--accent-green); }
         .badge-expense { background: rgba(255, 69, 58, 0.15); color: var(--accent-red); }
 
@@ -378,42 +258,41 @@
 </head>
 <body>
 
-    <!-- Apple-style Sidebar -->
     <aside class="sidebar">
         <div>
             <div class="brand">
                 <h2>ExpenseFlow</h2>
-                <span>PERSONAL</span>
+                <span>PRO</span>
             </div>
             <ul class="nav-links">
-                <li class="nav-item active" onclick="switchTab('dashboard', this)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
-                    Dashboard
-                </li>
-                <li class="nav-item" onclick="switchTab('accounts', this)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    Wallets & Accounts
-                </li>
+                <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Dashboard</li>
+                <li class="nav-item" onclick="switchTab('budgets', this)">🎯 Budgets & Caps</li>
+                <li class="nav-item" onclick="switchTab('subscriptions', this)">🔄 Subscriptions</li>
+                <li class="nav-item" onclick="switchTab('goals', this)">🐷 Savings Goals</li>
             </ul>
         </div>
-        <button class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%; justify-content: center;">🌓 Toggle Appearance</button>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <select id="currencySelector" onchange="changeCurrency(this.value)" style="padding: 6px 10px; font-size: 0.8rem;">
+                <option value="$">USD ($)</option>
+                <option value="₹">INR (₹)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+            </select>
+            <button class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%; justify-content: center;">🌓 Appearance</button>
+        </div>
     </aside>
 
-    <!-- Main Workspace -->
     <div class="main-wrapper">
         <header class="top-bar">
             <h1 id="page-title">Personal Overview</h1>
             <div class="actions-group">
-                <button class="btn btn-secondary" onclick="exportToCSV()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Export
-                </button>
+                <button class="btn btn-secondary" onclick="exportToCSV()">Export</button>
             </div>
         </header>
 
         <div class="content-body">
             
-            <!-- TAB 1: PERSONAL DASHBOARD -->
+            <!-- DASHBOARD -->
             <div id="tab-dashboard" class="tab-content active">
                 <div class="kpi-container">
                     <div class="kpi-card">
@@ -428,28 +307,41 @@
                         <span>Net Savings</span>
                         <h2 id="kpi-margin">$0.00</h2>
                     </div>
+                    <div class="kpi-card">
+                        <span>Monthly Subscriptions</span>
+                        <h2 id="kpi-subs" class="text-purple">$0.00</h2>
+                    </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Overview</h3>
+                            <h3>Month-over-Month Comparison</h3>
                         </div>
                         <canvas id="trendChart" height="120"></canvas>
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h3>Categories</h3>
+                            <h3>Expense Categories</h3>
                         </div>
                         <canvas id="categoryChart" height="200"></canvas>
                     </div>
                 </div>
 
-                <!-- Transaction Form -->
+                <!-- Transaction Entry & Presets -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Log Transaction</h3>
+                        <h3>Quick Log Transaction</h3>
                     </div>
+                    
+                    <div class="presets-row">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); align-self: center;">Quick Add:</span>
+                        <div class="preset-chip" onclick="quickAdd('Coffee', 5, 'Dining Out')">☕ $5 Coffee</div>
+                        <div class="preset-chip" onclick="quickAdd('Lunch', 15, 'Dining Out')">🥗 $15 Lunch</div>
+                        <div class="preset-chip" onclick="quickAdd('Groceries', 50, 'Groceries')">🛒 $50 Groceries</div>
+                        <div class="preset-chip" onclick="quickAdd('Gas Fill-up', 40, 'Utilities')">⛽ $40 Gas</div>
+                    </div>
+
                     <form onsubmit="addPersonalTx(event)">
                         <div class="type-toggle-container">
                             <label id="lbl-income" class="type-toggle-btn income-active" onclick="setTxType('income')">
@@ -460,12 +352,8 @@
                             </label>
                         </div>
 
-                        <div>
-                            <input type="text" id="desc" placeholder="Description" required>
-                        </div>
-                        <div>
-                            <input type="number" step="0.01" id="amount" placeholder="Amount ($)" required>
-                        </div>
+                        <div><input type="text" id="desc" placeholder="Description" required></div>
+                        <div><input type="number" step="0.01" id="amount" placeholder="Amount" required></div>
                         <div>
                             <select id="category" required>
                                 <option value="Salary">Salary</option>
@@ -485,23 +373,18 @@
                                 <option value="Petty Cash">Cash</option>
                             </select>
                         </div>
-                        <div class="form-full">
-                            <input type="date" id="date" required>
-                        </div>
+                        <div class="form-full"><input type="date" id="date" required></div>
                         <div class="form-full">
                             <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Transaction</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Recent Transactions -->
+                <!-- Search & Transactions -->
                 <div class="card">
                     <div class="card-header">
                         <h3>Recent Transactions</h3>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="date" id="filterStart" onchange="renderApp()" style="padding: 4px 8px; font-size: 0.8rem;">
-                            <input type="date" id="filterEnd" onchange="renderApp()" style="padding: 4px 8px; font-size: 0.8rem;">
-                        </div>
+                        <input type="text" id="searchInput" placeholder="🔍 Search description..." oninput="renderApp()" style="width: 200px; padding: 6px 12px; font-size: 0.8rem;">
                     </div>
                     <div class="table-container">
                         <table>
@@ -522,40 +405,84 @@
                 </div>
             </div>
 
-            <!-- TAB 2: MY WALLETS & ACCOUNTS -->
-            <div id="tab-accounts" class="tab-content">
-                <div class="kpi-container">
-                    <div class="kpi-card">
-                        <span>Bank Balance</span>
-                        <h2 id="acc-bank" class="text-green">$0.00</h2>
+            <!-- BUDGETS & CAPS -->
+            <div id="tab-budgets" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Set Category Monthly Cap</h3>
                     </div>
-                    <div class="kpi-card">
-                        <span>Credit Card</span>
-                        <h2 id="acc-credit" class="text-red">$0.00</h2>
+                    <form onsubmit="setBudgetCap(event)">
+                        <div>
+                            <select id="budgetCategory" required>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Dining Out">Dining Out</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Rent">Rent</option>
+                                <option value="Health & Fitness">Health & Fitness</option>
+                            </select>
+                        </div>
+                        <div><input type="number" step="0.01" id="budgetAmount" placeholder="Monthly Cap" required></div>
+                        <div class="form-full"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Budget Limit</button></div>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Monthly Budget Progress</h3>
                     </div>
-                    <div class="kpi-card">
-                        <span>Cash Hand</span>
-                        <h2 id="acc-cash" class="text-purple">$0.00</h2>
+                    <div id="budgetProgressList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+                </div>
+            </div>
+
+            <!-- SUBSCRIPTIONS -->
+            <div id="tab-subscriptions" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Add Recurring Bill / Subscription</h3>
                     </div>
+                    <form onsubmit="addSubscription(event)">
+                        <div><input type="text" id="subName" placeholder="Service (e.g. Netflix)" required></div>
+                        <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost" required></div>
+                        <div class="form-full"><input type="date" id="subDueDate" required></div>
+                        <div class="form-full"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Add Subscription</button></div>
+                    </form>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3>Accounts Ledger</h3>
+                        <h3>Active Subscriptions</h3>
                     </div>
                     <div class="table-container">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Account Name</th>
-                                    <th>Inflow</th>
-                                    <th>Outflow</th>
-                                    <th>Net Position</th>
-                                </tr>
+                                <tr><th>Subscription</th><th>Monthly Cost</th><th>Next Due Date</th><th>Action</th></tr>
                             </thead>
-                            <tbody id="accountsTableBody"></tbody>
+                            <tbody id="subsTableBody"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- SAVINGS GOALS -->
+            <div id="tab-goals" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Create New Savings Goal</h3>
+                    </div>
+                    <form onsubmit="addGoal(event)">
+                        <div><input type="text" id="goalName" placeholder="Goal Name (e.g. Emergency Fund)" required></div>
+                        <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount" required></div>
+                        <div><input type="number" step="0.01" id="goalSaved" placeholder="Already Saved" value="0"></div>
+                        <div><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 100%;">Create Goal</button></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Savings Progress</h3>
+                    </div>
+                    <div id="goalsList" style="display: flex; flex-direction: column; gap: 18px;"></div>
                 </div>
             </div>
 
@@ -563,17 +490,28 @@
     </div>
 
     <script>
+        let currSym = localStorage.getItem('ef_curr') || '$';
         let transactions = JSON.parse(localStorage.getItem('ef_personal_transactions')) || [];
+        let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 300, 'Dining Out': 150 };
+        let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
+        let goals = JSON.parse(localStorage.getItem('ef_goals')) || [];
         let theme = localStorage.getItem('ef_personal_theme') || 'dark';
+
         document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('currencySelector').value = currSym;
 
         let trendChartObj = null;
         let categoryChartObj = null;
 
+        function changeCurrency(sym) {
+            currSym = sym;
+            localStorage.setItem('ef_curr', sym);
+            renderApp();
+        }
+
         function setTxType(type) {
             const lblIncome = document.getElementById('lbl-income');
             const lblExpense = document.getElementById('lbl-expense');
-
             if (type === 'income') {
                 lblIncome.classList.add('income-active');
                 lblExpense.classList.remove('expense-active');
@@ -588,15 +526,8 @@
         function switchTab(tabName, el) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-
             el.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
-
-            const titles = {
-                dashboard: 'Personal Overview',
-                accounts: 'Wallets & Accounts'
-            };
-            document.getElementById('page-title').textContent = titles[tabName];
         }
 
         function toggleTheme() {
@@ -606,26 +537,76 @@
             renderCharts();
         }
 
+        function quickAdd(desc, amount, category) {
+            transactions.push({
+                id: Date.now(),
+                desc,
+                amount,
+                type: 'expense',
+                category,
+                account: 'Bank Account',
+                date: new Date().toISOString().split('T')[0]
+            });
+            saveAndRender();
+        }
+
         function addPersonalTx(e) {
             e.preventDefault();
-            const rawAmount = parseFloat(document.getElementById('amount').value);
-            const selectedType = document.querySelector('input[name="txType"]:checked').value;
-
-            const tx = {
+            transactions.push({
                 id: Date.now(),
                 desc: document.getElementById('desc').value,
-                amount: rawAmount,
-                type: selectedType,
+                amount: parseFloat(document.getElementById('amount').value),
+                type: document.querySelector('input[name="txType"]:checked').value,
                 category: document.getElementById('category').value,
                 account: document.getElementById('account').value,
                 date: document.getElementById('date').value
-            };
-
-            transactions.push(tx);
+            });
             saveAndRender();
             e.target.reset();
             setTxType('income');
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function setBudgetCap(e) {
+            e.preventDefault();
+            const cat = document.getElementById('budgetCategory').value;
+            const cap = parseFloat(document.getElementById('budgetAmount').value);
+            budgetCaps[cat] = cap;
+            localStorage.setItem('ef_budget_caps', JSON.stringify(budgetCaps));
+            renderApp();
+            e.target.reset();
+        }
+
+        function addSubscription(e) {
+            e.preventDefault();
+            subscriptions.push({
+                id: Date.now(),
+                name: document.getElementById('subName').value,
+                cost: parseFloat(document.getElementById('subCost').value),
+                dueDate: document.getElementById('subDueDate').value
+            });
+            localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
+            renderApp();
+            e.target.reset();
+        }
+
+        function deleteSubscription(id) {
+            subscriptions = subscriptions.filter(s => s.id !== id);
+            localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
+            renderApp();
+        }
+
+        function addGoal(e) {
+            e.preventDefault();
+            goals.push({
+                id: Date.now(),
+                name: document.getElementById('goalName').value,
+                target: parseFloat(document.getElementById('goalTarget').value),
+                saved: parseFloat(document.getElementById('goalSaved').value) || 0
+            });
+            localStorage.setItem('ef_goals', JSON.stringify(goals));
+            renderApp();
+            e.target.reset();
         }
 
         function deleteTx(id) {
@@ -639,27 +620,23 @@
         }
 
         function renderApp() {
-            const start = document.getElementById('filterStart').value;
-            const end = document.getElementById('filterEnd').value;
-
-            let filtered = transactions;
-            if (start) filtered = filtered.filter(t => t.date >= start);
-            if (end) filtered = filtered.filter(t => t.date <= end);
+            const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            let filtered = transactions.filter(t => t.desc.toLowerCase().includes(searchQuery));
 
             let totalIncome = 0, totalExpense = 0;
-
             filtered.forEach(t => {
                 if (t.type === 'income') totalIncome += t.amount;
                 else totalExpense += t.amount;
             });
 
-            document.getElementById('kpi-revenue').textContent = `$${totalIncome.toFixed(2)}`;
-            document.getElementById('kpi-expenses').textContent = `$${totalExpense.toFixed(2)}`;
-            const savings = totalIncome - totalExpense;
-            document.getElementById('kpi-margin').textContent = `$${savings.toFixed(2)}`;
-            document.getElementById('kpi-margin').style.color = savings >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            document.getElementById('kpi-revenue').textContent = `${currSym}${totalIncome.toFixed(2)}`;
+            document.getElementById('kpi-expenses').textContent = `${currSym}${totalExpense.toFixed(2)}`;
+            document.getElementById('kpi-margin').textContent = `${currSym}${(totalIncome - totalExpense).toFixed(2)}`;
 
-            // Ledger Render
+            const totalSubCost = subscriptions.reduce((acc, s) => acc + s.cost, 0);
+            document.getElementById('kpi-subs').textContent = `${currSym}${totalSubCost.toFixed(2)}`;
+
+            // Recent Transactions Table
             const tbody = document.getElementById('ledgerBody');
             tbody.innerHTML = filtered.map(t => `
                 <tr>
@@ -669,52 +646,76 @@
                     <td>${t.account}</td>
                     <td><span class="badge ${t.type === 'income' ? 'badge-income' : 'badge-expense'}">${t.type.toUpperCase()}</span></td>
                     <td style="font-weight: 600; color: ${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
-                        $${t.amount.toFixed(2)}
+                        ${currSym}${t.amount.toFixed(2)}
                     </td>
                     <td><button class="btn btn-secondary" onclick="deleteTx(${t.id})" style="padding: 2px 8px; font-size: 0.75rem;">Delete</button></td>
                 </tr>
             `).join('');
 
-            renderAccountsTab(filtered);
+            renderBudgets();
+            renderSubscriptions();
+            renderGoals();
             renderCharts(filtered);
         }
 
-        function renderAccountsTab(data) {
-            const accounts = {
-                'Bank Account': { in: 0, out: 0 },
-                'Credit Card': { in: 0, out: 0 },
-                'Petty Cash': { in: 0, out: 0 }
-            };
-
-            data.forEach(t => {
-                if (accounts[t.account]) {
-                    if (t.type === 'income') accounts[t.account].in += t.amount;
-                    else accounts[t.account].out += t.amount;
-                }
+        function renderBudgets() {
+            const list = document.getElementById('budgetProgressList');
+            const catSpent = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                catSpent[t.category] = (catSpent[t.category] || 0) + t.amount;
             });
 
-            const bankBal = accounts['Bank Account'].in - accounts['Bank Account'].out;
-            const creditBal = accounts['Credit Card'].out - accounts['Credit Card'].in;
-            const cashBal = accounts['Petty Cash'].in - accounts['Petty Cash'].out;
+            list.innerHTML = Object.entries(budgetCaps).map(([cat, cap]) => {
+                const spent = catSpent[cat] || 0;
+                const pct = Math.min(100, (spent / cap) * 100);
+                const color = pct >= 100 ? 'var(--accent-red)' : pct >= 80 ? 'var(--accent-orange)' : 'var(--accent-green)';
+                return `
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500;">
+                            <span>${cat}</span>
+                            <span>${currSym}${spent.toFixed(2)} / ${currSym}${cap.toFixed(2)}</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${color};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<p style="color: var(--text-secondary); font-size: 0.85rem;">No budget caps configured.</p>';
+        }
 
-            document.getElementById('acc-bank').textContent = `$${bankBal.toFixed(2)}`;
-            document.getElementById('acc-credit').textContent = `$${creditBal.toFixed(2)}`;
-            document.getElementById('acc-cash').textContent = `$${cashBal.toFixed(2)}`;
-
-            const accBody = document.getElementById('accountsTableBody');
-            accBody.innerHTML = Object.entries(accounts).map(([name, val]) => `
+        function renderSubscriptions() {
+            const tbody = document.getElementById('subsTableBody');
+            tbody.innerHTML = subscriptions.map(s => `
                 <tr>
-                    <td><strong>${name}</strong></td>
-                    <td class="text-green">$${val.in.toFixed(2)}</td>
-                    <td class="text-red">$${val.out.toFixed(2)}</td>
-                    <td style="font-weight: 700;">$${(val.in - val.out).toFixed(2)}</td>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${currSym}${s.cost.toFixed(2)}</td>
+                    <td>${s.dueDate}</td>
+                    <td><button class="btn btn-secondary" onclick="deleteSubscription(${s.id})" style="padding: 2px 8px; font-size: 0.75rem;">Cancel</button></td>
                 </tr>
-            `).join('');
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No recurring subscriptions logged.</td></tr>';
+        }
+
+        function renderGoals() {
+            const list = document.getElementById('goalsList');
+            list.innerHTML = goals.map(g => {
+                const pct = Math.min(100, (g.saved / g.target) * 100);
+                return `
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500;">
+                            <span>${g.name}</span>
+                            <span>${currSym}${g.saved.toFixed(2)} / ${currSym}${g.target.toFixed(2)} (${pct.toFixed(0)}%)</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${pct}%; background-color: var(--accent-blue);"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<p style="color: var(--text-secondary); font-size: 0.85rem;">No active savings goals.</p>';
         }
 
         function renderCharts(data = transactions) {
             const isDark = theme === 'dark';
-            const textColor = isDark ? '#86868b' : '#86868b';
+            const textColor = '#86868b';
 
             const inc = data.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
             const exp = data.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
@@ -756,14 +757,14 @@
                     }]
                 },
                 options: {
-                    plugins: { legend: { labels: { color: textColor, font: { family: '-apple-system' } } } },
+                    plugins: { legend: { labels: { color: textColor } } },
                     cutout: '75%'
                 }
             });
         }
 
         function exportToCSV() {
-            if (transactions.length === 0) return alert('No transactions recorded to export.');
+            if (transactions.length === 0) return alert('No transactions to export.');
             let csv = 'ID,Date,Description,Category,Account,Type,Amount\n';
             transactions.forEach(t => {
                 csv += `"${t.id}","${t.date}","${t.desc}","${t.category}","${t.account}","${t.type}",${t.amount}\n`;
