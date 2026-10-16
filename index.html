@@ -1,885 +1,1226 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenseFlow - Dynamic OS</title>
+    <title>ExpenseFlow Pro - Futuristic iOS Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        ios: {
+                            bg: '#050714',
+                            card: 'rgba(18, 24, 43, 0.55)',
+                            border: 'rgba(255, 255, 255, 0.12)',
+                            accent: '#6366f1',
+                            cyan: '#06b6d4',
+                            pink: '#ec4899',
+                            emerald: '#10b981',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0b0d19 0%, #06070c 50%, #110d1f 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-card: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-blur: blur(25px) saturate(190%);
-            --text-primary: #f5f5f7;
-            --text-secondary: rgba(235, 235, 245, 0.6);
-            --accent-blue: #0a84ff;
-            --accent-green: #30d158;
-            --accent-red: #ff453a;
-            --accent-purple: #bf5af2;
-            --accent-teal: #64d2ff;
-            --accent-orange: #ff9f0a;
-            --radius-xl: 28px;
-            --radius-lg: 18px;
-            --radius-md: 12px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
         body {
-            background: var(--bg-gradient);
-            color: var(--text-primary);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            background-color: #030712;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            width: 260px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            padding: 32px 16px 24px 16px;
-            justify-content: space-between;
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-left: 10px;
-            margin-bottom: 28px;
-        }
-
-        .brand-logo {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
-        }
-
-        .brand h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.4px; }
-
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            color: var(--text-secondary);
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
-        .nav-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            font-weight: 600;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        
-        .top-bar {
-            padding: 28px 40px 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .top-bar h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.6px; }
-
-        .dynamic-island-badge {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--glass-border);
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .content-body { padding: 0 40px 40px 40px; display: flex; flex-direction: column; gap: 24px; }
-        .tab-content { display: none; flex-direction: column; gap: 24px; }
-        .tab-content.active { display: flex; }
-
-        /* KPI Cards */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .kpi-card {
-            background: var(--glass-card);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            padding: 22px;
-            border-radius: var(--radius-xl);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        .kpi-card span { font-size: 0.78rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-card h2 { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.5px; }
-
-        .text-green { color: var(--accent-green); }
-        .text-red { color: var(--accent-red); }
-        .text-blue { color: var(--accent-blue); }
-        .text-teal { color: var(--accent-teal); }
-
-        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
         .glass-card {
-            background: var(--glass-card);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
         }
 
-        .card-header h3 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f9fafb;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
 
-        /* Modern Form Inputs */
-        form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-        .form-full { grid-column: span 2; }
-
-        input, select {
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--text-primary);
-            font-size: 0.92rem;
+        .glass-input:focus {
             outline: none;
-            transition: all 0.2s;
+            border-color: #6366f1;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
         }
 
-        input:focus, select:focus {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--accent-blue);
+        /* Ambient Mesh Backgrounds */
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        button.btn-ios {
-            background: linear-gradient(135deg, var(--accent-blue), #0056b3);
-            color: #ffffff;
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35);
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.6);
         }
 
-        button.btn-ios:active { transform: scale(0.97); }
-
-        .btn-subtle {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.82rem;
-            cursor: pointer;
-        }
-
-        /* Glass Table */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        th { color: var(--text-secondary); padding: 14px 16px; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid var(--glass-border); }
-        td { padding: 16px; border-bottom: 1px solid var(--glass-border); }
-
-        .badge-pill {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
-        .badge-income { background: rgba(48, 209, 88, 0.18); color: var(--accent-green); }
-        .badge-expense { background: rgba(255, 69, 58, 0.18); color: var(--accent-red); }
-
-        @media (max-width: 1024px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-            .content-body { padding: 0 20px 20px 20px; }
-            .top-bar { padding: 20px; }
+        /* Dynamic Island Glow */
+        .dynamic-island {
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.2);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen relative flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-    <aside class="sidebar">
-        <div>
-            <div class="brand">
-                <div class="brand-logo"></div>
-                <h2>ExpenseFlow</h2>
+    <!-- Ambient Glowing Orbs -->
+    <div class="ambient-orb w-[450px] h-[450px] bg-indigo-600/30 top-[-100px] left-[-100px] animate-pulse-glow"></div>
+    <div class="ambient-orb w-[500px] h-[500px] bg-purple-600/25 bottom-[-100px] right-[-100px] animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+    <div class="ambient-orb w-[350px] h-[350px] bg-cyan-600/20 top-[40%] left-[30%] animate-pulse-glow" style="animation-delay: 3s;"></div>
+
+    <!-- Main Outer Container -->
+    <div class="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1600px] w-full mx-auto p-3 md:p-6 gap-6">
+
+        <!-- FUTURISTIC GLASS SIDEBAR NAVIGATION -->
+        <aside class="w-full lg:w-72 flex flex-col justify-between glass-panel rounded-3xl p-5 shrink-0">
+            <div>
+                <!-- Brand Title -->
+                <div class="flex items-center gap-3 px-2 py-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30 animate-float">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">ExpenseFlow</h1>
+                        <p class="text-xs font-medium text-indigo-400/90 tracking-widest uppercase">PRO • VISION OS</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-1.5" id="nav-container">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10">
+                        <i class="fa-solid fa-chart-pie text-indigo-400 w-5"></i>
+                        <span>Dashboard & Ledger</span>
+                    </button>
+                    <button onclick="switchTab('sms')" id="nav-sms" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-[#fa-envelope] fa-comment-sms text-cyan-400 w-5"></i>
+                        <span>SMS Auto-Parser</span>
+                        <span class="ml-auto text-[10px] bg-cyan-500/20 text-cyan-300 font-bold px-2 py-0.5 rounded-full border border-cyan-500/30">AI</span>
+                    </button>
+                    <button onclick="switchTab('networth')" id="nav-networth" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-vault text-emerald-400 w-5"></i>
+                        <span>Net Worth</span>
+                    </button>
+                    <button onclick="switchTab('sip')" id="nav-sip" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-chart-line text-purple-400 w-5"></i>
+                        <span>SIP Investments</span>
+                    </button>
+                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-calendar-days text-pink-400 w-5"></i>
+                        <span>Bill Calendar</span>
+                    </button>
+                    <button onclick="switchTab('splitter')" id="nav-splitter" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-users-viewfinder text-amber-400 w-5"></i>
+                        <span>Expense Splitter</span>
+                    </button>
+                    <button onclick="switchTab('budgets')" id="nav-budgets" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-bullseye text-red-400 w-5"></i>
+                        <span>Budget Caps</span>
+                    </button>
+                    <button onclick="switchTab('subscriptions')" id="nav-subscriptions" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-rotate text-blue-400 w-5"></i>
+                        <span>Subscriptions</span>
+                    </button>
+                    <button onclick="switchTab('goals')" id="nav-goals" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-piggy-bank text-teal-400 w-5"></i>
+                        <span>Savings Goals</span>
+                    </button>
+                </nav>
             </div>
-            <ul class="nav-links">
-                <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Main Ledger</li>
-                <li class="nav-item" onclick="switchTab('networth', this)">🏛️ Net Worth</li>
-                <li class="nav-item" onclick="switchTab('sips', this)">📈 SIP Portfolio</li>
-                <li class="nav-item" onclick="switchTab('budgets', this)">🎯 Budget Caps</li>
-                <li class="nav-item" onclick="switchTab('subscriptions', this)">🔄 Subscriptions</li>
-                <li class="nav-item" onclick="switchTab('goals', this)">🐷 Savings Goals</li>
-            </ul>
-        </div>
-        <div>
-            <select id="currencySelector" onchange="changeCurrency(this.value)" style="padding: 10px; font-size: 0.85rem;">
-                <option value="₹">INR (₹)</option>
-                <option value="$">USD ($)</option>
-                <option value="€">EUR (€)</option>
-                <option value="£">GBP (£)</option>
-            </select>
-        </div>
-    </aside>
 
-    <div class="main-wrapper">
-        <header class="top-bar">
-            <h1>Financial Hub</h1>
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <div id="dailyStatusBadge" class="dynamic-island-badge">
-                    🟢 Checking Daily Limit...
+            <!-- Sidebar Bottom Settings -->
+            <div class="pt-6 border-t border-white/10 space-y-3">
+                <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+                    <span>Currency</span>
+                    <select id="currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white">
+                        <option value="₹">₹ INR</option>
+                        <option value="$">$ USD</option>
+                        <option value="€">€ EUR</option>
+                        <option value="£">£ GBP</option>
+                    </select>
                 </div>
-                <button class="btn-subtle" onclick="exportToCSV()">Export CSV</button>
+                <button onclick="exportToCSV()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-200 glass-card hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-file-csv text-indigo-400"></i>
+                    <span>Export CSV Data</span>
+                </button>
             </div>
-        </header>
+        </aside>
 
-        <div class="content-body">
-            
-            <!-- DASHBOARD TAB -->
-            <div id="tab-dashboard" class="tab-content active">
-                <div class="kpi-container">
-                    <div class="kpi-card">
-                        <span>Total Income</span>
-                        <h2 id="kpi-revenue" class="text-green">₹0.00</h2>
-                    </div>
-                    <div class="kpi-card">
-                        <span>Total Expenses</span>
-                        <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
-                    </div>
-                    <div class="kpi-card">
-                        <span>Net Cashflow</span>
-                        <h2 id="kpi-margin">₹0.00</h2>
-                    </div>
-                    <div class="kpi-card">
-                        <span>Current Net Worth</span>
-                        <h2 id="kpi-networth-quick" class="text-teal">₹0.00</h2>
-                    </div>
-                </div>
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col gap-6 min-w-0">
 
-                <div class="dashboard-grid">
-                    <div class="glass-card">
-                        <div class="card-header"><h3>Cashflow Trends</h3></div>
-                        <canvas id="trendChart" height="130"></canvas>
-                    </div>
-                    <div class="glass-card">
-                        <div class="card-header"><h3>Expense Distribution</h3></div>
-                        <canvas id="categoryChart" height="200"></canvas>
-                    </div>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header"><h3>Quick Log Entry</h3></div>
-                    <form onsubmit="addPersonalTx(event)">
-                        <div class="form-full" style="display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 20px;">
-                            <button type="button" id="btn-inc-toggle" class="btn-ios" style="flex: 1; padding: 10px;" onclick="setTxType('income')">Income (+)</button>
-                            <button type="button" id="btn-exp-toggle" class="btn-subtle" style="flex: 1; border: none;" onclick="setTxType('expense')">Expense (-)</button>
+            <!-- DYNAMIC ISLAND HEADER BAR -->
+            <header class="glass-panel rounded-3xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                <div class="flex items-center gap-4 w-full sm:w-auto">
+                    <!-- Dynamic Island Capsule -->
+                    <div class="dynamic-island px-4 py-2 rounded-full flex items-center gap-3 border border-indigo-500/30">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <div class="text-xs">
+                            <span class="text-slate-400 font-medium">Daily Limit Status: </span>
+                            <span id="island-spend-status" class="font-bold text-emerald-400">₹0 spent / ₹2,000 Cap</span>
                         </div>
+                    </div>
+                </div>
 
-                        <div><input type="text" id="desc" placeholder="Transaction Description" required></div>
-                        <div><input type="number" step="0.01" id="amount" placeholder="Amount (₹)" required></div>
+                <!-- Controls & Notifications -->
+                <div class="flex items-center gap-3 self-end sm:self-auto">
+                    <button onclick="requestNotificationPermission()" class="px-3 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-indigo-400"></i>
+                        <span>Alerts</span>
+                    </button>
+                    <div class="text-right">
+                        <p class="text-xs font-medium text-slate-400" id="live-date-str">Fri, Oct 16, 2026</p>
+                        <p class="text-sm font-bold text-white font-display" id="live-time-str">18:09 IST</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: MAIN DASHBOARD & LEDGER -->
+            <section id="tab-page-dashboard" class="tab-page space-y-6">
+                
+                <!-- KPI Financial Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-emerald-500/10 text-6xl font-bold"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Income</p>
+                        <h3 class="text-2xl font-bold font-display text-emerald-400 mt-2" id="kpi-income">₹0.00</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Total credited balance</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-rose-500/10 text-6xl font-bold"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Expenses</p>
+                        <h3 class="text-2xl font-bold font-display text-rose-400 mt-2" id="kpi-expense">₹0.00</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Total outflows logged</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-indigo-500/10 text-6xl font-bold"><i class="fa-solid fa-wallet"></i></div>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Net Cashflow</p>
+                        <h3 class="text-2xl font-bold font-display text-indigo-400 mt-2" id="kpi-cashflow">₹0.00</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Income minus Expense</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-cyan-500/10 text-6xl font-bold"><i class="fa-solid fa-vault"></i></div>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Net Worth</p>
+                        <h3 class="text-2xl font-bold font-display text-cyan-400 mt-2" id="kpi-networth">₹0.00</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Assets minus Liabilities</p>
+                    </div>
+                </div>
+
+                <!-- One-Tap Smart Presets Bar -->
+                <div class="glass-panel p-4 rounded-3xl">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                        <span>One-Tap Smart Micro-Expense Presets</span>
+                    </p>
+                    <div class="flex flex-wrap gap-2.5">
+                        <button onclick="applyPreset('Chai / Coffee', 20, 'Dining Out')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
+                            <span>☕ ₹20 Chai/Tea</span>
+                        </button>
+                        <button onclick="applyPreset('Auto / Taxi Fare', 50, 'Transport')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
+                            <span>🚕 ₹50 Auto/Taxi</span>
+                        </button>
+                        <button onclick="applyPreset('Snacks / Evening', 150, 'Groceries')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
+                            <span>🍿 ₹150 Snacks</span>
+                        </button>
+                        <button onclick="applyPreset('Petrol / Fuel', 500, 'Transport')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
+                            <span>⛽ ₹500 Fuel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Entry Form & Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Quick Add Form -->
+                    <div class="lg:col-span-5 glass-panel p-6 rounded-3xl flex flex-col justify-between">
                         <div>
-                            <select id="category" required>
-                                <option value="Salary">Salary</option>
-                                <option value="Groceries">Groceries</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Dining Out">Dining Out</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Rent">Rent</option>
-                                <option value="Health & Fitness">Health & Fitness</option>
+                            <div class="flex items-center justify-between mb-5">
+                                <h3 class="font-display font-bold text-lg text-white">Log Transaction</h3>
+                                <!-- Type Pill Toggle -->
+                                <div class="flex p-1 rounded-2xl bg-slate-900/80 border border-white/10">
+                                    <button type="button" id="tx-type-exp" onclick="setTxType('expense')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-lg">Expense</button>
+                                    <button type="button" id="tx-type-inc" onclick="setTxType('income')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">Income</button>
+                                </div>
+                            </div>
+
+                            <form id="tx-form" onsubmit="addTransaction(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+                                    <input type="text" id="tx-desc" placeholder="e.g. Swiggy Lunch Order" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-400 mb-1">Amount</label>
+                                        <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
+                                        <select id="tx-category" class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
+                                            <option value="Groceries" class="bg-slate-900">Groceries</option>
+                                            <option value="Dining Out" class="bg-slate-900">Dining Out</option>
+                                            <option value="Salary" class="bg-slate-900">Salary</option>
+                                            <option value="Transport" class="bg-slate-900">Transport</option>
+                                            <option value="Utilities" class="bg-slate-900">Utilities</option>
+                                            <option value="Entertainment" class="bg-slate-900">Entertainment</option>
+                                            <option value="Shopping" class="bg-slate-900">Shopping</option>
+                                            <option value="General" class="bg-slate-900">General</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-400 mb-1">Account</label>
+                                        <select id="tx-account" class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
+                                            <option value="UPI / Wallet" class="bg-slate-900">UPI / Wallet</option>
+                                            <option value="Bank Account" class="bg-slate-900">Bank Account</option>
+                                            <option value="Credit Card" class="bg-slate-900">Credit Card</option>
+                                            <option value="Cash" class="bg-slate-900">Cash</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-400 mb-1">Date</label>
+                                        <input type="date" id="tx-date" required class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-3 mt-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all">
+                                    <i class="fa-solid fa-plus mr-2"></i> Log Entry
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Cashflow Trend & Distribution Charts -->
+                    <div class="lg:col-span-7 glass-panel p-6 rounded-3xl flex flex-col justify-between">
+                        <h3 class="font-display font-bold text-lg text-white mb-4">Cashflow Analytics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-64">
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <canvas id="chart-cashflow"></canvas>
+                            </div>
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <canvas id="chart-categories"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ledger Table -->
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <h3 class="font-display font-bold text-lg text-white">Recent Transactions</h3>
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <input type="text" id="search-tx" oninput="renderApp()" placeholder="Search description..." class="glass-input rounded-2xl px-4 py-2 text-xs w-full sm:w-64">
+                            <select id="filter-category" onchange="renderApp()" class="glass-input rounded-2xl px-3 py-2 text-xs">
+                                <option value="ALL" class="bg-slate-900">All Categories</option>
+                                <option value="Groceries" class="bg-slate-900">Groceries</option>
+                                <option value="Dining Out" class="bg-slate-900">Dining Out</option>
+                                <option value="Salary" class="bg-slate-900">Salary</option>
+                                <option value="Transport" class="bg-slate-900">Transport</option>
+                                <option value="Utilities" class="bg-slate-900">Utilities</option>
                             </select>
                         </div>
-                        <div>
-                            <select id="account" required>
-                                <option value="Bank Account">Bank Account</option>
-                                <option value="UPI / Wallet">UPI / Wallet</option>
-                                <option value="Credit Card">Credit Card</option>
-                                <option value="Petty Cash">Cash</option>
-                            </select>
-                        </div>
-                        <div class="form-full"><input type="date" id="date" required></div>
-                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Post Transaction</button></div>
-                    </form>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header">
-                        <h3>Recent Transactions</h3>
-                        <input type="text" id="searchInput" placeholder="🔍 Search..." oninput="renderApp()" style="width: 180px; padding: 8px 14px;">
                     </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Type</th><th>Amount</th><th>Action</th></tr>
+
+                    <div class="overflow-x-auto rounded-2xl border border-white/10">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-white/10">
+                                <tr>
+                                    <th class="p-3.5">Date</th>
+                                    <th class="p-3.5">Description</th>
+                                    <th class="p-3.5">Category</th>
+                                    <th class="p-3.5">Account</th>
+                                    <th class="p-3.5">Amount</th>
+                                    <th class="p-3.5 text-right">Action</th>
+                                </tr>
                             </thead>
-                            <tbody id="ledgerBody"></tbody>
+                            <tbody id="tx-table-body" class="divide-y divide-white/5">
+                                <!-- Dynamic Rows -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
 
-            <!-- NET WORTH TAB -->
-            <div id="tab-networth" class="tab-content">
-                <div class="kpi-container">
-                    <div class="kpi-card"><span>Total Assets</span><h2 id="nw-assets-kpi" class="text-green">₹0.00</h2></div>
-                    <div class="kpi-card"><span>Total Liabilities</span><h2 id="nw-liabilities-kpi" class="text-red">₹0.00</h2></div>
-                    <div class="kpi-card"><span>Net Position</span><h2 id="nw-position-kpi" class="text-teal">₹0.00</h2></div>
-                </div>
+            </section>
 
-                <div class="glass-card">
-                    <div class="card-header"><h3>Add Asset or Liability</h3></div>
-                    <form onsubmit="addNetWorthItem(event)">
-                        <div><input type="text" id="nwName" placeholder="Item Name (e.g. Savings, Loan)" required></div>
-                        <div><input type="number" step="0.01" id="nwValue" placeholder="Current Value (₹)" required></div>
-                        <div>
-                            <select id="nwType" required>
-                                <option value="asset">Asset (+)</option>
-                                <option value="liability">Liability (-)</option>
-                            </select>
+            <!-- TAB 2: BANK SMS AUTO-PARSER & SIMULATOR -->
+            <section id="tab-page-sms" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl border border-cyan-500/30">
+                            <i class="fa-solid fa-comment-sms"></i>
                         </div>
-                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Save Position</button></div>
-                    </form>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header"><h3>Balance Sheet Ledger</h3></div>
-                    <div class="table-container">
-                        <table>
-                            <thead><tr><th>Item</th><th>Type</th><th>Value</th><th>Action</th></tr></thead>
-                            <tbody id="netWorthTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SIP TAB -->
-            <div id="tab-sips" class="tab-content">
-                <div class="kpi-container">
-                    <div class="kpi-card"><span>Total Monthly SIP</span><h2 id="sip-total-kpi" class="text-teal">₹0.00</h2></div>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header"><h3>Log Investment Entry</h3></div>
-                    <form onsubmit="addSip(event)">
-                        <div><input type="text" id="sipName" placeholder="Fund/Asset Name" required></div>
-                        <div><input type="number" step="0.01" id="sipAmount" placeholder="Monthly Contribution (₹)" required></div>
                         <div>
-                            <select id="sipCategory" required>
-                                <option value="Equity Mutual Fund">Equity Mutual Fund</option>
-                                <option value="Direct Stocks">Direct Stocks</option>
-                                <option value="Digital Gold">Digital Gold</option>
-                                <option value="PPF / NPS">PPF / NPS</option>
-                            </select>
+                            <h3 class="font-display font-bold text-lg text-white">Bank SMS Auto-Expense Parser</h3>
+                            <p class="text-xs text-slate-400">Simulate incoming bank notifications or paste raw SMS text to auto-extract transaction details.</p>
                         </div>
-                        <div><input type="date" id="sipDate" required></div>
-                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Save Position</button></div>
-                    </form>
-                </div>
+                    </div>
 
-                <div class="glass-card">
-                    <div class="card-header"><h3>Active Portfolios</h3></div>
-                    <div class="table-container">
-                        <table>
-                            <thead><tr><th>Asset Name</th><th>Category</th><th>Day</th><th>Monthly Amount</th><th>Action</th></tr></thead>
-                            <tbody id="sipsTableBody"></tbody>
-                        </table>
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-slate-300">Raw Bank SMS Message:</label>
+                        <textarea id="sms-text-input" rows="3" placeholder="e.g. Rs 450.00 debited from A/C **9876 on 16-Oct-26 at Starbucks via UPI." class="w-full glass-input rounded-2xl p-4 text-xs font-mono"></textarea>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="parseAndLogSMS()" class="px-5 py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Parse & Auto-Log Expense</span>
+                            </button>
+                            <button onclick="loadSampleSMS('swiggy')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Swiggy ₹250</button>
+                            <button onclick="loadSampleSMS('fuel')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Fuel ₹500</button>
+                            <button onclick="loadSampleSMS('salary')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Salary Credit</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/10">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Parser Execution Log</h4>
+                        <div id="sms-log-output" class="p-4 rounded-2xl bg-slate-950/80 border border-white/10 font-mono text-xs text-cyan-300 space-y-1">
+                            > Parser ready. Enter or select an SMS text above.
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- BUDGET CAPS TAB -->
-            <div id="tab-budgets" class="tab-content">
-                <div class="glass-card">
-                    <div class="card-header"><h3>Daily Limit & Category Caps</h3></div>
-                    <form onsubmit="setDailyLimit(event)" style="margin-bottom: 16px;">
-                        <div><input type="number" step="0.01" id="dailyLimitInput" placeholder="Max Daily Limit (₹)" required></div>
-                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Set Daily Target</button></div>
-                    </form>
-
-                    <form onsubmit="setBudgetCap(event)">
-                        <div>
-                            <select id="budgetCategory" required>
-                                <option value="Groceries">Groceries</option>
-                                <option value="Dining Out">Dining Out</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Rent">Rent</option>
-                            </select>
-                        </div>
-                        <div><input type="number" step="0.01" id="budgetAmount" placeholder="Category Cap (₹)" required></div>
-                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Set Limit</button></div>
-                    </form>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header"><h3>Monthly Progress</h3></div>
-                    <div id="budgetProgressList" style="display: flex; flex-direction: column; gap: 12px;"></div>
-                </div>
-            </div>
-
-            <!-- SUBSCRIPTIONS TAB -->
-            <div id="tab-subscriptions" class="tab-content">
-                <div class="glass-card">
-                    <div class="card-header"><h3>Add Recurring Subscription</h3></div>
-                    <form onsubmit="addSubscription(event)">
-                        <div><input type="text" id="subName" placeholder="Service Name" required></div>
-                        <div><input type="number" step="0.01" id="subCost" placeholder="Monthly Cost (₹)" required></div>
-                        <div class="form-full"><input type="date" id="subDueDate" required></div>
-                        <div class="form-full"><button type="submit" class="btn-ios" style="width: 100%;">Add Subscription</button></div>
-                    </form>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-header"><h3>Active Subscriptions</h3></div>
-                    <div class="table-container">
-                        <table>
-                            <thead><tr><th>Service</th><th>Monthly Cost</th><th>Due Date</th><th>Action</th></tr></thead>
-                            <tbody id="subsTableBody"></tbody>
-                        </table>
+            <!-- TAB 3: NET WORTH BALANCE SHEET -->
+            <section id="tab-page-networth" class="tab-page hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5 rounded-3xl">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Assets</p>
+                        <h3 class="text-2xl font-bold font-display text-emerald-400 mt-2" id="nw-assets-sum">₹0.00</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-3xl">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Liabilities</p>
+                        <h3 class="text-2xl font-bold font-display text-rose-400 mt-2" id="nw-liabilities-sum">₹0.00</h3>
+                    </div>
+                    <div class="glass-card p-5 rounded-3xl">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Net Wealth Position</p>
+                        <h3 class="text-2xl font-bold font-display text-cyan-400 mt-2" id="nw-position-sum">₹0.00</h3>
                     </div>
                 </div>
-            </div>
 
-            <!-- SAVINGS GOALS TAB -->
-            <div id="tab-goals" class="tab-content">
-                <div class="glass-card">
-                    <div class="card-header"><h3>Configure Savings Goal</h3></div>
-                    <form onsubmit="addGoal(event)">
-                        <div><input type="text" id="goalName" placeholder="Goal Name" required></div>
-                        <div><input type="number" step="0.01" id="goalTarget" placeholder="Target Amount (₹)" required></div>
-                        <div><input type="number" step="0.01" id="goalSaved" placeholder="Saved Amount (₹)" value="0"></div>
-                        <div><button type="submit" class="btn-ios" style="width: 100%; height: 100%;">Create Goal</button></div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-4 glass-panel p-6 rounded-3xl">
+                        <h3 class="font-display font-bold text-lg text-white mb-4">Add Asset / Liability</h3>
+                        <form onsubmit="addNetWorthItem(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Item Description</label>
+                                <input type="text" id="nw-item-name" placeholder="e.g. Savings Account or Car Loan" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Value Amount</label>
+                                <input type="number" step="0.01" id="nw-item-val" placeholder="0.00" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Classification</label>
+                                <select id="nw-item-type" class="w-full glass-input rounded-2xl px-3 py-2.5 text-xs">
+                                    <option value="asset" class="bg-slate-900">Asset (+)</option>
+                                    <option value="liability" class="bg-slate-900">Liability (-)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20">
+                                Save Valuation
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-8 glass-panel p-6 rounded-3xl">
+                        <h3 class="font-display font-bold text-lg text-white mb-4">Valuation Ledger</h3>
+                        <div class="overflow-x-auto rounded-2xl border border-white/10">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-900/80 text-slate-400 uppercase border-b border-white/10">
+                                    <tr>
+                                        <th class="p-3">Item</th>
+                                        <th class="p-3">Type</th>
+                                        <th class="p-3">Amount</th>
+                                        <th class="p-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="nw-table-body" class="divide-y divide-white/5"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SIP & INVESTMENT PORTFOLIO -->
+            <section id="tab-page-sip" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display font-bold text-lg text-white">Monthly SIP & Investments Tracker</h3>
+                        <span id="sip-total-monthly" class="text-xs font-bold text-purple-400 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">Monthly Commitment: ₹0</span>
+                    </div>
+
+                    <form onsubmit="addSipItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
+                        <input type="text" id="sip-name" placeholder="Fund/Asset Name (e.g. Nifty 50 Index)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="sip-amount" placeholder="Monthly SIP (₹)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="sip-date" min="1" max="31" placeholder="Deduction Day (1-31)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <button type="submit" class="py-2 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-lg shadow-purple-500/20">
+                            Add SIP Plan
+                        </button>
                     </form>
-                </div>
 
-                <div class="glass-card">
-                    <div class="card-header"><h3>Savings Progress</h3></div>
-                    <div id="goalsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    <div id="sip-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
-            </div>
+            </section>
 
-        </div>
+            <!-- TAB 5: BILL DUE DATE CALENDAR -->
+            <section id="tab-page-calendar" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-display font-bold text-lg text-white">Bill Due Date Calendar</h3>
+                        <span class="text-xs text-pink-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Auto-Populates Subscriptions & SIPs</span>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs text-slate-400 mb-2">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+                </div>
+            </section>
+
+            <!-- TAB 6: EXPENSE SPLITTER & SETTLEMENTS -->
+            <section id="tab-page-splitter" class="tab-page hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4">
+                        <h3 class="font-display font-bold text-lg text-white">Add Shared Group Expense</h3>
+                        <form onsubmit="addGroupExpense(event)" class="space-y-3">
+                            <input type="text" id="split-desc" placeholder="Expense description (e.g. Dinner Party)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            <input type="number" step="0.01" id="split-amount" placeholder="Total bill amount" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            <input type="text" id="split-payer" placeholder="Paid by (e.g. You or Rahul)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            <input type="text" id="split-members" placeholder="Comma separated members (e.g. You, Rahul, Priya)" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20">
+                                Calculate & Split
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-7 glass-panel p-6 rounded-3xl space-y-4">
+                        <h3 class="font-display font-bold text-lg text-white">Settlement Balance Sheets</h3>
+                        <div id="split-summary-cards" class="space-y-3"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: BUDGET CAPS -->
+            <section id="tab-page-budgets" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-display font-bold text-lg text-white">Category Budget Limits</h3>
+                        <button onclick="configureDailyCap()" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-indigo-300 hover:text-white">
+                            Set Daily Threshold
+                        </button>
+                    </div>
+
+                    <div id="budgets-container" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <!-- TAB 8: SUBSCRIPTIONS MANAGER -->
+            <section id="tab-page-subscriptions" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white">Active Subscriptions</h3>
+                    <form onsubmit="addSubscription(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <input type="text" id="sub-name" placeholder="Service (e.g. Netflix)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="sub-cost" placeholder="Monthly Cost" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="sub-day" min="1" max="31" placeholder="Renewal Day (1-31)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <button type="submit" class="py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20">
+                            Add Subscription
+                        </button>
+                    </form>
+
+                    <div id="subs-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4"></div>
+                </div>
+            </section>
+
+            <!-- TAB 9: SAVINGS GOALS -->
+            <section id="tab-page-goals" class="tab-page hidden space-y-6">
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white">Savings Goals Tracker</h3>
+                    <form onsubmit="addGoal(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <input type="text" id="goal-name" placeholder="Goal (e.g. iPhone 18)" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="goal-target" placeholder="Target Amount" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <input type="number" id="goal-saved" placeholder="Current Saved" required class="glass-input rounded-2xl px-4 py-2 text-xs">
+                        <button type="submit" class="py-2 rounded-2xl bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20">
+                            Create Goal
+                        </button>
+                    </form>
+
+                    <div id="goals-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4"></div>
+                </div>
+            </section>
+
+        </main>
     </div>
 
+    <!-- APPLICATION LOGIC -->
     <script>
-        let currSym = localStorage.getItem('ef_curr') || '₹';
-        let transactions = JSON.parse(localStorage.getItem('ef_personal_transactions')) || [];
-        let netWorthItems = JSON.parse(localStorage.getItem('ef_networth_items')) || [];
-        let sips = JSON.parse(localStorage.getItem('ef_sips')) || [];
-        let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 10000, 'Dining Out': 5000 };
-        let dailyLimit = parseFloat(localStorage.getItem('ef_daily_limit')) || 1000;
-        let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
-        let goals = JSON.parse(localStorage.getItem('ef_goals')) || [];
-        let activeTxType = 'income';
+        // GLOBAL STATE & LOCAL STORAGE INITIALIZATION
+        let state = {
+            currency: '₹',
+            txType: 'expense',
+            dailyCap: 2000,
+            transactions: JSON.parse(localStorage.getItem('ef_tx')) || [
+                { id: 1, desc: 'Monthly Salary Credit', amount: 85000, type: 'income', category: 'Salary', account: 'Bank Account', date: '2026-10-01' },
+                { id: 2, desc: 'Swiggy Gourmet Order', amount: 450, type: 'expense', category: 'Dining Out', account: 'UPI / Wallet', date: '2026-10-15' },
+                { id: 3, desc: 'Reliance Fresh Groceries', amount: 2300, type: 'expense', category: 'Groceries', account: 'Credit Card', date: '2026-10-16' }
+            ],
+            networth: JSON.parse(localStorage.getItem('ef_nw')) || [
+                { id: 1, name: 'HDFC Savings Account', val: 125000, type: 'asset' },
+                { id: 2, name: 'Mutual Fund Equity Portfolio', val: 340000, type: 'asset' },
+                { id: 3, name: 'Personal Credit Card Bill', val: 18500, type: 'liability' }
+            ],
+            sips: JSON.parse(localStorage.getItem('ef_sips')) || [
+                { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
+                { id: 2, name: 'Parag Parikh Flexi Cap', amount: 7500, date: 15 }
+            ],
+            subscriptions: JSON.parse(localStorage.getItem('ef_subs')) || [
+                { id: 1, name: 'Netflix Premium 4K', cost: 649, day: 10 },
+                { id: 2, name: 'Spotify Duo Plan', cost: 149, day: 22 }
+            ],
+            goals: JSON.parse(localStorage.getItem('ef_goals')) || [
+                { id: 1, name: 'Japan Travel Fund', target: 200000, saved: 115000 },
+                { id: 2, name: 'Emergency Liquid Runway', target: 300000, saved: 210000 }
+            ],
+            splits: JSON.parse(localStorage.getItem('ef_splits')) || [
+                { id: 1, desc: 'Weekend Goa Villa Stay', amount: 12000, payer: 'You', members: ['You', 'Rahul', 'Ananya'] }
+            ],
+            categoryBudgets: {
+                'Groceries': 10000,
+                'Dining Out': 6000,
+                'Transport': 5000,
+                'Utilities': 8000,
+                'Entertainment': 4000
+            }
+        };
 
-        document.getElementById('currencySelector').value = currSym;
-        document.getElementById('dailyLimitInput').value = dailyLimit;
+        let chartCashflowInstance = null;
+        let chartCategoryInstance = null;
 
-        let trendChartObj = null;
-        let categoryChartObj = null;
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set default date input to today
+            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+            renderApp();
+            initCharts();
+        });
 
+        function saveState() {
+            localStorage.setItem('ef_tx', JSON.stringify(state.transactions));
+            localStorage.setItem('ef_nw', JSON.stringify(state.networth));
+            localStorage.setItem('ef_sips', JSON.stringify(state.sips));
+            localStorage.setItem('ef_subs', JSON.stringify(state.subscriptions));
+            localStorage.setItem('ef_goals', JSON.stringify(state.goals));
+            localStorage.setItem('ef_splits', JSON.stringify(state.splits));
+        }
+
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('live-date-str').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('live-time-str').innerText = now.toLocaleTimeString('en-US', { hour12: false }) + ' IST';
+        }
+
+        function changeCurrency(curr) {
+            state.currency = curr;
+            renderApp();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-page-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-indigo-600/30', 'border', 'border-indigo-500/40', 'text-white', 'shadow-lg');
+                el.classList.add('text-slate-400');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-indigo-600/30', 'border', 'border-indigo-500/40', 'text-white', 'shadow-lg');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'budgets') renderBudgets();
+        }
+
+        // TRANSACTION MANAGEMENT
         function setTxType(type) {
-            activeTxType = type;
-            const btnInc = document.getElementById('btn-inc-toggle');
-            const btnExp = document.getElementById('btn-exp-toggle');
-            if (type === 'income') {
-                btnInc.className = 'btn-ios';
-                btnExp.className = 'btn-subtle';
+            state.txType = type;
+            const expBtn = document.getElementById('tx-type-exp');
+            const incBtn = document.getElementById('tx-type-inc');
+            if (type === 'expense') {
+                expBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-lg";
+                incBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
             } else {
-                btnExp.className = 'btn-ios';
-                btnInc.className = 'btn-subtle';
+                incBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-white shadow-lg";
+                expBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
             }
         }
 
-        function changeCurrency(sym) {
-            currSym = sym;
-            localStorage.setItem('ef_curr', sym);
-            renderApp();
+        function applyPreset(desc, amount, category) {
+            document.getElementById('tx-desc').value = desc;
+            document.getElementById('tx-amount').value = amount;
+            document.getElementById('tx-category').value = category;
+            setTxType('expense');
         }
 
-        function switchTab(tabName, el) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-        }
-
-        function setDailyLimit(e) {
+        function addTransaction(e) {
             e.preventDefault();
-            dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value);
-            localStorage.setItem('ef_daily_limit', dailyLimit);
-            renderApp();
-            alert('Daily Target Saved!');
-        }
+            const desc = document.getElementById('tx-desc').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const account = document.getElementById('tx-account').value;
+            const date = document.getElementById('tx-date').value;
 
-        function addPersonalTx(e) {
-            e.preventDefault();
-            transactions.push({
+            state.transactions.unshift({
                 id: Date.now(),
-                desc: document.getElementById('desc').value,
-                amount: parseFloat(document.getElementById('amount').value),
-                type: activeTxType,
-                category: document.getElementById('category').value,
-                account: document.getElementById('account').value,
-                date: document.getElementById('date').value
+                desc, amount, type: state.txType, category, account, date
             });
-            saveAndRender();
-            e.target.reset();
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+            document.getElementById('tx-form').reset();
+            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            saveState();
+            renderApp();
+            updateCharts();
         }
 
+        function deleteTransaction(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveState();
+            renderApp();
+            updateCharts();
+        }
+
+        // BANK SMS PARSER
+        function loadSampleSMS(type) {
+            const input = document.getElementById('sms-text-input');
+            if (type === 'swiggy') input.value = "Rs 250.00 debited from A/C **1234 on 16-Oct-26 at Swiggy via UPI Ref 883920";
+            if (type === 'fuel') input.value = "Alert: INR 500.00 spent on your Credit Card xx9012 at HP Petrol Pump on 16-Oct-26.";
+            if (type === 'salary') input.value = "Rs 45000.00 credited to A/C **1234 on 01-Oct-26 by Salary Direct Deposit.";
+        }
+
+        function parseAndLogSMS() {
+            const text = document.getElementById('sms-text-input').value;
+            const log = document.getElementById('sms-log-output');
+
+            if (!text.trim()) {
+                log.innerText = "> Error: SMS text input is empty.";
+                return;
+            }
+
+            const isIncome = /credited|received|added|deposited/i.test(text);
+            const isExpense = /debited|spent|paid|withdrawn/i.test(text);
+
+            const amtMatch = text.match(/(?:RS|INR|₹)\s?([\d,]+\.?\d*)/i);
+            const amount = amtMatch ? parseFloat(amtMatch[1].replace(/,/g, '')) : 0;
+
+            let merchant = "Bank Alert Transaction";
+            const merchMatch = text.match(/(?:at|to|info)\s+([A-Za-z0-9\s]+?)(?=\s+on|\s+ref|\s+via|\.|$)/i);
+            if (merchMatch) merchant = merchMatch[1].trim();
+
+            if (amount > 0) {
+                const type = isIncome ? 'income' : 'expense';
+                state.transactions.unshift({
+                    id: Date.now(),
+                    desc: `[SMS] ${merchant}`,
+                    amount: amount,
+                    type: type,
+                    category: 'General',
+                    account: 'UPI / Wallet',
+                    date: new Date().toISOString().split('T')[0]
+                });
+
+                saveState();
+                renderApp();
+                updateCharts();
+
+                log.innerHTML = `> SUCCESS: Parsed ${state.currency}${amount} (${type.toUpperCase()}) for '${merchant}'. Logged into ledger.`;
+                triggerNotification(`SMS Logged: ${state.currency}${amount} at ${merchant}`);
+            } else {
+                log.innerText = "> FAIL: Could not detect valid monetary amount from SMS text.";
+            }
+        }
+
+        // NET WORTH MANAGEMENT
         function addNetWorthItem(e) {
             e.preventDefault();
-            netWorthItems.push({
-                id: Date.now(),
-                name: document.getElementById('nwName').value,
-                value: parseFloat(document.getElementById('nwValue').value),
-                type: document.getElementById('nwType').value
-            });
-            localStorage.setItem('ef_networth_items', JSON.stringify(netWorthItems));
-            renderApp();
+            const name = document.getElementById('nw-item-name').value;
+            const val = parseFloat(document.getElementById('nw-item-val').value);
+            const type = document.getElementById('nw-item-type').value;
+
+            state.networth.push({ id: Date.now(), name, val, type });
             e.target.reset();
+            saveState();
+            renderApp();
         }
 
         function deleteNetWorthItem(id) {
-            netWorthItems = netWorthItems.filter(i => i.id !== id);
-            localStorage.setItem('ef_networth_items', JSON.stringify(netWorthItems));
+            state.networth = state.networth.filter(i => i.id !== id);
+            saveState();
             renderApp();
         }
 
-        function addSip(e) {
+        // SIP MANAGEMENT
+        function addSipItem(e) {
             e.preventDefault();
-            sips.push({
-                id: Date.now(),
-                name: document.getElementById('sipName').value,
-                amount: parseFloat(document.getElementById('sipAmount').value),
-                category: document.getElementById('sipCategory').value,
-                date: document.getElementById('sipDate').value
-            });
-            localStorage.setItem('ef_sips', JSON.stringify(sips));
-            renderApp();
+            const name = document.getElementById('sip-name').value;
+            const amount = parseFloat(document.getElementById('sip-amount').value);
+            const date = parseInt(document.getElementById('sip-date').value);
+
+            state.sips.push({ id: Date.now(), name, amount, date });
             e.target.reset();
-            document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
+            saveState();
+            renderApp();
         }
 
         function deleteSip(id) {
-            sips = sips.filter(s => s.id !== id);
-            localStorage.setItem('ef_sips', JSON.stringify(sips));
+            state.sips = state.sips.filter(s => s.id !== id);
+            saveState();
             renderApp();
         }
 
-        function setBudgetCap(e) {
+        // EXPENSE SPLITTER
+        function addGroupExpense(e) {
             e.preventDefault();
-            const cat = document.getElementById('budgetCategory').value;
-            const cap = parseFloat(document.getElementById('budgetAmount').value);
-            budgetCaps[cat] = cap;
-            localStorage.setItem('ef_budget_caps', JSON.stringify(budgetCaps));
-            renderApp();
+            const desc = document.getElementById('split-desc').value;
+            const amount = parseFloat(document.getElementById('split-amount').value);
+            const payer = document.getElementById('split-payer').value;
+            const members = document.getElementById('split-members').value.split(',').map(m => m.trim());
+
+            state.splits.push({ id: Date.now(), desc, amount, payer, members });
             e.target.reset();
+            saveState();
+            renderApp();
         }
 
+        function deleteSplit(id) {
+            state.splits = state.splits.filter(s => s.id !== id);
+            saveState();
+            renderApp();
+        }
+
+        // SUBSCRIPTIONS & GOALS
         function addSubscription(e) {
             e.preventDefault();
-            subscriptions.push({
-                id: Date.now(),
-                name: document.getElementById('subName').value,
-                cost: parseFloat(document.getElementById('subCost').value),
-                dueDate: document.getElementById('subDueDate').value
-            });
-            localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
-            renderApp();
+            const name = document.getElementById('sub-name').value;
+            const cost = parseFloat(document.getElementById('sub-cost').value);
+            const day = parseInt(document.getElementById('sub-day').value);
+
+            state.subscriptions.push({ id: Date.now(), name, cost, day });
             e.target.reset();
+            saveState();
+            renderApp();
         }
 
-        function deleteSubscription(id) {
-            subscriptions = subscriptions.filter(s => s.id !== id);
-            localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
+        function deleteSub(id) {
+            state.subscriptions = state.subscriptions.filter(s => s.id !== id);
+            saveState();
             renderApp();
         }
 
         function addGoal(e) {
             e.preventDefault();
-            goals.push({
-                id: Date.now(),
-                name: document.getElementById('goalName').value,
-                target: parseFloat(document.getElementById('goalTarget').value),
-                saved: parseFloat(document.getElementById('goalSaved').value) || 0
-            });
-            localStorage.setItem('ef_goals', JSON.stringify(goals));
-            renderApp();
+            const name = document.getElementById('goal-name').value;
+            const target = parseFloat(document.getElementById('goal-target').value);
+            const saved = parseFloat(document.getElementById('goal-saved').value);
+
+            state.goals.push({ id: Date.now(), name, target, saved });
             e.target.reset();
-        }
-
-        function deleteTx(id) {
-            transactions = transactions.filter(t => t.id !== id);
-            saveAndRender();
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('ef_personal_transactions', JSON.stringify(transactions));
+            saveState();
             renderApp();
         }
 
+        function configureDailyCap() {
+            const cap = prompt("Enter daily spending limit threshold:", state.dailyCap);
+            if (cap && !isNaN(cap)) {
+                state.dailyCap = parseFloat(cap);
+                renderApp();
+            }
+        }
+
+        // RENDER CORE APPLICATION UI
         function renderApp() {
-            const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
-            let filtered = transactions.filter(t => t.desc.toLowerCase().includes(searchQuery));
+            const sym = state.currency;
 
-            let totalIncome = 0, totalExpense = 0;
-            filtered.forEach(t => {
-                if (t.type === 'income') totalIncome += t.amount;
-                else totalExpense += t.amount;
-            });
+            // Calculations
+            const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+            const netCashflow = totalIncome - totalExpense;
 
-            const netSavings = totalIncome - totalExpense;
+            const assetsSum = state.networth.filter(i => i.type === 'asset').reduce((acc, i) => acc + i.val, 0);
+            const liabilitiesSum = state.networth.filter(i => i.type === 'liability').reduce((acc, i) => acc + i.val, 0);
+            const netWorthPos = assetsSum - liabilitiesSum;
 
-            // Daily Limit Indicator
+            // Daily Spend Check
             const todayStr = new Date().toISOString().split('T')[0];
-            const todaySpent = transactions
+            const todaySpent = state.transactions
                 .filter(t => t.type === 'expense' && t.date === todayStr)
                 .reduce((acc, t) => acc + t.amount, 0);
 
-            const badgeEl = document.getElementById('dailyStatusBadge');
-            if (todaySpent > dailyLimit) {
-                badgeEl.style.background = 'rgba(255, 69, 58, 0.25)';
-                badgeEl.style.color = 'var(--accent-red)';
-                badgeEl.textContent = `🔴 Daily Exceeded (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
+            // Update Dynamic Island
+            const islandStatus = document.getElementById('island-spend-status');
+            islandStatus.innerText = `${sym}${todaySpent} spent / ${sym}${state.dailyCap} Cap`;
+            if (todaySpent > state.dailyCap) {
+                islandStatus.className = "font-bold text-rose-400";
             } else {
-                badgeEl.style.background = 'rgba(48, 209, 88, 0.2)';
-                badgeEl.style.color = 'var(--accent-green)';
-                badgeEl.textContent = `🟢 Within Daily Limit (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
+                islandStatus.className = "font-bold text-emerald-400";
             }
 
-            // Net Worth
-            let totalAssets = netSavings;
-            let totalLiabilities = 0;
-            netWorthItems.forEach(i => {
-                if (i.type === 'asset') totalAssets += i.value;
-                else totalLiabilities += i.value;
+            // Update Dashboard KPIs
+            document.getElementById('kpi-income').innerText = `${sym}${totalIncome.toLocaleString()}`;
+            document.getElementById('kpi-expense').innerText = `${sym}${totalExpense.toLocaleString()}`;
+            document.getElementById('kpi-cashflow').innerText = `${sym}${netCashflow.toLocaleString()}`;
+            document.getElementById('kpi-networth').innerText = `${sym}${netWorthPos.toLocaleString()}`;
+
+            // Render Transactions Table
+            const searchVal = document.getElementById('search-tx').value.toLowerCase();
+            const categoryFilter = document.getElementById('filter-category').value;
+            const tableBody = document.getElementById('tx-table-body');
+            tableBody.innerHTML = '';
+
+            const filteredTx = state.transactions.filter(t => {
+                const matchSearch = t.desc.toLowerCase().includes(searchVal);
+                const matchCat = categoryFilter === 'ALL' || t.category === categoryFilter;
+                return matchSearch && matchCat;
             });
-            const netWorthPosition = totalAssets - totalLiabilities;
 
-            document.getElementById('kpi-revenue').textContent = `${currSym}${totalIncome.toFixed(2)}`;
-            document.getElementById('kpi-expenses').textContent = `${currSym}${totalExpense.toFixed(2)}`;
-            document.getElementById('kpi-margin').textContent = `${currSym}${netSavings.toFixed(2)}`;
-            document.getElementById('kpi-networth-quick').textContent = `${currSym}${netWorthPosition.toFixed(2)}`;
-
-            document.getElementById('nw-assets-kpi').textContent = `${currSym}${totalAssets.toFixed(2)}`;
-            document.getElementById('nw-liabilities-kpi').textContent = `${currSym}${totalLiabilities.toFixed(2)}`;
-            document.getElementById('nw-position-kpi').textContent = `${currSym}${netWorthPosition.toFixed(2)}`;
-
-            // Render Table
-            const tbody = document.getElementById('ledgerBody');
-            tbody.innerHTML = filtered.map(t => `
-                <tr>
-                    <td>${t.date}</td>
-                    <td><strong>${t.desc}</strong></td>
-                    <td>${t.category}</td>
-                    <td>${t.account}</td>
-                    <td><span class="badge-pill ${t.type === 'income' ? 'badge-income' : 'badge-expense'}">${t.type.toUpperCase()}</span></td>
-                    <td style="font-weight: 700; color: ${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
-                        ${currSym}${t.amount.toFixed(2)}
+            filteredTx.forEach(t => {
+                const isInc = t.type === 'income';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-white/5 transition-all";
+                row.innerHTML = `
+                    <td class="p-3.5 text-slate-400 font-mono text-[11px]">${t.date}</td>
+                    <td class="p-3.5 font-semibold text-white">${t.desc}</td>
+                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10 text-slate-300">${t.category}</span></td>
+                    <td class="p-3.5 text-slate-400">${t.account}</td>
+                    <td class="p-3.5 font-bold ${isInc ? 'text-emerald-400' : 'text-rose-400'}">${isInc ? '+' : '-'}${sym}${t.amount.toLocaleString()}</td>
+                    <td class="p-3.5 text-right">
+                        <button onclick="deleteTransaction(${t.id})" class="text-slate-500 hover:text-rose-400 px-2 py-1 transition-all"><i class="fa-solid fa-trash-can"></i></button>
                     </td>
-                    <td><button class="btn-subtle" onclick="deleteTx(${t.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
-                </tr>
-            `).join('') || '<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">No entries logged.</td></tr>';
+                `;
+                tableBody.appendChild(row);
+            });
 
-            renderNetWorthTable();
-            renderSips();
-            renderBudgets();
-            renderSubscriptions();
-            renderGoals();
-            renderCharts(filtered);
+            // Render Net Worth Page
+            document.getElementById('nw-assets-sum').innerText = `${sym}${assetsSum.toLocaleString()}`;
+            document.getElementById('nw-liabilities-sum').innerText = `${sym}${liabilitiesSum.toLocaleString()}`;
+            document.getElementById('nw-position-sum').innerText = `${sym}${netWorthPos.toLocaleString()}`;
+
+            const nwBody = document.getElementById('nw-table-body');
+            nwBody.innerHTML = '';
+            state.networth.forEach(item => {
+                const isAsset = item.type === 'asset';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-white/5";
+                row.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${item.name}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isAsset ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${isAsset ? 'Asset' : 'Liability'}</span></td>
+                    <td class="p-3 font-bold text-white">${sym}${item.val.toLocaleString()}</td>
+                    <td class="p-3 text-right"><button onclick="deleteNetWorthItem(${item.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></td>
+                `;
+                nwBody.appendChild(row);
+            });
+
+            // Render SIP Tracker
+            const sipGrid = document.getElementById('sip-grid');
+            sipGrid.innerHTML = '';
+            const totalSip = state.sips.reduce((acc, s) => acc + s.amount, 0);
+            document.getElementById('sip-total-monthly').innerText = `Monthly Commitment: ${sym}${totalSip.toLocaleString()}`;
+
+            state.sips.forEach(s => {
+                const card = document.createElement('div');
+                card.className = "glass-card p-4 rounded-2xl flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-sm text-white">${s.name}</p>
+                        <p class="text-xs text-slate-400 mt-1">Due on day ${s.date} of month</p>
+                        <p class="text-base font-display font-bold text-purple-400 mt-2">${sym}${s.amount.toLocaleString()}</p>
+                    </div>
+                    <button onclick="deleteSip(${s.id})" class="text-slate-500 hover:text-rose-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                sipGrid.appendChild(card);
+            });
+
+            // Render Expense Splitter
+            const splitContainer = document.getElementById('split-summary-cards');
+            splitContainer.innerHTML = '';
+            state.splits.forEach(sp => {
+                const perPerson = (sp.amount / sp.members.length).toFixed(2);
+                const card = document.createElement('div');
+                card.className = "glass-card p-4 rounded-2xl space-y-2";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm">${sp.desc}</h4>
+                        <span class="text-xs font-bold text-amber-400">${sym}${sp.amount}</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Paid by <span class="text-white font-semibold">${sp.payer}</span> • Share per member: <span class="text-white font-semibold">${sym}${perPerson}</span></p>
+                    <div class="text-[11px] text-slate-300 pt-2 border-t border-white/5 flex items-center justify-between">
+                        <span>Members: ${sp.members.join(', ')}</span>
+                        <button onclick="deleteSplit(${sp.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i> Settle</button>
+                    </div>
+                `;
+                splitContainer.appendChild(card);
+            });
+
+            // Render Subscriptions
+            const subsList = document.getElementById('subs-list');
+            subsList.innerHTML = '';
+            state.subscriptions.forEach(sub => {
+                const card = document.createElement('div');
+                card.className = "glass-card p-4 rounded-2xl flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-sm text-white">${sub.name}</p>
+                        <p class="text-xs text-slate-400">Renews on day ${sub.day}</p>
+                        <p class="text-sm font-bold text-blue-400 mt-1">${sym}${sub.cost}/mo</p>
+                    </div>
+                    <button onclick="deleteSub(${sub.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                subsList.appendChild(card);
+            });
+
+            // Render Goals
+            const goalsContainer = document.getElementById('goals-container');
+            goalsContainer.innerHTML = '';
+            state.goals.forEach(g => {
+                const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+                const card = document.createElement('div');
+                card.className = "glass-card p-5 rounded-3xl space-y-3";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm">${g.name}</h4>
+                        <span class="text-xs font-bold text-teal-400">${pct}%</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-white/10">
+                        <div class="bg-gradient-to-r from-teal-400 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Saved: ${sym}${g.saved.toLocaleString()}</span>
+                        <span>Target: ${sym}${g.target.toLocaleString()}</span>
+                    </div>
+                `;
+                goalsContainer.appendChild(card);
+            });
         }
 
-        function renderNetWorthTable() {
-            const tbody = document.getElementById('netWorthTableBody');
-            tbody.innerHTML = netWorthItems.map(i => `
-                <tr>
-                    <td><strong>${i.name}</strong></td>
-                    <td><span class="badge-pill ${i.type === 'asset' ? 'badge-income' : 'badge-expense'}">${i.type.toUpperCase()}</span></td>
-                    <td style="font-weight: 700; color: ${i.type === 'asset' ? 'var(--accent-green)' : 'var(--accent-red)'}">
-                        ${currSym}${i.value.toFixed(2)}
-                    </td>
-                    <td><button class="btn-subtle" onclick="deleteNetWorthItem(${i.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
-                </tr>
-            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No assets or liabilities logged.</td></tr>';
+        // RENDER CALENDAR GRID
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            for (let day = 1; day <= 30; day++) {
+                const sipsOnDay = state.sips.filter(s => s.date === day);
+                const subsOnDay = state.subscriptions.filter(s => s.day === day);
+
+                const cell = document.createElement('div');
+                cell.className = "glass-card min-h-[75px] p-2 rounded-2xl flex flex-col justify-between";
+                
+                let eventsHTML = '';
+                sipsOnDay.forEach(s => {
+                    eventsHTML += `<div class="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] px-1.5 py-0.5 rounded-md truncate">SIP: ${s.name}</div>`;
+                });
+                subsOnDay.forEach(sub => {
+                    eventsHTML += `<div class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[9px] px-1.5 py-0.5 rounded-md truncate">Sub: ${sub.name}</div>`;
+                });
+
+                cell.innerHTML = `
+                    <span class="text-xs font-bold text-slate-400">${day}</span>
+                    <div class="space-y-1 mt-1">${eventsHTML}</div>
+                `;
+                grid.appendChild(cell);
+            }
         }
 
-        function renderSips() {
-            const totalInvested = sips.reduce((acc, s) => acc + s.amount, 0);
-            document.getElementById('sip-total-kpi').textContent = `${currSym}${totalInvested.toFixed(2)}`;
-            const tbody = document.getElementById('sipsTableBody');
-            tbody.innerHTML = sips.map(s => `
-                <tr>
-                    <td><strong>${s.name}</strong></td>
-                    <td><span class="badge-pill badge-income">${s.category}</span></td>
-                    <td>Day ${s.date ? s.date.split('-')[2] : '1'}</td>
-                    <td style="font-weight: 700; color: var(--accent-teal);">${currSym}${s.amount.toFixed(2)}</td>
-                    <td><button class="btn-subtle" onclick="deleteSip(${s.id})" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button></td>
-                </tr>
-            `).join('') || '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">No SIP entries recorded.</td></tr>';
-        }
-
+        // RENDER BUDGET PROGRESS
         function renderBudgets() {
-            const list = document.getElementById('budgetProgressList');
-            const catSpent = {};
-            transactions.filter(t => t.type === 'expense').forEach(t => {
-                catSpent[t.category] = (catSpent[t.category] || 0) + t.amount;
+            const container = document.getElementById('budgets-container');
+            container.innerHTML = '';
+
+            Object.keys(state.categoryBudgets).forEach(cat => {
+                const cap = state.categoryBudgets[cat];
+                const spent = state.transactions
+                    .filter(t => t.type === 'expense' && t.category === cat)
+                    .reduce((acc, t) => acc + t.amount, 0);
+
+                const pct = Math.min(100, Math.round((spent / cap) * 100));
+                const isOver = spent > cap;
+
+                const item = document.createElement('div');
+                item.className = "glass-card p-4 rounded-2xl space-y-2";
+                item.innerHTML = `
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-white">${cat}</span>
+                        <span class="${isOver ? 'text-rose-400 font-bold' : 'text-slate-400'}">${state.currency}${spent.toLocaleString()} / ${state.currency}${cap.toLocaleString()}</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-white/10">
+                        <div class="${isOver ? 'bg-rose-500' : 'bg-indigo-500'} h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
             });
-
-            list.innerHTML = Object.entries(budgetCaps).map(([cat, cap]) => {
-                const spent = catSpent[cat] || 0;
-                const pct = Math.min(100, (spent / cap) * 100);
-                return `
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500;">
-                            <span>${cat}</span>
-                            <span>${currSym}${spent.toFixed(2)} / ${currSym}${cap.toFixed(2)}</span>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px;">
-                            <div style="width: ${pct}%; height: 100%; background: ${pct >= 100 ? 'var(--accent-red)' : 'var(--accent-blue)'};"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('') || '<p style="color: var(--text-secondary);">No caps configured.</p>';
         }
 
-        function renderSubscriptions() {
-            const tbody = document.getElementById('subsTableBody');
-            tbody.innerHTML = subscriptions.map(s => `
-                <tr>
-                    <td><strong>${s.name}</strong></td>
-                    <td>${currSym}${s.cost.toFixed(2)}</td>
-                    <td>${s.dueDate}</td>
-                    <td><button class="btn-subtle" onclick="deleteSubscription(${s.id})" style="padding: 4px 10px; font-size: 0.75rem;">Cancel</button></td>
-                </tr>
-            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No active subscriptions.</td></tr>';
-        }
-
-        function renderGoals() {
-            const list = document.getElementById('goalsList');
-            list.innerHTML = goals.map(g => {
-                const pct = Math.min(100, (g.saved / g.target) * 100);
-                return `
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500;">
-                            <span>${g.name}</span>
-                            <span>${currSym}${g.saved.toFixed(2)} / ${currSym}${g.target.toFixed(2)}</span>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 6px;">
-                            <div style="width: ${pct}%; height: 100%; background: var(--accent-teal);"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('') || '<p style="color: var(--text-secondary);">No active goals.</p>';
-        }
-
-        function renderCharts(data = transactions) {
-            const inc = data.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-            const exp = data.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-
-            if (trendChartObj) trendChartObj.destroy();
-            trendChartObj = new Chart(document.getElementById('trendChart'), {
+        // CHART.JS INITIALIZATION & UPDATES
+        function initCharts() {
+            const ctx1 = document.getElementById('chart-cashflow').getContext('2d');
+            chartCashflowInstance = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: ['Income', 'Expenses'],
+                    labels: ['Income', 'Expense'],
                     datasets: [{
-                        data: [inc, exp],
-                        backgroundColor: ['#30d158', '#ff453a'],
+                        data: [0, 0],
+                        backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(244, 63, 94, 0.6)'],
+                        borderColor: ['#10b981', '#f43f5e'],
+                        borderWidth: 1.5,
                         borderRadius: 12
                     }]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } }
+                }
             });
 
-            const categories = {};
-            data.filter(t => t.type === 'expense').forEach(t => {
-                categories[t.category] = (categories[t.category] || 0) + t.amount;
-            });
-
-            if (categoryChartObj) categoryChartObj.destroy();
-            categoryChartObj = new Chart(document.getElementById('categoryChart'), {
+            const ctx2 = document.getElementById('chart-categories').getContext('2d');
+            chartCategoryInstance = new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(categories),
+                    labels: ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'General'],
                     datasets: [{
-                        data: Object.values(categories),
-                        backgroundColor: ['#0a84ff', '#bf5af2', '#ff9f0a', '#30d158', '#ff453a', '#64d2ff'],
+                        data: [1, 1, 1, 1, 1],
+                        backgroundColor: ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981'],
                         borderWidth: 0
                     }]
                 },
-                options: { plugins: { legend: { labels: { color: '#86868b' } } }, cutout: '75%' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } }
+                }
             });
+
+            updateCharts();
         }
 
-        function exportToCSV() {
-            if (transactions.length === 0) return alert('No transactions to export.');
-            let csv = 'ID,Date,Description,Category,Account,Type,Amount\n';
-            transactions.forEach(t => {
-                csv += `"${t.id}","${t.date}","${t.desc}","${t.category}","${t.account}","${t.type}",${t.amount}\n`;
+        function updateCharts() {
+            if (!chartCashflowInstance || !chartCategoryInstance) return;
+
+            const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+
+            chartCashflowInstance.data.datasets[0].data = [totalIncome, totalExpense];
+            chartCashflowInstance.update();
+
+            const categories = ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'General'];
+            const catTotals = categories.map(cat => {
+                return state.transactions
+                    .filter(t => t.type === 'expense' && t.category === cat)
+                    .reduce((acc, t) => acc + t.amount, 0);
             });
+
+            chartCategoryInstance.data.datasets[0].data = catTotals;
+            chartCategoryInstance.update();
+        }
+
+        // CSV EXPORT FUNCTION
+        function exportToCSV() {
+            let csv = "ID,Date,Description,Category,Account,Type,Amount\n";
+            state.transactions.forEach(t => {
+                csv += `"${t.id}","${t.date}","${t.desc}","${t.category}","${t.account}","${t.type}","${t.amount}"\n`;
+            });
+
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', `ExpenseFlow_${new Date().toISOString().split('T')[0]}.csv`);
+            a.setAttribute('download', `ExpenseFlow_Export_${new Date().toISOString().split('T')[0]}.csv`);
             a.click();
         }
 
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
-        renderApp();
+        // BROWSER NOTIFICATION HELPER
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        triggerNotification("Notifications activated for ExpenseFlow Pro.");
+                    }
+                });
+            }
+        }
+
+        function triggerNotification(msg) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("ExpenseFlow Pro", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/2382/2382461.png" });
+            }
+        }
     </script>
 </body>
 </html>
