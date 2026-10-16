@@ -280,7 +280,7 @@
             </div>
             <ul class="nav-links">
                 <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Dashboard</li>
-                <li class="nav-item" onclick="switchTab('sips', this)">📈 SIP & Investments</li>
+                <li class="nav-item" onclick="switchTab('networth', this)">🏛️ Net Worth</li>
                 <li class="nav-item" onclick="switchTab('budgets', this)">🎯 Budgets & Caps</li>
                 <li class="nav-item" onclick="switchTab('subscriptions', this)">🔄 Subscriptions</li>
                 <li class="nav-item" onclick="switchTab('goals', this)">🐷 Savings Goals</li>
@@ -322,16 +322,12 @@
                         <h2 id="kpi-expenses" class="text-red">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Monthly Investments</span>
-                        <h2 id="kpi-investments" class="text-teal">₹0.00</h2>
-                    </div>
-                    <div class="kpi-card">
                         <span>Net Savings</span>
                         <h2 id="kpi-margin">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Projected EOM Balance</span>
-                        <h2 id="kpi-forecast" class="text-blue">₹0.00</h2>
+                        <span>Current Net Worth</span>
+                        <h2 id="kpi-networth-quick" class="text-teal">₹0.00</h2>
                     </div>
                 </div>
 
@@ -428,58 +424,55 @@
                 </div>
             </div>
 
-            <!-- SIP & INVESTMENTS TAB -->
-            <div id="tab-sips" class="tab-content">
+            <!-- NET WORTH DASHBOARD TAB -->
+            <div id="tab-networth" class="tab-content">
                 <div class="kpi-container">
                     <div class="kpi-card">
-                        <span>Total Monthly Investment</span>
-                        <h2 id="sip-total-kpi" class="text-teal">₹0.00</h2>
+                        <span>Total Assets</span>
+                        <h2 id="nw-assets-kpi" class="text-green">₹0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Wealth Rate (% of Income)</span>
-                        <h2 id="sip-rate-kpi" class="text-green">0%</h2>
+                        <span>Total Liabilities</span>
+                        <h2 id="nw-liabilities-kpi" class="text-red">₹0.00</h2>
+                    </div>
+                    <div class="kpi-card">
+                        <span>Net Worth Position</span>
+                        <h2 id="nw-position-kpi" class="text-teal">₹0.00</h2>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3>Add SIP / Investment Record</h3>
+                        <h3>Add Asset / Liability Item</h3>
                     </div>
-                    <form onsubmit="addSip(event)">
-                        <div><input type="text" id="sipName" placeholder="Fund/Asset Name (e.g. Nifty 50 Index)" required></div>
-                        <div><input type="number" step="0.01" id="sipAmount" placeholder="Monthly Amount (₹)" required></div>
+                    <form onsubmit="addNetWorthItem(event)">
+                        <div><input type="text" id="nwName" placeholder="Item Name (e.g. Bank Savings, Car Loan)" required></div>
+                        <div><input type="number" step="0.01" id="nwValue" placeholder="Current Value (₹)" required></div>
                         <div>
-                            <select id="sipCategory" required>
-                                <option value="Equity Mutual Fund">Equity Mutual Fund</option>
-                                <option value="Direct Stocks">Direct Stocks</option>
-                                <option value="Digital Gold / Sovereign Gold">Digital / SGB Gold</option>
-                                <option value="PPF / NPS">PPF / NPS</option>
-                                <option value="Crypto">Crypto</option>
+                            <select id="nwType" required>
+                                <option value="asset">Asset (Cash, Investments, Gold, Property)</option>
+                                <option value="liability">Liability (Credit Card Debt, Loans, Owed)</option>
                             </select>
                         </div>
-                        <div><input type="date" id="sipDate" required></div>
-                        <div class="form-full">
-                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Log Investment</button>
-                        </div>
+                        <div><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 100%;">Save Item</button></div>
                     </form>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3>Active SIP Portfolio</h3>
+                        <h3>Balance Sheet Ledger</h3>
                     </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Asset / Fund Name</th>
-                                    <th>Type</th>
-                                    <th>SIP Date</th>
-                                    <th>Monthly Amount</th>
+                                    <th>Item Name</th>
+                                    <th>Classification</th>
+                                    <th>Current Value</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="sipsTableBody"></tbody>
+                            <tbody id="netWorthTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -577,7 +570,7 @@
     <script>
         let currSym = localStorage.getItem('ef_curr') || '₹';
         let transactions = JSON.parse(localStorage.getItem('ef_personal_transactions')) || [];
-        let sips = JSON.parse(localStorage.getItem('ef_sips')) || [];
+        let netWorthItems = JSON.parse(localStorage.getItem('ef_networth_items')) || [];
         let budgetCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { Groceries: 10000, 'Dining Out': 5000 };
         let dailyLimit = parseFloat(localStorage.getItem('ef_daily_limit')) || 1000;
         let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [];
@@ -630,7 +623,7 @@
             dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value);
             localStorage.setItem('ef_daily_limit', dailyLimit);
             renderApp();
-            alert('Daily limit updated successfully!');
+            alert('Daily spending limit updated!');
         }
 
         function quickAdd(desc, amount, category) {
@@ -663,24 +656,22 @@
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
         }
 
-        function addSip(e) {
+        function addNetWorthItem(e) {
             e.preventDefault();
-            sips.push({
+            netWorthItems.push({
                 id: Date.now(),
-                name: document.getElementById('sipName').value,
-                amount: parseFloat(document.getElementById('sipAmount').value),
-                category: document.getElementById('sipCategory').value,
-                date: document.getElementById('sipDate').value
+                name: document.getElementById('nwName').value,
+                value: parseFloat(document.getElementById('nwValue').value),
+                type: document.getElementById('nwType').value
             });
-            localStorage.setItem('ef_sips', JSON.stringify(sips));
+            localStorage.setItem('ef_networth_items', JSON.stringify(netWorthItems));
             renderApp();
             e.target.reset();
-            document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
         }
 
-        function deleteSip(id) {
-            sips = sips.filter(s => s.id !== id);
-            localStorage.setItem('ef_sips', JSON.stringify(sips));
+        function deleteNetWorthItem(id) {
+            netWorthItems = netWorthItems.filter(i => i.id !== id);
+            localStorage.setItem('ef_networth_items', JSON.stringify(netWorthItems));
             renderApp();
         }
 
@@ -746,12 +737,9 @@
                 else totalExpense += t.amount;
             });
 
-            const totalInvested = sips.reduce((acc, s) => acc + s.amount, 0);
-            const netSavings = totalIncome - totalExpense - totalInvested;
-            const totalSubCost = subscriptions.reduce((acc, s) => acc + s.cost, 0);
-            const projectedEOM = netSavings - totalSubCost;
+            const netSavings = totalIncome - totalExpense;
 
-            // Daily Limit Checking Logic
+            // Daily Limit Alert
             const todayStr = new Date().toISOString().split('T')[0];
             const todaySpent = transactions
                 .filter(t => t.type === 'expense' && t.date === todayStr)
@@ -768,19 +756,25 @@
                 badgeEl.textContent = `🟢 Within Daily Limit (${currSym}${todaySpent}/${currSym}${dailyLimit})`;
             }
 
+            // Net Worth Position Calculation
+            let totalAssets = netSavings;
+            let totalLiabilities = 0;
+
+            netWorthItems.forEach(i => {
+                if (i.type === 'asset') totalAssets += i.value;
+                else totalLiabilities += i.value;
+            });
+
+            const netWorthPosition = totalAssets - totalLiabilities;
+
             document.getElementById('kpi-revenue').textContent = `${currSym}${totalIncome.toFixed(2)}`;
             document.getElementById('kpi-expenses').textContent = `${currSym}${totalExpense.toFixed(2)}`;
-            document.getElementById('kpi-investments').textContent = `${currSym}${totalInvested.toFixed(2)}`;
             document.getElementById('kpi-margin').textContent = `${currSym}${netSavings.toFixed(2)}`;
-            
-            const forecastEl = document.getElementById('kpi-forecast');
-            forecastEl.textContent = `${currSym}${projectedEOM.toFixed(2)}`;
-            forecastEl.className = projectedEOM >= 0 ? 'text-blue' : 'text-red';
+            document.getElementById('kpi-networth-quick').textContent = `${currSym}${netWorthPosition.toFixed(2)}`;
 
-            // SIP Metrics
-            document.getElementById('sip-total-kpi').textContent = `${currSym}${totalInvested.toFixed(2)}`;
-            const wealthRate = totalIncome > 0 ? ((totalInvested / totalIncome) * 100).toFixed(1) : 0;
-            document.getElementById('sip-rate-kpi').textContent = `${wealthRate}%`;
+            document.getElementById('nw-assets-kpi').textContent = `${currSym}${totalAssets.toFixed(2)}`;
+            document.getElementById('nw-liabilities-kpi').textContent = `${currSym}${totalLiabilities.toFixed(2)}`;
+            document.getElementById('nw-position-kpi').textContent = `${currSym}${netWorthPosition.toFixed(2)}`;
 
             // Recent Transactions Table
             const tbody = document.getElementById('ledgerBody');
@@ -798,24 +792,25 @@
                 </tr>
             `).join('');
 
-            renderSips();
+            renderNetWorthTable();
             renderBudgets();
             renderSubscriptions();
             renderGoals();
             renderCharts(filtered);
         }
 
-        function renderSips() {
-            const tbody = document.getElementById('sipsTableBody');
-            tbody.innerHTML = sips.map(s => `
+        function renderNetWorthTable() {
+            const tbody = document.getElementById('netWorthTableBody');
+            tbody.innerHTML = netWorthItems.map(i => `
                 <tr>
-                    <td><strong>${s.name}</strong></td>
-                    <td><span class="badge badge-income">${s.category}</span></td>
-                    <td>Day ${s.date ? s.date.split('-')[2] : '1'}</td>
-                    <td style="font-weight: 600; color: var(--accent-teal);">${currSym}${s.amount.toFixed(2)}</td>
-                    <td><button class="btn btn-secondary" onclick="deleteSip(${s.id})" style="padding: 2px 8px; font-size: 0.75rem;">Delete</button></td>
+                    <td><strong>${i.name}</strong></td>
+                    <td><span class="badge ${i.type === 'asset' ? 'badge-income' : 'badge-expense'}">${i.type.toUpperCase()}</span></td>
+                    <td style="font-weight: 600; color: ${i.type === 'asset' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                        ${currSym}${i.value.toFixed(2)}
+                    </td>
+                    <td><button class="btn btn-secondary" onclick="deleteNetWorthItem(${i.id})" style="padding: 2px 8px; font-size: 0.75rem;">Delete</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">No SIP or investment positions recorded.</td></tr>';
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No additional assets or liabilities logged.</td></tr>';
         }
 
         function renderBudgets() {
@@ -938,7 +933,6 @@
         }
 
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        document.getElementById('sipDate').value = new Date().toISOString().split('T')[0];
         renderApp();
     </script>
 </body>
