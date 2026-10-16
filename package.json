@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "ExpenseFlow Desktop App",
   "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "devDependencies": {
+ "scripts": {
+  "start": "electron .",
+  "build": "node -e \"require('fs').copyFileSync('index.html', 'www/index.html')\""
+},
+ "devDependencies": {
     "electron": "^44.4.5",
     "electron-packager": "^14.2.1"
   },
