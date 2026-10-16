@@ -3,44 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenseFlow - Personal Dashboard</title>
-    <!-- Google Fonts & Chart.js -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>ExpenseFlow</title>
+    <!-- SF Pro System Fonts & Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-main: #0f172a;
-            --bg-sidebar: #1e293b;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-purple: #8b5cf6;
+            --bg-main: #000000;
+            --bg-sidebar: rgba(28, 28, 30, 0.75);
+            --card-bg: rgba(28, 28, 30, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-purple: #bf5af2;
+            --input-bg: rgba(44, 44, 46, 0.6);
+            --radius-large: 20px;
+            --radius-medium: 12px;
+            --radius-small: 8px;
+            --blur: blur(20px);
         }
 
         [data-theme="light"] {
-            --bg-main: #f8fafc;
-            --bg-sidebar: #ffffff;
-            --card-bg: #ffffff;
-            --card-border: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --accent-green: #059669;
-            --accent-red: #dc2626;
-            --accent-purple: #7c3aed;
+            --bg-main: #f5f5f7;
+            --bg-sidebar: rgba(255, 255, 255, 0.75);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.04);
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent-blue: #0071e3;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --accent-purple: #af52de;
+            --input-bg: rgba(238, 238, 240, 0.8);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
@@ -49,17 +53,19 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
-            transition: background 0.3s ease;
+            transition: background 0.4s ease;
         }
 
-        /* Sidebar Styling */
+        /* Apple Glass Sidebar */
         .sidebar {
-            width: 260px;
+            width: 250px;
             background-color: var(--bg-sidebar);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             border-right: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
-            padding: 24px 20px;
+            padding: 32px 16px 24px 16px;
             justify-content: space-between;
         }
 
@@ -67,50 +73,59 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 30px;
+            padding-left: 8px;
+            margin-bottom: 36px;
         }
 
         .brand h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -0.4px;
         }
 
         .brand span {
-            color: var(--primary);
-            font-size: 0.8rem;
-            background: rgba(59, 130, 246, 0.15);
-            padding: 2px 8px;
-            border-radius: 12px;
+            color: var(--accent-blue);
+            font-size: 0.7rem;
+            background: rgba(10, 132, 255, 0.12);
+            padding: 3px 8px;
+            border-radius: 20px;
             font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         .nav-links {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 10px 12px;
             color: var(--text-secondary);
-            border-radius: 8px;
+            border-radius: var(--radius-medium);
             cursor: pointer;
             font-weight: 500;
             font-size: 0.9rem;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
         }
 
-        /* Main Content Layout */
+        .nav-item.active {
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+        }
+
+        /* Main Workspace */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -119,43 +134,50 @@
         }
 
         .top-bar {
-            padding: 20px 32px;
+            padding: 28px 40px 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--card-border);
-            background-color: var(--bg-sidebar);
+            background-color: transparent;
         }
 
         .top-bar h1 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-        }
-
-        .actions-group {
-            display: flex;
-            gap: 12px;
+            letter-spacing: -0.5px;
         }
 
         button.btn {
             padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid var(--card-border);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: opacity 0.2s;
+            gap: 6px;
+            transition: all 0.2s ease;
+            backdrop-filter: var(--blur);
         }
 
-        .btn-primary { background-color: var(--primary); color: #fff; }
-        .btn-secondary { background-color: var(--card-border); color: var(--text-primary); }
-        .btn:hover { opacity: 0.9; }
+        .btn-primary { 
+            background-color: var(--accent-blue); 
+            color: #fff; 
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+        }
+        .btn-secondary { 
+            background-color: var(--card-bg); 
+            color: var(--text-primary); 
+        }
+        .btn:hover { 
+            opacity: 0.9; 
+            transform: scale(0.98);
+        }
 
         .content-body {
-            padding: 32px;
+            padding: 0 40px 40px 40px;
             display: flex;
             flex-direction: column;
             gap: 24px;
@@ -171,7 +193,7 @@
             display: flex;
         }
 
-        /* KPI Cards */
+        /* Minimalist Apple Metric Cards */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -180,62 +202,74 @@
 
         .kpi-card {
             background-color: var(--card-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--card-border);
-            padding: 20px;
-            border-radius: 12px;
+            padding: 22px 24px;
+            border-radius: var(--radius-large);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
         }
 
         .kpi-card span {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.78rem;
+            letter-spacing: -0.1px;
             color: var(--text-secondary);
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .kpi-card h2 {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .text-green { color: var(--accent-green); }
         .text-red { color: var(--accent-red); }
         .text-purple { color: var(--accent-purple); }
 
-        /* Charts & Forms Grid */
+        /* Dashboard Cards & Layout */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 24px;
+            gap: 20px;
         }
 
         .card {
             background-color: var(--card-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: var(--radius-large);
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .card-header h3 {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
-        /* Form Inputs */
+        /* Form Inputs - Apple iOS Style */
         form {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 14px;
         }
 
         .form-full { grid-column: span 2; }
@@ -243,7 +277,10 @@
         .type-toggle-container {
             grid-column: span 2;
             display: flex;
-            gap: 12px;
+            background-color: var(--input-bg);
+            padding: 3px;
+            border-radius: 12px;
+            gap: 4px;
         }
 
         .type-toggle-btn {
@@ -251,14 +288,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--card-border);
-            background-color: var(--bg-main);
+            padding: 8px;
+            border-radius: 9px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 500;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             transition: all 0.2s ease;
         }
@@ -268,28 +302,34 @@
         }
 
         .type-toggle-btn.income-active {
-            background-color: rgba(16, 185, 129, 0.15);
-            border-color: var(--accent-green);
+            background-color: var(--card-bg);
             color: var(--accent-green);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
         .type-toggle-btn.expense-active {
-            background-color: rgba(239, 68, 68, 0.15);
-            border-color: var(--accent-red);
+            background-color: var(--card-bg);
             color: var(--accent-red);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
         input, select {
             width: 100%;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px 14px;
+            border-radius: var(--radius-medium);
             border: 1px solid var(--card-border);
-            background-color: var(--bg-main);
+            background-color: var(--input-bg);
             color: var(--text-primary);
-            font-size: 0.875rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.2s ease;
         }
 
-        /* Data Table */
+        input:focus, select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* Apple Data Table */
         .table-container {
             overflow-x: auto;
         }
@@ -298,40 +338,47 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.875rem;
+            font-size: 0.88rem;
         }
 
         th {
-            background-color: var(--bg-main);
             color: var(--text-secondary);
-            padding: 12px;
-            font-weight: 600;
+            padding: 12px 16px;
+            font-weight: 500;
+            font-size: 0.8rem;
             border-bottom: 1px solid var(--card-border);
         }
 
         td {
-            padding: 12px;
+            padding: 14px 16px;
             border-bottom: 1px solid var(--card-border);
         }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        tr:last-child td {
+            border-bottom: none;
         }
 
-        .badge-income { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
-        .badge-expense { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-income { background: rgba(48, 209, 88, 0.15); color: var(--accent-green); }
+        .badge-expense { background: rgba(255, 69, 58, 0.15); color: var(--accent-red); }
 
         @media (max-width: 1024px) {
             .dashboard-grid { grid-template-columns: 1fr; }
+            .content-body { padding: 0 20px 20px 20px; }
+            .top-bar { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- Apple-style Sidebar -->
     <aside class="sidebar">
         <div>
             <div class="brand">
@@ -339,11 +386,17 @@
                 <span>PERSONAL</span>
             </div>
             <ul class="nav-links">
-                <li class="nav-item active" onclick="switchTab('dashboard', this)">📊 Personal Dashboard</li>
-                <li class="nav-item" onclick="switchTab('accounts', this)">💳 My Wallets & Accounts</li>
+                <li class="nav-item active" onclick="switchTab('dashboard', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+                    Dashboard
+                </li>
+                <li class="nav-item" onclick="switchTab('accounts', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    Wallets & Accounts
+                </li>
             </ul>
         </div>
-        <button class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%;">🌓 Switch Theme</button>
+        <button class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%; justify-content: center;">🌓 Toggle Appearance</button>
     </aside>
 
     <!-- Main Workspace -->
@@ -351,7 +404,10 @@
         <header class="top-bar">
             <h1 id="page-title">Personal Overview</h1>
             <div class="actions-group">
-                <button class="btn btn-secondary" onclick="exportToCSV()">📥 Export CSV Report</button>
+                <button class="btn btn-secondary" onclick="exportToCSV()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export
+                </button>
             </div>
         </header>
 
@@ -377,35 +433,35 @@
                 <div class="dashboard-grid">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Financial Overview (Income vs. Expenses)</h3>
+                            <h3>Overview</h3>
                         </div>
                         <canvas id="trendChart" height="120"></canvas>
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h3>Expenses by Category</h3>
+                            <h3>Categories</h3>
                         </div>
                         <canvas id="categoryChart" height="200"></canvas>
                     </div>
                 </div>
 
-                <!-- Personal Transaction Entry Form -->
+                <!-- Transaction Form -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Log New Transaction</h3>
+                        <h3>Log Transaction</h3>
                     </div>
                     <form onsubmit="addPersonalTx(event)">
                         <div class="type-toggle-container">
                             <label id="lbl-income" class="type-toggle-btn income-active" onclick="setTxType('income')">
-                                <input type="radio" name="txType" value="income" checked> 🟢 Income
+                                <input type="radio" name="txType" value="income" checked> Income
                             </label>
                             <label id="lbl-expense" class="type-toggle-btn" onclick="setTxType('expense')">
-                                <input type="radio" name="txType" value="expense"> 🔴 Expense
+                                <input type="radio" name="txType" value="expense"> Expense
                             </label>
                         </div>
 
                         <div>
-                            <input type="text" id="desc" placeholder="Description (e.g. Groceries)" required>
+                            <input type="text" id="desc" placeholder="Description" required>
                         </div>
                         <div>
                             <input type="number" step="0.01" id="amount" placeholder="Amount ($)" required>
@@ -433,18 +489,18 @@
                             <input type="date" id="date" required>
                         </div>
                         <div class="form-full">
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Transaction</button>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Add Transaction</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Personal Recent Transactions Ledger -->
+                <!-- Recent Transactions -->
                 <div class="card">
                     <div class="card-header">
                         <h3>Recent Transactions</h3>
                         <div style="display: flex; gap: 8px;">
-                            <input type="date" id="filterStart" onchange="renderApp()" style="padding: 4px 8px;">
-                            <input type="date" id="filterEnd" onchange="renderApp()" style="padding: 4px 8px;">
+                            <input type="date" id="filterStart" onchange="renderApp()" style="padding: 4px 8px; font-size: 0.8rem;">
+                            <input type="date" id="filterEnd" onchange="renderApp()" style="padding: 4px 8px; font-size: 0.8rem;">
                         </div>
                     </div>
                     <div class="table-container">
@@ -474,27 +530,27 @@
                         <h2 id="acc-bank" class="text-green">$0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Credit Card Balance</span>
+                        <span>Credit Card</span>
                         <h2 id="acc-credit" class="text-red">$0.00</h2>
                     </div>
                     <div class="kpi-card">
-                        <span>Cash on Hand</span>
+                        <span>Cash Hand</span>
                         <h2 id="acc-cash" class="text-purple">$0.00</h2>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3>Account Ledger Breakdown</h3>
+                        <h3>Accounts Ledger</h3>
                     </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Account Name</th>
-                                    <th>Total Inflow</th>
-                                    <th>Total Outflow</th>
-                                    <th>Net Account Position</th>
+                                    <th>Inflow</th>
+                                    <th>Outflow</th>
+                                    <th>Net Position</th>
                                 </tr>
                             </thead>
                             <tbody id="accountsTableBody"></tbody>
@@ -538,7 +594,7 @@
 
             const titles = {
                 dashboard: 'Personal Overview',
-                accounts: 'My Wallets & Accounts'
+                accounts: 'Wallets & Accounts'
             };
             document.getElementById('page-title').textContent = titles[tabName];
         }
@@ -619,10 +675,7 @@
                 </tr>
             `).join('');
 
-            // Render Accounts Tab Data
             renderAccountsTab(filtered);
-
-            // Render Charts
             renderCharts(filtered);
         }
 
@@ -661,7 +714,7 @@
 
         function renderCharts(data = transactions) {
             const isDark = theme === 'dark';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const textColor = isDark ? '#86868b' : '#86868b';
 
             const inc = data.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
             const exp = data.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
@@ -673,21 +726,21 @@
                     labels: ['Income', 'Expenses'],
                     datasets: [{
                         data: [inc, exp],
-                        backgroundColor: ['#10b981', '#ef4444'],
-                        borderRadius: 6
+                        backgroundColor: ['#30d158', '#ff453a'],
+                        borderRadius: 12
                     }]
                 },
                 options: {
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { color: textColor } },
-                        y: { ticks: { color: textColor } }
+                        x: { grid: { display: false }, ticks: { color: textColor } },
+                        y: { grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, ticks: { color: textColor } }
                     }
                 }
             });
 
             const categories = {};
-            data.filter(t => { return t.type === 'expense'; }).forEach(t => {
+            data.filter(t => t.type === 'expense').forEach(t => {
                 categories[t.category] = (categories[t.category] || 0) + t.amount;
             });
 
@@ -698,11 +751,13 @@
                     labels: Object.keys(categories),
                     datasets: [{
                         data: Object.values(categories),
-                        backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1']
+                        backgroundColor: ['#0a84ff', '#bf5af2', '#ff9f0a', '#30d158', '#ff453a', '#64d2ff'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    plugins: { legend: { labels: { color: textColor } } }
+                    plugins: { legend: { labels: { color: textColor, font: { family: '-apple-system' } } } },
+                    cutout: '75%'
                 }
             });
         }
@@ -717,7 +772,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', `Personal_Expenses_${new Date().toISOString().split('T')[0]}.csv`);
+            a.setAttribute('download', `ExpenseFlow_${new Date().toISOString().split('T')[0]}.csv`);
             a.click();
         }
 
