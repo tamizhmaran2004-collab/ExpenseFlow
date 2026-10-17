@@ -560,7 +560,12 @@
                 <div class="glass-panel p-6 rounded-3xl space-y-5">
                     <div>
                         <h3 class="font-display font-bold text-lg text-white">SIP Investments</h3>
-                        <p id="sip-total-monthly" class="text-xs text-slate-400 mt-1">Monthly Commitment: ₹0</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Monthly commitment</p><p id="sip-total-monthly" class="text-sm font-bold text-purple-300 mt-1">₹0</p></div>
+                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Total invested</p><p id="sip-total-invested" class="text-sm font-bold text-white mt-1">₹0</p></div>
+                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Current value</p><p id="sip-current-value" class="text-sm font-bold text-cyan-300 mt-1">₹0</p></div>
+                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Gain / loss</p><p id="sip-gain-loss" class="text-sm font-bold mt-1">₹0</p></div>
+                        </div>
                     </div>
                     <form onsubmit="addSipItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <input type="text" id="sip-name" placeholder="Fund name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
@@ -569,6 +574,22 @@
                         <button type="submit" class="py-2.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs">Add SIP</button>
                     </form>
                     <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">One-Time Investments</h3>
+                        <p class="text-xs text-slate-400 mt-1">Track lump-sum investments alongside your recurring SIPs.</p>
+                    </div>
+                    <form onsubmit="addOneTimeInvestment(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <input type="text" id="investment-name" placeholder="Investment name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" id="investment-invested" min="0.01" step="0.01" placeholder="Amount invested" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" id="investment-current-value" min="0" step="0.01" placeholder="Current value" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="date" id="investment-date" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold text-xs">Add Investment</button>
+                    </form>
+                    <div id="investment-summary" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                    <div id="one-time-investment-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
             </section>
 
@@ -713,6 +734,7 @@
             { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
             { id: 2, name: 'Smallcap Discovery', amount: 2500, date: 15 }
         ];
+        let oneTimeInvestments = JSON.parse(localStorage.getItem('ef_one_time_investments')) || [];
 
         let splits = JSON.parse(localStorage.getItem('ef_splits')) || [];
         let subscriptions = JSON.parse(localStorage.getItem('ef_subscriptions')) || [
@@ -814,6 +836,7 @@
             localStorage.setItem('ef_transactions', JSON.stringify(transactions));
             localStorage.setItem('ef_networth', JSON.stringify(networthItems));
             localStorage.setItem('ef_sips', JSON.stringify(sips));
+            localStorage.setItem('ef_one_time_investments', JSON.stringify(oneTimeInvestments));
             localStorage.setItem('ef_splits', JSON.stringify(splits));
             localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
             localStorage.setItem('ef_goals', JSON.stringify(goals));
@@ -874,6 +897,7 @@
 
             renderNetWorth();
             renderSIPs();
+            renderOneTimeInvestments();
             renderCalendar();
             renderSplitter();
             renderBudgets();
@@ -1075,7 +1099,7 @@
             const amount = parseFloat(document.getElementById('sip-amount').value);
             const date = parseInt(document.getElementById('sip-date').value);
 
-            sips.push({ id: Date.now(), name, amount, date });
+            sips.push({ id: Date.now(), name, amount, date, invested: 0, currentValue: 0 });
             saveAndRender();
             e.target.reset();
         }
@@ -1087,7 +1111,15 @@
 
         function renderSIPs() {
             const total = sips.reduce((a,b) => a + b.amount, 0);
-            document.getElementById('sip-total-monthly').innerText = `Monthly Commitment: ${currSym}${total.toLocaleString()}`;
+            const investedTotal = sips.reduce((sum, sip) => sum + (Number(sip.invested) || 0), 0);
+            const currentTotal = sips.reduce((sum, sip) => sum + (Number(sip.currentValue) || 0), 0);
+            const gainLoss = currentTotal - investedTotal;
+            document.getElementById('sip-total-monthly').innerText = `${currSym}${total.toLocaleString()}`;
+            document.getElementById('sip-total-invested').innerText = `${currSym}${investedTotal.toLocaleString()}`;
+            document.getElementById('sip-current-value').innerText = `${currSym}${currentTotal.toLocaleString()}`;
+            const gainLossElement = document.getElementById('sip-gain-loss');
+            gainLossElement.innerText = `${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}`;
+            gainLossElement.className = `text-sm font-bold mt-1 ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
             const container = document.getElementById('sip-list');
             container.innerHTML = sips.map(s => `
@@ -1100,8 +1132,91 @@
                         </div>
                     </div>
                     <p class="text-lg font-bold text-purple-400">${currSym}${s.amount.toLocaleString()} / mo</p>
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <p class="text-slate-400">Invested <span class="text-white">${currSym}${(Number(s.invested) || 0).toLocaleString()}</span></p>
+                        <p class="text-slate-400">Value <span class="text-cyan-300">${currSym}${(Number(s.currentValue) || 0).toLocaleString()}</span></p>
+                    </div>
+                    <details class="pt-2 border-t border-white/10">
+                        <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update invested amount and current value</summary>
+                        <form onsubmit="updateSipValuation(event, ${s.id})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                            <input name="invested" type="number" min="0" step="0.01" value="${Number(s.invested) || 0}" aria-label="Total invested in ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                            <input name="currentValue" type="number" min="0" step="0.01" value="${Number(s.currentValue) || 0}" aria-label="Current value of ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                            <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
+                        </form>
+                    </details>
                 </div>
             `).join('');
+        }
+
+        function updateSipValuation(e, id) {
+            e.preventDefault();
+            const sip = sips.find(item => item.id === id);
+            if (!sip) return;
+            sip.invested = Math.max(0, Number(e.target.elements.invested.value) || 0);
+            sip.currentValue = Math.max(0, Number(e.target.elements.currentValue.value) || 0);
+            saveAndRender();
+        }
+
+        function addOneTimeInvestment(e) {
+            e.preventDefault();
+            const name = document.getElementById('investment-name').value.trim();
+            const invested = Number(document.getElementById('investment-invested').value);
+            const currentValue = Number(document.getElementById('investment-current-value').value);
+            const date = document.getElementById('investment-date').value;
+            if (!name || !Number.isFinite(invested) || invested <= 0 || !Number.isFinite(currentValue) || currentValue < 0 || !date) return;
+            oneTimeInvestments.unshift({ id: Date.now(), name, invested, currentValue, date });
+            e.target.reset();
+            saveAndRender();
+        }
+
+        function deleteOneTimeInvestment(id) {
+            oneTimeInvestments = oneTimeInvestments.filter(investment => investment.id !== id);
+            saveAndRender();
+        }
+
+        function updateOneTimeInvestment(e, id) {
+            e.preventDefault();
+            const investment = oneTimeInvestments.find(item => item.id === id);
+            if (!investment) return;
+            investment.invested = Math.max(0, Number(e.target.elements.invested.value) || 0);
+            investment.currentValue = Math.max(0, Number(e.target.elements.currentValue.value) || 0);
+            saveAndRender();
+        }
+
+        function renderOneTimeInvestments() {
+            const invested = oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
+            const currentValue = oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const gainLoss = currentValue - invested;
+            document.getElementById('investment-summary').innerHTML = `
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time invested</p><p class="text-sm font-bold text-white mt-1">${currSym}${invested.toLocaleString()}</p></div>
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Current value</p><p class="text-sm font-bold text-cyan-300 mt-1">${currSym}${currentValue.toLocaleString()}</p></div>
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Gain / loss</p><p class="text-sm font-bold ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1">${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}</p></div>
+            `;
+            const container = document.getElementById('one-time-investment-list');
+            container.innerHTML = oneTimeInvestments.length ? oneTimeInvestments.map(item => {
+                const itemGain = item.currentValue - item.invested;
+                return `
+                    <div class="glass-card p-4 rounded-2xl space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <div><h4 class="text-xs font-bold text-white">${item.name}</h4><p class="text-[10px] text-slate-400 mt-1">Invested ${item.date}</p></div>
+                            <button type="button" onclick="deleteOneTimeInvestment(${item.id})" aria-label="Delete ${item.name}" title="Delete investment" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-[10px]">
+                            <p class="text-slate-400">Invested<br><span class="text-white font-bold">${currSym}${item.invested.toLocaleString()}</span></p>
+                            <p class="text-slate-400">Value<br><span class="text-cyan-300 font-bold">${currSym}${item.currentValue.toLocaleString()}</span></p>
+                            <p class="text-slate-400">Gain/loss<br><span class="${itemGain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${itemGain >= 0 ? '+' : '-'}${currSym}${Math.abs(itemGain).toLocaleString()}</span></p>
+                        </div>
+                        <details class="pt-2 border-t border-white/10">
+                            <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update valuation</summary>
+                            <form onsubmit="updateOneTimeInvestment(event, ${item.id})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                                <input name="invested" type="number" min="0" step="0.01" value="${item.invested}" aria-label="Amount invested in ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input name="currentValue" type="number" min="0" step="0.01" value="${item.currentValue}" aria-label="Current value of ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
+                            </form>
+                        </details>
+                    </div>
+                `;
+            }).join('') : '<p class="text-xs text-slate-500">No one-time investments added yet.</p>';
         }
 
         // Calendar
