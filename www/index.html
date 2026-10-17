@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ExpenseFlow Pro - Futuristic iOS Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -127,6 +127,59 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.2);
         }
+
+        @media (max-width: 767px) {
+            html, body { min-height: 100%; }
+            body { min-height: 100dvh; }
+            #app-shell { display: block; padding: 10px 10px calc(90px + env(safe-area-inset-bottom)); }
+            #app-sidebar {
+                position: fixed;
+                inset: auto 8px max(8px, env(safe-area-inset-bottom)) 8px;
+                z-index: 50;
+                width: auto;
+                padding: 8px;
+                border-radius: 20px;
+                background: rgba(8, 13, 29, 0.96);
+                box-shadow: 0 10px 35px rgba(0, 0, 0, 0.65);
+            }
+            #app-sidebar-brand, #app-sidebar-settings { display: none; }
+            #nav-container {
+                display: flex;
+                gap: 4px;
+                overflow-x: auto;
+                overscroll-behavior-x: contain;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            #nav-container::-webkit-scrollbar { display: none; }
+            #nav-container .nav-item {
+                flex: 0 0 auto;
+                width: auto;
+                min-width: 62px;
+                min-height: 52px;
+                padding: 7px 9px;
+                flex-direction: column;
+                justify-content: center;
+                gap: 3px;
+                border-radius: 14px;
+                font-size: 9px;
+                line-height: 1.1;
+            }
+            #nav-container .nav-item > i { width: auto; font-size: 16px; }
+            #nav-container .nav-item > span { white-space: nowrap; }
+            #nav-sms .ml-auto { display: none; }
+            #app-main { width: 100%; gap: 16px; }
+            #app-main > header { border-radius: 20px; padding: 14px; }
+            #app-main > header h2 { font-size: 18px; }
+            #app-main > header .dynamic-island { max-width: 100%; }
+            .tab-page { min-width: 0; }
+            .glass-panel { border-radius: 20px; }
+            .glass-card:hover { transform: none; }
+            input, select, textarea, button { font-size: max(12px, 1em); }
+            input, select, textarea { min-height: 42px; }
+            #calendar-grid > div { overflow: hidden; }
+            #calendar-grid .min-h-16 { min-height: 62px; }
+        }
     </style>
 </head>
 <body class="min-h-screen relative flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -137,13 +190,13 @@
     <div class="ambient-orb w-[350px] h-[350px] bg-cyan-600/20 top-[40%] left-[30%] animate-pulse-glow" style="animation-delay: 3s;"></div>
 
     <!-- Main Outer Container -->
-    <div class="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1600px] w-full mx-auto p-3 md:p-6 gap-6">
+    <div id="app-shell" class="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1600px] w-full mx-auto p-3 md:p-6 gap-6">
 
         <!-- FUTURISTIC GLASS SIDEBAR NAVIGATION -->
-        <aside class="w-full lg:w-72 flex flex-col justify-between glass-panel rounded-3xl p-5 shrink-0">
+        <aside id="app-sidebar" class="w-full lg:w-72 flex flex-col justify-between glass-panel rounded-3xl p-5 shrink-0">
             <div>
                 <!-- Brand Title -->
-                <div class="flex items-center gap-3 px-2 py-3 mb-6">
+                <div id="app-sidebar-brand" class="flex items-center gap-3 px-2 py-3 mb-6">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30 animate-float">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
@@ -196,7 +249,7 @@
             </div>
 
             <!-- Sidebar Bottom Settings -->
-            <div class="pt-6 border-t border-white/10 space-y-3">
+            <div id="app-sidebar-settings" class="pt-6 border-t border-white/10 space-y-3">
                 <div class="flex items-center justify-between text-xs font-medium text-slate-400">
                     <span>Currency</span>
                     <select id="currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white">
@@ -214,7 +267,7 @@
         </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 flex flex-col gap-6 min-w-0">
+        <main id="app-main" class="flex-1 flex flex-col gap-6 min-w-0">
 
             <!-- DYNAMIC ISLAND HEADER BAR -->
             <header class="glass-panel rounded-3xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
