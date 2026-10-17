@@ -460,6 +460,9 @@
                                 <option value="Salary" class="bg-slate-900">Salary</option>
                                 <option value="Transport" class="bg-slate-900">Transport</option>
                                 <option value="Utilities" class="bg-slate-900">Utilities</option>
+                                <option value="Entertainment" class="bg-slate-900">Entertainment</option>
+                                <option value="Shopping" class="bg-slate-900">Shopping</option>
+                                <option value="General" class="bg-slate-900">General</option>
                             </select>
                         </div>
                     </div>
@@ -950,6 +953,19 @@
             autoParseSMS(raw);
         }
 
+        function categorizeSms(smsText, type) {
+            const text = smsText.toLowerCase();
+            if (/salary|payroll|wage|monthly pay/.test(text)) return 'Salary';
+            if (type === 'income') return 'General';
+            if (/restaurant|dining|cafe|coffee|chai|swiggy|zomato|food|takeaway/.test(text)) return 'Dining Out';
+            if (/netflix|spotify|movie|cinema|theatre|gaming|entertainment/.test(text)) return 'Entertainment';
+            if (/petrol|fuel|metro|uber|ola|taxi|transport|parking/.test(text)) return 'Transport';
+            if (/grocery|groceries|supermarket|bigbasket|blinkit|zepto/.test(text)) return 'Groceries';
+            if (/electricity|water bill|gas bill|broadband|internet bill|mobile recharge/.test(text)) return 'Utilities';
+            if (/amazon|flipkart|shopping|store purchase/.test(text)) return 'Shopping';
+            return 'General';
+        }
+
         function autoParseSMS(smsText, options = {}) {
             if (!smsText.trim()) return;
             const logBox = document.getElementById('sms-log-output');
@@ -990,7 +1006,7 @@
                     desc: `[SMS] ${merchant}`,
                     amount: amount,
                     type: type,
-                    category: isCredit ? 'Salary' : 'General',
+                    category: categorizeSms(smsText, type),
                     account: accountSuffix ? `Bank Account ••••${accountSuffix}` : 'UPI / Wallet',
                     date: localDate
                 });
