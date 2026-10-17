@@ -901,20 +901,17 @@
                 updateSmsDetectionStatus('Automatic detection is off.');
                 return;
             }
-            if (!smsNativeReady || !window.cordova?.plugins?.SMSReceive) {
-                updateSmsDetectionStatus('SMS detection is available in the installed Android app only.', true);
-                return;
-            }
             localStorage.setItem('ef_sms_auto_enabled', 'true');
             startSmsDetection();
         }
 
         function startSmsDetection() {
             const smsPlugin = window.cordova?.plugins?.SMSReceive;
-            if (!smsNativeReady || !smsPlugin) {
-                updateSmsDetectionStatus('Waiting for Android SMS service…');
+            if (!smsPlugin) {
+                updateSmsDetectionStatus('Android SMS plugin is unavailable. Install the latest Android build and reopen the app.', true);
                 return;
             }
+            smsNativeReady = true;
             smsPlugin.startWatch(result => {
                 if (result === 'SMS_WATCHING_STARTED' || result === 'SMS_WATCHING_ALREADY_STARTED') {
                     smsWatching = true;
@@ -939,7 +936,13 @@
             if (seenMessages.includes(signatureKey)) return;
             seenMessages.push(signatureKey);
             localStorage.setItem('ef_sms_seen', JSON.stringify(seenMessages.slice(-500)));
+            const transactionCountBefore = transactions.length;
             autoParseSMS(message.body, { automatic: true, receivedAt: message.date_sent || message.date });
+            if (transactions.length > transactionCountBefore) {
+                updateSmsDetectionStatus('Bank transaction detected and saved to your ledger.');
+            } else {
+                updateSmsDetectionStatus('SMS received but skipped. Check the parser log for the reason.', true);
+            }
         }
 
         function parseAndLogSMS() {
