@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Includes app-private state such as the Capacitor WebView local storage. -->
+    <include domain="root" path="." />
+    <exclude domain="root" path="cache/" />
+    <exclude domain="root" path="code_cache/" />
+    <exclude domain="root" path="no_backup/" />
+</full-backup-content>

@@ -285,6 +285,11 @@
                     <select id="mobile-currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white"><option value="₹">₹ INR</option><option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option></select>
                     <button onclick="exportToCSV()" class="rounded-xl glass-card px-3 py-2 text-xs text-slate-200"><i class="fa-solid fa-file-csv text-teal-300 mr-1"></i>Export</button>
                 </div>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <button onclick="exportDataBackup()" class="more-nav-item rounded-xl bg-teal-500/15 border border-teal-400/20 px-3 py-2.5 text-xs font-semibold text-teal-100"><i class="fa-solid fa-cloud-arrow-down mr-1.5"></i>Back up data</button>
+                    <button onclick="document.getElementById('restore-backup-input').click()" class="more-nav-item rounded-xl glass-card px-3 py-2.5 text-xs font-semibold text-slate-200"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Restore backup</button>
+                </div>
+                <p class="text-[10px] leading-relaxed text-slate-500 mt-2">Android restore uses your device backup settings. Keep exported backup files private; they contain your app data.</p>
             </div>
 
             <!-- Sidebar Bottom Settings -->
@@ -302,7 +307,13 @@
                     <i class="fa-solid fa-file-csv text-teal-400"></i>
                     <span>Export CSV Data</span>
                 </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportDataBackup()" class="rounded-xl bg-teal-500/15 border border-teal-400/20 px-2 py-2.5 text-[11px] font-semibold text-teal-100"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Backup</button>
+                    <button onclick="document.getElementById('restore-backup-input').click()" class="rounded-xl glass-card px-2 py-2.5 text-[11px] font-semibold text-slate-200"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Restore</button>
+                </div>
+                <p class="text-[10px] leading-relaxed text-slate-500">Keep backups private; they contain your app data.</p>
             </div>
+            <input id="restore-backup-input" type="file" accept=".json,application/json" class="hidden" onchange="importDataBackup(event)">
         </aside>
 
         <!-- MAIN CONTENT AREA -->
@@ -1680,6 +1691,48 @@
                 categoryChart.data.datasets[0].data = entries.map(([, amount]) => amount);
                 categoryChart.data.datasets[0].backgroundColor = entries.map((_, index) => ['#0d9488', '#14b8a6', '#2dd4bf', '#22d3ee', '#06b6d4', '#0f766e', '#f59e0b', '#10b981'][index % 8]);
                 categoryChart.update();
+            }
+        }
+
+        function exportDataBackup() {
+            const data = {};
+            for (let index = 0; index < localStorage.length; index++) {
+                const key = localStorage.key(index);
+                if (key && key.startsWith('ef_')) data[key] = localStorage.getItem(key);
+            }
+            const backup = { application: 'ExpenseFlow', formatVersion: 1, exportedAt: new Date().toISOString(), data };
+            const file = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `expenseflow-backup-${localDateString(new Date())}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        async function importDataBackup(event) {
+            const file = event.target.files && event.target.files[0];
+            event.target.value = '';
+            if (!file) return;
+            if (file.size > 20 * 1024 * 1024) {
+                alert('This backup file is too large to restore.');
+                return;
+            }
+            try {
+                const backup = JSON.parse(await file.text());
+                if (backup.application !== 'ExpenseFlow' || backup.formatVersion !== 1 || !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)) {
+                    throw new Error('This file is not a supported ExpenseFlow backup.');
+                }
+                const entries = Object.entries(backup.data).filter(([key, value]) => key.startsWith('ef_') && typeof value === 'string');
+                if (!entries.length) throw new Error('The backup does not contain ExpenseFlow data.');
+                if (!confirm(`Restore ${entries.length} data item(s) from ${file.name}? Matching data on this device will be replaced.`)) return;
+                entries.forEach(([key, value]) => localStorage.setItem(key, value));
+                alert('Backup restored. ExpenseFlow will reload your data now.');
+                location.reload();
+            } catch (error) {
+                alert(error.message || 'Could not read this backup file.');
             }
         }
 
