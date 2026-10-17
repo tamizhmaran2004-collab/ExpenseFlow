@@ -244,20 +244,30 @@
 
             <!-- TAB 1: MAIN DASHBOARD & LEDGER -->
             <section id="tab-page-dashboard" class="tab-page space-y-6">
+
+                <div class="glass-panel p-4 rounded-3xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="font-display font-bold text-lg text-white">Monthly Overview</h2>
+                        <p class="text-xs text-slate-400">Review income, spending, and cash flow for a month.</p>
+                    </div>
+                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-2">Month
+                        <input type="month" id="dashboard-month" onchange="renderApp()" class="glass-input rounded-xl px-3 py-2 text-sm">
+                    </label>
+                </div>
                 
                 <!-- KPI Financial Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 text-emerald-500/10 text-6xl font-bold"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Income</p>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Monthly Income</p>
                         <h3 class="text-2xl font-bold font-display text-emerald-400 mt-2" id="kpi-income">₹0.00</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Total credited balance</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Selected month</p>
                     </div>
                     <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 text-rose-500/10 text-6xl font-bold"><i class="fa-solid fa-arrow-trend-down"></i></div>
-                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Expenses</p>
+                        <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Monthly Expenses</p>
                         <h3 class="text-2xl font-bold font-display text-rose-400 mt-2" id="kpi-expense">₹0.00</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Total outflows logged</p>
+                        <p class="text-[11px] text-slate-400 mt-1" id="kpi-expense-comparison">Selected month</p>
                     </div>
                     <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 text-indigo-500/10 text-6xl font-bold"><i class="fa-solid fa-wallet"></i></div>
@@ -279,24 +289,32 @@
                         <i class="fa-solid fa-bolt text-amber-400"></i>
                         <span>One-Tap Smart Micro-Expense Presets</span>
                     </p>
-                    <div class="flex flex-wrap gap-2.5">
-                        <button onclick="applyPreset('Chai / Coffee', 20, 'Dining Out')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
-                            <span>☕ ₹20 Chai/Tea</span>
-                        </button>
-                        <button onclick="applyPreset('Auto / Taxi Fare', 50, 'Transport')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
-                            <span>🚕 ₹50 Auto/Taxi</span>
-                        </button>
-                        <button onclick="applyPreset('Snacks / Evening', 150, 'Groceries')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
-                            <span>🍿 ₹150 Snacks</span>
-                        </button>
-                        <button onclick="applyPreset('Petrol / Fuel', 500, 'Transport')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-indigo-500/50 flex items-center gap-2">
-                            <span>⛽ ₹500 Fuel</span>
-                        </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
+                        <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-200 flex-1">☕ Chai / Tea</span>
+                            <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-chai-amount" type="number" min="0.01" step="0.01" value="20" aria-label="Chai or tea amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
+                            <button type="button" onclick="applyPreset('Chai / Coffee', document.getElementById('preset-chai-amount').value, 'Dining Out')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                        </div>
+                        <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-200 flex-1">🚕 Auto / Taxi</span>
+                            <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-taxi-amount" type="number" min="0.01" step="0.01" value="50" aria-label="Auto or taxi amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
+                            <button type="button" onclick="applyPreset('Auto / Taxi Fare', document.getElementById('preset-taxi-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                        </div>
+                        <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-200 flex-1">🍿 Snacks</span>
+                            <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-snacks-amount" type="number" min="0.01" step="0.01" value="150" aria-label="Snacks amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
+                            <button type="button" onclick="applyPreset('Snacks / Evening', document.getElementById('preset-snacks-amount').value, 'Groceries')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                        </div>
+                        <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-200 flex-1">⛽ Petrol / Fuel</span>
+                            <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-fuel-amount" type="number" min="0.01" step="0.01" value="500" aria-label="Petrol or fuel amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
+                            <button type="button" onclick="applyPreset('Petrol / Fuel', document.getElementById('preset-fuel-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Quick Entry Form & Charts Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
                     
                     <!-- Quick Add Form -->
                     <div class="lg:col-span-5 glass-panel p-6 rounded-3xl flex flex-col justify-between">
@@ -357,14 +375,20 @@
                     </div>
 
                     <!-- Cashflow Trend & Distribution Charts -->
-                    <div class="lg:col-span-7 glass-panel p-6 rounded-3xl flex flex-col justify-between">
+                    <div class="lg:col-span-7 min-w-0 glass-panel p-6 rounded-3xl">
                         <h3 class="font-display font-bold text-lg text-white mb-4">Cashflow Analytics</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-64">
-                            <div class="relative w-full h-full flex items-center justify-center">
-                                <canvas id="chart-cashflow"></canvas>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 min-w-0">
+                            <div class="min-w-0 rounded-2xl bg-slate-950/30 border border-white/5 p-3">
+                                <p class="text-xs font-semibold text-slate-400 mb-2">Income vs Expenses</p>
+                                <div class="relative h-56 min-w-0 w-full">
+                                    <canvas id="chart-cashflow" class="block max-w-full"></canvas>
+                                </div>
                             </div>
-                            <div class="relative w-full h-full flex items-center justify-center">
-                                <canvas id="chart-categories"></canvas>
+                            <div class="min-w-0 rounded-2xl bg-slate-950/30 border border-white/5 p-3">
+                                <p class="text-xs font-semibold text-slate-400 mb-2">Expense Breakdown</p>
+                                <div class="relative h-56 min-w-0 w-full">
+                                    <canvas id="chart-categories" class="block max-w-full"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -447,88 +471,88 @@
 
             <!-- TAB 3: NET WORTH BALANCE SHEET -->
             <section id="tab-page-networth" class="tab-page hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass-card p-5 rounded-3xl">
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Assets</p>
-                        <h3 class="text-2xl font-bold font-display text-emerald-400 mt-2" id="nw-assets-sum">₹0.00</h3>
+                <div class="glass-panel p-6 rounded-3xl space-y-5">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">Net Worth</h3>
+                        <p class="text-xs text-slate-400 mt-1">Track your assets and liabilities.</p>
                     </div>
-                    <div class="glass-card p-5 rounded-3xl">
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Liabilities</p>
-                        <h3 class="text-2xl font-bold font-display text-rose-400 mt-2" id="nw-liabilities-sum">₹0.00</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="glass-card p-4 rounded-2xl"><p class="text-xs text-slate-400">Assets</p><p id="nw-assets-sum" class="text-lg font-bold text-emerald-400 mt-1">₹0</p></div>
+                        <div class="glass-card p-4 rounded-2xl"><p class="text-xs text-slate-400">Liabilities</p><p id="nw-liabilities-sum" class="text-lg font-bold text-rose-400 mt-1">₹0</p></div>
+                        <div class="glass-card p-4 rounded-2xl"><p class="text-xs text-slate-400">Net Worth</p><p id="nw-position-sum" class="text-lg font-bold text-cyan-400 mt-1">₹0</p></div>
                     </div>
-                    <div class="glass-card p-5 rounded-3xl">
-                        <p class="text-xs font-semibold text-slate-400 uppercase">Net Wealth Position</p>
-                        <h3 class="text-2xl font-bold font-display text-cyan-400 mt-2" id="nw-position-sum">₹0.00</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-4 glass-panel p-6 rounded-3xl">
-                        <h3 class="font-display font-bold text-lg text-white mb-4">Add Asset / Liability</h3>
-                        <form onsubmit="addNetWorthItem(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Item Description</label>
-                                <input type="text" id="nw-item-name" placeholder="e.g. Savings Account or Car Loan" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Value Amount</label>
-                                <input type="number" step="0.01" id="nw-item-val" placeholder="0.00" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Classification</label>
-                                <select id="nw-item-type" class="w-full glass-input rounded-2xl px-3 py-2.5 text-xs">
-                                    <option value="asset" class="bg-slate-900">Asset (+)</option>
-                                    <option value="liability" class="bg-slate-900">Liability (-)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20">
-                                Save Valuation
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="lg:col-span-8 glass-panel p-6 rounded-3xl">
-                        <h3 class="font-display font-bold text-lg text-white mb-4">Balance Sheet Assets &amp; Liabilities</h3>
-                        <div id="nw-items-list" class="space-y-2">
-                            <!-- Dynamic NW items -->
-                        </div>
-                    </div>
+                    <form onsubmit="addNetWorthItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <input type="text" id="nw-item-name" placeholder="Name (e.g. Savings)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" min="0" step="0.01" id="nw-item-val" placeholder="Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <select id="nw-item-type" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs"><option value="asset">Asset</option><option value="liability">Liability</option></select>
+                        <button type="submit" class="py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs">Add Item</button>
+                    </form>
+                    <div id="nw-items-list" class="space-y-3"></div>
                 </div>
             </section>
 
             <!-- TAB 4: SIP INVESTMENTS -->
             <section id="tab-page-sip" class="tab-page hidden space-y-6">
-                <div class="glass-panel p-6 rounded-3xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-display font-bold text-lg text-white">SIP &amp; Investment Portfolio</h3>
-                            <p class="text-xs text-slate-400">Track recurring mutual funds, stocks, and assets.</p>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-400 font-display" id="sip-total-monthly">Monthly Commitment: ₹0.00</h3>
+                <div class="glass-panel p-6 rounded-3xl space-y-5">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">SIP Investments</h3>
+                        <p id="sip-total-monthly" class="text-xs text-slate-400 mt-1">Monthly Commitment: ₹0</p>
                     </div>
-
-                    <form onsubmit="addSipItem(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        <input type="text" id="sip-name" placeholder="Fund / Asset Name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
-                        <input type="number" step="0.01" id="sip-amount" placeholder="Monthly Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
-                        <input type="number" id="sip-date" placeholder="SIP Date (1-31)" min="1" max="31" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
-                        <button type="submit" class="py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-lg shadow-purple-600/20">Add SIP</button>
+                    <form onsubmit="addSipItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <input type="text" id="sip-name" placeholder="Fund name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" min="0.01" step="0.01" id="sip-amount" placeholder="Monthly amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" min="1" max="31" id="sip-date" placeholder="Debit day" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <button type="submit" class="py-2.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs">Add SIP</button>
                     </form>
-
-                    <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-4">
-                        <!-- Dynamic SIP Cards -->
-                    </div>
+                    <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
             </section>
 
             <!-- TAB 5: BILL CALENDAR -->
             <section id="tab-page-calendar" class="tab-page hidden space-y-6">
-                <div class="glass-panel p-6 rounded-3xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-display font-bold text-lg text-white">Bill Due Date Calendar</h3>
-                        <span class="text-xs font-semibold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-3 py-1 rounded-full">October 2026</span>
+                <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-display font-bold text-lg text-white">Bill &amp; SIP Calendar</h3>
+                            <p class="text-xs text-slate-400 mt-1">See upcoming subscription due dates and monthly SIPs.</p>
+                        </div>
+                        <div class="flex items-center gap-2 self-start sm:self-auto">
+                            <button type="button" onclick="changeCalendarMonth(-1)" aria-label="Previous month" class="w-9 h-9 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-white/10"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span id="calendar-month-label" class="min-w-32 text-center text-sm font-bold text-white"></span>
+                            <button type="button" onclick="changeCalendarMonth(1)" aria-label="Next month" class="w-9 h-9 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-white/10"><i class="fa-solid fa-chevron-right"></i></button>
+                            <button type="button" onclick="goToCurrentCalendarMonth()" class="px-3 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-xs font-semibold hover:bg-indigo-500/25">Today</button>
+                        </div>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center text-xs">
+                    <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[10px] sm:text-xs">
+                        <div class="py-2 font-bold uppercase tracking-wider text-slate-500">Sun</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Mon</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Tue</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Wed</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Thu</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Fri</div><div class="py-2 font-bold uppercase tracking-wider text-slate-500">Sat</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2 text-xs">
                         <!-- Dynamic Calendar -->
+                    </div>
+                    <div class="flex flex-wrap gap-x-5 gap-y-2 border-t border-white/10 pt-4 text-[11px] text-slate-400">
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-pink-400"></i>SIP investment</span>
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-cyan-400"></i>Subscription due</span>
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-indigo-400"></i>Today</span>
+                    </div>
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 border-t border-white/10 pt-5">
+                        <form onsubmit="addCalendarSip(event)" class="glass-card rounded-2xl p-4 space-y-3">
+                            <h4 class="text-sm font-bold text-pink-200 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i>Add a monthly SIP</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input id="calendar-sip-name" type="text" placeholder="Fund name" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input id="calendar-sip-amount" type="number" min="0.01" step="0.01" placeholder="Monthly amount" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input id="calendar-sip-day" type="number" min="1" max="31" placeholder="Debit day (1–31)" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-pink-500/20 text-pink-100 text-xs font-bold hover:bg-pink-500/30">Add SIP to calendar</button>
+                        </form>
+                        <form onsubmit="addCalendarSubscription(event)" class="glass-card rounded-2xl p-4 space-y-3">
+                            <h4 class="text-sm font-bold text-cyan-200 flex items-center gap-2"><i class="fa-solid fa-receipt"></i>Add a subscription</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input id="calendar-sub-name" type="text" placeholder="Service name" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input id="calendar-sub-cost" type="number" min="0.01" step="0.01" placeholder="Monthly cost" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input id="calendar-sub-due" type="date" required class="glass-input rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-cyan-500/20 text-cyan-100 text-xs font-bold hover:bg-cyan-500/30">Add subscription to calendar</button>
+                        </form>
                     </div>
                 </div>
             </section>
@@ -556,6 +580,7 @@
             <section id="tab-page-budgets" class="tab-page hidden space-y-6">
                 <div class="glass-panel p-6 rounded-3xl space-y-4">
                     <h3 class="font-display font-bold text-lg text-white">Category Budget Limits</h3>
+                    <p id="budget-month-label" class="text-xs text-slate-400">Budgets for selected month</p>
                     <div id="budget-caps-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Dynamic Budget Progress Bars -->
                     </div>
@@ -603,6 +628,7 @@
         let txType = 'expense';
         let cashflowChart = null;
         let categoryChart = null;
+        let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
         // Persistent Collections
         let transactions = JSON.parse(localStorage.getItem('ef_transactions')) || [
@@ -631,11 +657,12 @@
             { id: 1, name: 'Emergency Fund', target: 100000, saved: 45000 }
         ];
 
-        const categoryCaps = { 'Groceries': 15000, 'Dining Out': 8000, 'Transport': 6000, 'Entertainment': 5000 };
+        let categoryCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { 'Groceries': 15000, 'Dining Out': 8000, 'Transport': 6000, 'Entertainment': 5000 };
 
         // Initialization
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
+            document.getElementById('dashboard-month').value = getCurrentMonth();
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
             initCharts();
@@ -665,6 +692,11 @@
             if (activeBtn) {
                 activeBtn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10";
             }
+        }
+
+        function getCurrentMonth() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         }
 
         function setTxType(type) {
@@ -718,15 +750,31 @@
             localStorage.setItem('ef_splits', JSON.stringify(splits));
             localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
             localStorage.setItem('ef_goals', JSON.stringify(goals));
+            localStorage.setItem('ef_budget_caps', JSON.stringify(categoryCaps));
 
             // Calculators
-            let inc = transactions.filter(t => t.type === 'income').reduce((a,b) => a + b.amount, 0);
-            let exp = transactions.filter(t => t.type === 'expense').reduce((a,b) => a + b.amount, 0);
+            const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
+            const monthTransactions = transactions.filter(t => typeof t.date === 'string' && t.date.slice(0, 7) === selectedMonth);
+            const previousMonthDate = new Date(`${selectedMonth}-01T12:00:00`);
+            previousMonthDate.setMonth(previousMonthDate.getMonth() - 1);
+            const previousMonth = previousMonthDate.toISOString().slice(0, 7);
+            const previousMonthExpenses = transactions.filter(t => t.type === 'expense' && typeof t.date === 'string' && t.date.slice(0, 7) === previousMonth).reduce((sum, t) => sum + t.amount, 0);
+            const inc = monthTransactions.filter(t => t.type === 'income').reduce((a,b) => a + b.amount, 0);
+            const exp = monthTransactions.filter(t => t.type === 'expense').reduce((a,b) => a + b.amount, 0);
             let assets = networthItems.filter(i => i.type === 'asset').reduce((a,b) => a + b.value, 0);
             let liab = networthItems.filter(i => i.type === 'liability').reduce((a,b) => a + b.value, 0);
 
             document.getElementById('kpi-income').innerText = `${currSym}${inc.toLocaleString()}`;
             document.getElementById('kpi-expense').innerText = `${currSym}${exp.toLocaleString()}`;
+            const expenseComparison = document.getElementById('kpi-expense-comparison');
+            if (previousMonthExpenses > 0) {
+                const changePct = Math.round(((exp - previousMonthExpenses) / previousMonthExpenses) * 100);
+                expenseComparison.innerText = `${Math.abs(changePct)}% ${changePct > 0 ? 'higher' : changePct < 0 ? 'lower' : 'same'} than last month`;
+                expenseComparison.className = `text-[11px] mt-1 ${changePct > 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+            } else {
+                expenseComparison.innerText = 'No spending last month';
+                expenseComparison.className = 'text-[11px] text-slate-400 mt-1';
+            }
             document.getElementById('kpi-cashflow').innerText = `${currSym}${(inc - exp).toLocaleString()}`;
             document.getElementById('kpi-networth').innerText = `${currSym}${(assets - liab).toLocaleString()}`;
 
@@ -764,7 +812,7 @@
             renderBudgets();
             renderSubscriptions();
             renderGoals();
-            updateCharts(inc, exp);
+            updateCharts(inc, exp, monthTransactions);
         }
 
         function saveAndRender() { renderApp(); }
@@ -826,6 +874,12 @@
 
             networthItems.push({ id: Date.now(), name, value, type });
             saveAndRender();
+            e.target.reset();
+        }
+
+        function deleteNetWorthItem(id) {
+            networthItems = networthItems.filter(item => item.id !== id);
+            saveAndRender();
         }
 
         function renderNetWorth() {
@@ -843,7 +897,10 @@
                         <p class="text-xs font-bold text-white">${i.name}</p>
                         <p class="text-[10px] text-slate-400 uppercase tracking-wider">${i.type}</p>
                     </div>
-                    <span class="font-bold text-xs ${i.type === 'asset' ? 'text-emerald-400' : 'text-rose-400'}">${currSym}${i.value.toLocaleString()}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-xs ${i.type === 'asset' ? 'text-emerald-400' : 'text-rose-400'}">${currSym}${i.value.toLocaleString()}</span>
+                        <button type="button" onclick="deleteNetWorthItem(${i.id})" aria-label="Delete ${i.name}" title="Delete item" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -857,6 +914,12 @@
 
             sips.push({ id: Date.now(), name, amount, date });
             saveAndRender();
+            e.target.reset();
+        }
+
+        function deleteSipItem(id) {
+            sips = sips.filter(sip => sip.id !== id);
+            saveAndRender();
         }
 
         function renderSIPs() {
@@ -868,7 +931,10 @@
                 <div class="glass-card p-4 rounded-2xl space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-white">${s.name}</span>
-                        <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full">Date: ${s.date}th</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full">Date: ${s.date}th</span>
+                            <button type="button" onclick="deleteSipItem(${s.id})" aria-label="Delete ${s.name}" title="Delete SIP" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>
                     <p class="text-lg font-bold text-purple-400">${currSym}${s.amount.toLocaleString()} / mo</p>
                 </div>
@@ -876,16 +942,85 @@
         }
 
         // Calendar
+        function changeCalendarMonth(offset) {
+            calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + offset, 1);
+            renderCalendar();
+        }
+
+        function goToCurrentCalendarMonth() {
+            const today = new Date();
+            calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            renderCalendar();
+        }
+
+        function addCalendarSip(e) {
+            e.preventDefault();
+            const name = document.getElementById('calendar-sip-name').value.trim();
+            const amount = Number(document.getElementById('calendar-sip-amount').value);
+            const date = Number(document.getElementById('calendar-sip-day').value);
+            if (!name || !Number.isFinite(amount) || amount <= 0 || !Number.isInteger(date) || date < 1 || date > 31) return;
+
+            sips.push({ id: Date.now(), name, amount, date });
+            e.target.reset();
+            saveAndRender();
+        }
+
+        function addCalendarSubscription(e) {
+            e.preventDefault();
+            const name = document.getElementById('calendar-sub-name').value.trim();
+            const cost = Number(document.getElementById('calendar-sub-cost').value);
+            const due = document.getElementById('calendar-sub-due').value;
+            if (!name || !Number.isFinite(cost) || cost <= 0 || !due) return;
+
+            subscriptions.push({ id: Date.now(), name, cost, due });
+            e.target.reset();
+            saveAndRender();
+        }
+
+        function deleteSubscription(id) {
+            subscriptions = subscriptions.filter(subscription => subscription.id !== id);
+            saveAndRender();
+        }
+
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
-            let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div class="font-bold text-slate-500 py-1">${d}</div>`).join('');
+            const year = calendarMonth.getFullYear();
+            const month = calendarMonth.getMonth();
+            const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const monthLabel = calendarMonth.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+            document.getElementById('calendar-month-label').innerText = monthLabel;
 
-            for (let day = 1; day <= 31; day++) {
-                const hasSip = sips.some(s => s.date === day);
+            const firstWeekday = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            let html = '';
+
+            for (let cell = 0; cell < firstWeekday; cell++) {
+                html += '<div aria-hidden="true" class="min-h-16 sm:min-h-24 rounded-xl"></div>';
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+                const isToday = dateKey === todayKey;
+                const daySips = sips.filter(sip => Number(sip.date) === day);
+                const dayBills = subscriptions.filter(subscription => {
+                    if (!subscription.due) return false;
+                    const dueDate = new Date(`${subscription.due}T12:00:00`);
+                    return !Number.isNaN(dueDate.getTime()) && dueDate.getDate() === day;
+                });
+                const isPast = dateKey < todayKey;
+                const dayEvents = [
+                    ...daySips.map(sip => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-pink-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-pink-200" title="${sip.name}: ${currSym}${Number(sip.amount).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-chart-line mr-1"></i><span class="hidden sm:inline">${sip.name}</span><span class="sm:hidden">SIP</span></span><button type="button" onclick="deleteSipItem(${sip.id})" aria-label="Delete SIP ${sip.name}" title="Delete SIP" class="shrink-0 px-1 text-pink-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`),
+                    ...dayBills.map(bill => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-cyan-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-cyan-200" title="${bill.name}: ${currSym}${Number(bill.cost).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-receipt mr-1"></i><span class="hidden sm:inline">${bill.name}</span><span class="sm:hidden">Bill</span></span><button type="button" onclick="deleteSubscription(${bill.id})" aria-label="Delete subscription ${bill.name}" title="Delete subscription" class="shrink-0 px-1 text-cyan-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`)
+                ].join('');
                 html += `
-                    <div class="glass-card p-2 rounded-xl h-16 flex flex-col justify-between items-center relative ${hasSip ? 'border-pink-500/50 bg-pink-500/10' : ''}">
-                        <span class="font-bold ${day === 16 ? 'text-indigo-400' : 'text-slate-300'}">${day}</span>
-                        ${hasSip ? `<span class="w-2 h-2 rounded-full bg-pink-400 animate-ping"></span>` : ''}
+                    <div class="min-w-0 min-h-16 sm:min-h-24 rounded-xl border p-1.5 sm:p-2 flex flex-col gap-1.5 ${isToday ? 'border-indigo-400/70 bg-indigo-500/10 shadow-lg shadow-indigo-500/5' : 'border-white/5 bg-slate-950/30'} ${isPast && !isToday ? 'opacity-60' : ''}">
+                        <div class="flex items-center justify-between">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold ${isToday ? 'bg-indigo-500 text-white' : 'text-slate-300'}">${day}</span>
+                            ${daySips.length + dayBills.length ? `<span class="text-[9px] text-slate-500">${daySips.length + dayBills.length}</span>` : ''}
+                        </div>
+                        <div class="space-y-1 min-w-0">${dayEvents}</div>
                     </div>
                 `;
             }
@@ -925,23 +1060,35 @@
         // Budget Caps
         function renderBudgets() {
             const container = document.getElementById('budget-caps-container');
+            const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
+            const monthLabel = new Date(`${selectedMonth}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+            document.getElementById('budget-month-label').innerText = `Spending and limits for ${monthLabel}`;
             container.innerHTML = Object.keys(categoryCaps).map(cat => {
                 const limit = categoryCaps[cat];
-                const spent = transactions.filter(t => t.type === 'expense' && t.category === cat).reduce((a,b) => a + b.amount, 0);
-                const pct = Math.min(100, Math.round((spent / limit) * 100));
+                const spent = transactions.filter(t => t.type === 'expense' && t.category === cat && typeof t.date === 'string' && t.date.slice(0, 7) === selectedMonth).reduce((a,b) => a + b.amount, 0);
+                const pct = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
+                const status = spent >= limit ? 'Limit reached' : pct >= 80 ? 'Almost at limit' : `${(limit - spent).toLocaleString()} left`;
 
                 return `
                     <div class="glass-card p-4 rounded-2xl space-y-2">
                         <div class="flex justify-between text-xs font-bold">
                             <span class="text-white">${cat}</span>
-                            <span class="text-slate-400">${currSym}${spent.toLocaleString()} / ${currSym}${limit.toLocaleString()}</span>
+                            <label class="flex items-center gap-1 text-slate-400">${currSym}<input type="number" min="1" step="1" value="${limit}" aria-label="${cat} monthly budget" onchange="updateBudget('${cat}', this.value)" class="glass-input rounded-lg px-2 py-1 w-24 text-right text-xs"></label>
                         </div>
                         <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-500 to-rose-500 rounded-full" style="width: ${pct}%"></div>
+                            <div class="h-full ${pct >= 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-400' : 'bg-gradient-to-r from-indigo-500 to-cyan-400'} rounded-full" style="width: ${pct}%"></div>
                         </div>
+                        <p class="flex justify-between text-[11px] text-slate-400"><span>${currSym}${spent.toLocaleString()} spent · ${status}</span><span>${pct}%</span></p>
                     </div>
                 `;
             }).join('');
+        }
+
+        function updateBudget(category, value) {
+            const limit = Number(value);
+            if (!Number.isFinite(limit) || limit <= 0) return renderApp();
+            categoryCaps[category] = limit;
+            renderApp();
         }
 
         // Subscriptions
@@ -959,7 +1106,7 @@
             const container = document.getElementById('sub-list');
             container.innerHTML = subscriptions.map(s => `
                 <div class="glass-card p-4 rounded-2xl space-y-1">
-                    <h4 class="text-xs font-bold text-white">${s.name}</h4>
+                    <div class="flex items-center justify-between gap-2"><h4 class="text-xs font-bold text-white">${s.name}</h4><button type="button" onclick="deleteSubscription(${s.id})" aria-label="Delete ${s.name}" title="Delete subscription" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20 transition-colors"><i class="fa-solid fa-trash"></i></button></div>
                     <p class="text-base font-bold text-blue-400">${currSym}${s.cost} / mo</p>
                     <p class="text-[10px] text-slate-400">Next Due: ${s.due}</p>
                 </div>
@@ -1024,10 +1171,24 @@
             });
         }
 
-        function updateCharts(inc, exp) {
+        function updateCharts(inc, exp, monthTransactions) {
             if (cashflowChart) {
                 cashflowChart.data.datasets[0].data = [inc, exp];
                 cashflowChart.update();
+            }
+            if (categoryChart) {
+                const categoryTotals = monthTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((totals, transaction) => {
+                        const category = transaction.category || 'Other';
+                        totals[category] = (totals[category] || 0) + transaction.amount;
+                        return totals;
+                    }, {});
+                const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+                categoryChart.data.labels = entries.map(([category]) => category);
+                categoryChart.data.datasets[0].data = entries.map(([, amount]) => amount);
+                categoryChart.data.datasets[0].backgroundColor = entries.map((_, index) => ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981', '#8b5cf6', '#f97316', '#14b8a6'][index % 8]);
+                categoryChart.update();
             }
         }
 
