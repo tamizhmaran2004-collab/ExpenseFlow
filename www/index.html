@@ -494,7 +494,15 @@
                         </div>
                         <div>
                             <h3 class="font-display font-bold text-lg text-white">Bank SMS Auto-Expense Parser</h3>
-                            <p class="text-xs text-slate-400">Simulate incoming bank notifications or paste raw SMS text to auto-extract transaction details.</p>
+                            <p class="text-xs text-slate-400">Automatically log bank transaction alerts from incoming SMS on this device, or paste a message below.</p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-cyan-400/15 bg-cyan-500/5 p-4 space-y-3">
+                        <p class="text-xs text-slate-300">SMS messages are processed on this device. Only messages that look like completed money movements are added to your ledger. Android will ask for SMS permission when detection is enabled.</p>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <button id="sms-detection-toggle" type="button" onclick="toggleSmsDetection()" class="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-xs font-bold">Enable automatic detection</button>
+                            <p id="sms-detection-status" aria-live="polite" class="text-xs text-slate-400">Automatic detection is off.</p>
                         </div>
                     </div>
 
@@ -682,6 +690,8 @@
         let cashflowChart = null;
         let categoryChart = null;
         let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        let smsNativeReady = false;
+        let smsWatching = false;
 
         // Persistent Collections
         let transactions = JSON.parse(localStorage.getItem('ef_transactions')) || [
@@ -720,11 +730,12 @@
             setInterval(updateLiveClock, 1000);
             initCharts();
             renderApp();
-            
-            // Listen for native Capacitor SMS event
-            window.addEventListener('onSMSReceived', (e) => {
-                if (e.detail && e.detail.body) autoParseSMS(e.detail.body);
-            });
+            document.addEventListener('onSMSArrive', handleIncomingSMS);
+            document.addEventListener('deviceready', () => {
+                smsNativeReady = true;
+                if (localStorage.getItem('ef_sms_auto_enabled') === 'true') startSmsDetection();
+                else updateSmsDetectionStatus('Automatic detection is off.');
+            }, { once: true });
         });
 
         function updateLiveClock() {
@@ -871,19 +882,83 @@
         function saveAndRender() { renderApp(); }
 
         // SMS Parser Engine
+        function updateSmsDetectionStatus(message, isError = false) {
+            const status = document.getElementById('sms-detection-status');
+            const toggle = document.getElementById('sms-detection-toggle');
+            if (!status || !toggle) return;
+            status.innerText = message;
+            status.className = `text-xs ${isError ? 'text-rose-400' : 'text-slate-400'}`;
+            toggle.innerText = smsWatching ? 'Turn off automatic detection' : 'Enable automatic detection';
+            toggle.className = `px-4 py-2.5 rounded-xl ${smsWatching ? 'bg-rose-500/15 text-rose-200 hover:bg-rose-500/25' : 'bg-cyan-500 hover:bg-cyan-600 text-slate-950'} text-xs font-bold`;
+        }
+
+        function toggleSmsDetection() {
+            if (smsWatching) {
+                localStorage.setItem('ef_sms_auto_enabled', 'false');
+                const smsPlugin = window.cordova?.plugins?.SMSReceive;
+                if (smsPlugin) smsPlugin.stopWatch(() => {}, error => console.warn('Could not stop SMS listener:', error));
+                smsWatching = false;
+                updateSmsDetectionStatus('Automatic detection is off.');
+                return;
+            }
+            if (!smsNativeReady || !window.cordova?.plugins?.SMSReceive) {
+                updateSmsDetectionStatus('SMS detection is available in the installed Android app only.', true);
+                return;
+            }
+            localStorage.setItem('ef_sms_auto_enabled', 'true');
+            startSmsDetection();
+        }
+
+        function startSmsDetection() {
+            const smsPlugin = window.cordova?.plugins?.SMSReceive;
+            if (!smsNativeReady || !smsPlugin) {
+                updateSmsDetectionStatus('Waiting for Android SMS service…');
+                return;
+            }
+            smsPlugin.startWatch(result => {
+                if (result === 'SMS_WATCHING_STARTED' || result === 'SMS_WATCHING_ALREADY_STARTED') {
+                    smsWatching = true;
+                    updateSmsDetectionStatus('Listening for incoming bank transaction messages.');
+                }
+            }, error => {
+                smsWatching = false;
+                localStorage.setItem('ef_sms_auto_enabled', 'false');
+                updateSmsDetectionStatus(error === 'PERMISSION_DENIED' ? 'SMS permission was denied. Allow it in Android settings to enable detection.' : `Could not start SMS detection: ${String(error)}`, true);
+            });
+        }
+
+        function handleIncomingSMS(message) {
+            if (!message || !message.body) return;
+            const signatureSource = `${message.address || ''}|${message.date_sent || message.date || ''}|${message.body}`;
+            let signature = 2166136261;
+            for (let index = 0; index < signatureSource.length; index++) {
+                signature = Math.imul(signature ^ signatureSource.charCodeAt(index), 16777619);
+            }
+            const signatureKey = `sms_${(signature >>> 0).toString(16)}`;
+            const seenMessages = JSON.parse(localStorage.getItem('ef_sms_seen') || '[]');
+            if (seenMessages.includes(signatureKey)) return;
+            seenMessages.push(signatureKey);
+            localStorage.setItem('ef_sms_seen', JSON.stringify(seenMessages.slice(-500)));
+            autoParseSMS(message.body, { receivedAt: message.date_sent || message.date });
+        }
+
         function parseAndLogSMS() {
             const raw = document.getElementById('sms-text-input').value;
             autoParseSMS(raw);
         }
 
-        function autoParseSMS(smsText) {
+        function autoParseSMS(smsText, options = {}) {
             if (!smsText.trim()) return;
             const logBox = document.getElementById('sms-log-output');
 
-            const isDebit = /debited|spent|paid|withdrawn|sent/i.test(smsText);
-            const isCredit = /credited|received|deposited/i.test(smsText);
+            const isDebit = /debited|spent|paid|withdrawn|sent|purchase|transferred|payment of/i.test(smsText);
+            const isCredit = /credited|received|deposited|refund|reversal|cashback/i.test(smsText);
+            if (!isDebit && !isCredit) {
+                logBox.innerText = '> Skipped: this message does not look like a completed money movement.';
+                return;
+            }
 
-            const amtMatch = smsText.match(/(?:RS|INR|₹)\s?([\d,]+\.?\d*)/i);
+            const amtMatch = smsText.match(/(?:RS\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?)/i);
             const amount = amtMatch ? parseFloat(amtMatch[1].replace(/,/g, '')) : 0;
 
             let merchant = "Auto Bank Transaction";
@@ -892,6 +967,9 @@
 
             if (amount > 0) {
                 const type = isCredit ? 'income' : 'expense';
+                const receivedAt = Number(options.receivedAt);
+                const transactionDate = receivedAt && Number.isFinite(receivedAt) ? new Date(receivedAt) : new Date();
+                const localDate = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}-${String(transactionDate.getDate()).padStart(2, '0')}`;
                 transactions.unshift({
                     id: Date.now(),
                     desc: `[SMS] ${merchant}`,
@@ -899,13 +977,14 @@
                     type: type,
                     category: isCredit ? 'Salary' : 'General',
                     account: 'UPI / Wallet',
-                    date: new Date().toISOString().split('T')[0]
+                    date: localDate
                 });
 
-                logBox.innerHTML = `&gt; <span class="text-emerald-400">SUCCESS:</span> Parsed ${type.toUpperCase()} of ${currSym}${amount} at "${merchant}". Saved to ledger.`;
+                const safeMerchant = merchant.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+                logBox.innerHTML = `&gt; <span class="text-emerald-400">SUCCESS:</span> Parsed ${type.toUpperCase()} of ${currSym}${amount.toLocaleString()} at "${safeMerchant}". Saved to ledger.`;
                 saveAndRender();
             } else {
-                logBox.innerHTML = `&gt; <span class="text-rose-400">ERROR:</span> Could not extract numeric amount from SMS pattern.`;
+                logBox.innerText = '> Could not extract a transaction amount from this SMS.';
             }
         }
 
