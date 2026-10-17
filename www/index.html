@@ -23,12 +23,12 @@
                     },
                     colors: {
                         ios: {
-                            bg: '#050714',
-                            card: 'rgba(18, 24, 43, 0.55)',
+                            bg: '#061113',
+                            card: 'rgba(16, 31, 35, 0.58)',
                             border: 'rgba(255, 255, 255, 0.12)',
-                            accent: '#6366f1',
-                            cyan: '#06b6d4',
-                            pink: '#ec4899',
+                            accent: '#14b8a6',
+                            cyan: '#22d3ee',
+                            teal: '#2dd4bf',
                             emerald: '#10b981',
                         }
                     },
@@ -52,7 +52,7 @@
     </script>
     <style>
         body {
-            background-color: #030712;
+            background-color: #050e11;
             color: #f3f4f6;
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
@@ -60,7 +60,7 @@
 
         /* Glassmorphism Classes */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.65);
+            background: rgba(13, 27, 31, 0.78);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -68,7 +68,7 @@
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.45);
+            background: rgba(22, 39, 43, 0.62);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -76,13 +76,13 @@
         }
 
         .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+            border-color: rgba(20, 184, 166, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(20, 184, 166, 0.3);
             transform: translateY(-2px);
         }
 
         .glass-input {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(10, 23, 27, 0.78);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #f9fafb;
             backdrop-filter: blur(8px);
@@ -91,8 +91,8 @@
 
         .glass-input:focus {
             outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            border-color: #14b8a6;
+            box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);
         }
 
         /* Ambient Mesh Backgrounds */
@@ -110,28 +110,28 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(10, 23, 27, 0.6);
         }
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.6);
+            background: rgba(20, 184, 166, 0.6);
         }
 
         /* Dynamic Island Glow */
         .dynamic-island {
-            background: rgba(3, 7, 18, 0.85);
+            background: rgba(3, 12, 15, 0.9);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(20, 184, 166, 0.2);
         }
 
         @media (max-width: 767px) {
             html, body { min-height: 100%; }
             html { scroll-behavior: smooth; }
-            body { min-height: 100dvh; background: #080d1a; }
+            body { min-height: 100dvh; background: #071114; }
             .ambient-orb { opacity: .12; filter: blur(120px); }
             #app-shell { display: block; padding: max(12px, env(safe-area-inset-top)) 14px calc(98px + env(safe-area-inset-bottom)); }
             #app-sidebar {
@@ -141,7 +141,7 @@
                 width: auto;
                 padding: 6px;
                 border-radius: 22px;
-                background: rgba(15, 23, 42, .97);
+                background: rgba(12, 27, 31, .98);
                 border: 1px solid rgba(148, 163, 184, .16);
                 box-shadow: 0 12px 34px rgba(0, 0, 0, .52);
             }
@@ -174,7 +174,7 @@
             #nav-container .nav-item > span { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
             #nav-sms .ml-auto { display: none; }
             #app-main { width: 100%; gap: 14px; }
-            #app-main > header { border-radius: 22px; padding: 14px; gap: 12px; align-items: stretch; background: rgba(15, 23, 42, .88); }
+            #app-main > header { border-radius: 22px; padding: 14px; gap: 12px; align-items: stretch; background: rgba(12, 27, 31, .92); }
             #app-main > header h2 { font-size: 18px; }
             #app-main > header .dynamic-island { max-width: 100%; width: fit-content; padding: 8px 11px; }
             #app-main > header .dynamic-island .text-xs { font-size: 10px; }
@@ -185,8 +185,8 @@
             #mobile-screen-title { color: #94a3b8; }
             .tab-page { min-width: 0; gap: 14px; }
             .tab-page > .glass-panel { border-radius: 22px; padding: 16px !important; }
-            .glass-panel { border-radius: 20px; background: rgba(15, 23, 42, .88); backdrop-filter: none; -webkit-backdrop-filter: none; }
-            .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(30, 41, 59, .55); }
+            .glass-panel { border-radius: 20px; background: rgba(12, 27, 31, .92); backdrop-filter: none; -webkit-backdrop-filter: none; }
+            .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(21, 39, 43, .72); }
             .glass-card:hover { transform: none; }
             input, select, textarea { min-height: 44px; font-size: 14px !important; }
             button { touch-action: manipulation; }
@@ -194,7 +194,7 @@
             #calendar-grid { gap: 4px; }
             #calendar-grid > div { overflow: hidden; }
             #calendar-grid .min-h-16 { min-height: 58px; }
-            #mobile-more-menu { position: fixed; display: none; inset: auto 12px calc(82px + env(safe-area-inset-bottom)) 12px; z-index: 60; max-height: min(62dvh, 520px); overflow-y: auto; padding: 14px; border-radius: 24px; background: rgba(15, 23, 42, .98); border: 1px solid rgba(148, 163, 184, .18); box-shadow: 0 18px 50px rgba(0, 0, 0, .6); }
+            #mobile-more-menu { position: fixed; display: none; inset: auto 12px calc(82px + env(safe-area-inset-bottom)) 12px; z-index: 60; max-height: min(62dvh, 520px); overflow-y: auto; padding: 14px; border-radius: 24px; background: rgba(12, 27, 31, .99); border: 1px solid rgba(148, 163, 184, .18); box-shadow: 0 18px 50px rgba(0, 0, 0, .6); }
             #mobile-more-menu.is-open { display: block; }
             #mobile-more-menu .more-nav-item { min-height: 48px; }
             #mobile-more-menu select { min-height: 40px; }
@@ -202,11 +202,11 @@
         @media (min-width: 768px) { #mobile-brand, #mobile-more-menu, #nav-more { display: none; } }
     </style>
 </head>
-<body class="min-h-screen relative flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen relative flex flex-col antialiased selection:bg-teal-500 selection:text-white">
 
     <!-- Ambient Glowing Orbs -->
-    <div class="ambient-orb w-[450px] h-[450px] bg-indigo-600/30 top-[-100px] left-[-100px] animate-pulse-glow"></div>
-    <div class="ambient-orb w-[500px] h-[500px] bg-purple-600/25 bottom-[-100px] right-[-100px] animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+    <div class="ambient-orb w-[450px] h-[450px] bg-teal-600/30 top-[-100px] left-[-100px] animate-pulse-glow"></div>
+    <div class="ambient-orb w-[500px] h-[500px] bg-cyan-600/25 bottom-[-100px] right-[-100px] animate-pulse-glow" style="animation-delay: 1.5s;"></div>
     <div class="ambient-orb w-[350px] h-[350px] bg-cyan-600/20 top-[40%] left-[30%] animate-pulse-glow" style="animation-delay: 3s;"></div>
 
     <!-- Main Outer Container -->
@@ -217,19 +217,19 @@
             <div>
                 <!-- Brand Title -->
                 <div id="app-sidebar-brand" class="flex items-center gap-3 px-2 py-3 mb-6">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30 animate-float">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-500 flex items-center justify-center text-white text-xl shadow-lg shadow-teal-500/30 animate-float">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <div>
                         <h1 class="font-display font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">ExpenseFlow</h1>
-                        <p class="text-xs font-medium text-indigo-400/90 tracking-widest uppercase">PERSONAL FINANCE</p>
+                        <p class="text-xs font-medium text-teal-400/90 tracking-widest uppercase">PERSONAL FINANCE</p>
                     </div>
                 </div>
 
                 <!-- Navigation Links -->
                 <nav class="space-y-1.5" id="nav-container">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10">
-                        <i class="fa-solid fa-chart-pie text-indigo-400 w-5"></i>
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-teal-600/30 border border-teal-500/40 shadow-lg shadow-teal-500/10">
+                        <i class="fa-solid fa-chart-pie text-teal-400 w-5"></i>
                         <span>Dashboard & Ledger</span>
                     </button>
                     <button onclick="switchTab('sms')" id="nav-sms" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
@@ -242,11 +242,11 @@
                         <span>Net Worth</span>
                     </button>
                     <button onclick="switchTab('sip')" id="nav-sip" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-chart-line text-purple-400 w-5"></i>
+                        <i class="fa-solid fa-chart-line text-cyan-400 w-5"></i>
                         <span>SIP Investments</span>
                     </button>
                     <button onclick="switchTab('calendar')" id="nav-calendar" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-calendar-days text-pink-400 w-5"></i>
+                        <i class="fa-solid fa-calendar-days text-teal-400 w-5"></i>
                         <span>Bill Calendar</span>
                     </button>
                     <button onclick="switchTab('splitter')" id="nav-splitter" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
@@ -283,7 +283,7 @@
                 <div class="mt-3 border-t border-white/10 pt-3 flex items-center justify-between gap-3">
                     <label for="mobile-currency-select" class="text-xs text-slate-400">Currency</label>
                     <select id="mobile-currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white"><option value="₹">₹ INR</option><option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option></select>
-                    <button onclick="exportToCSV()" class="rounded-xl glass-card px-3 py-2 text-xs text-slate-200"><i class="fa-solid fa-file-csv text-indigo-300 mr-1"></i>Export</button>
+                    <button onclick="exportToCSV()" class="rounded-xl glass-card px-3 py-2 text-xs text-slate-200"><i class="fa-solid fa-file-csv text-teal-300 mr-1"></i>Export</button>
                 </div>
             </div>
 
@@ -299,7 +299,7 @@
                     </select>
                 </div>
                 <button onclick="exportToCSV()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-200 glass-card hover:bg-white/10 transition-all">
-                    <i class="fa-solid fa-file-csv text-indigo-400"></i>
+                    <i class="fa-solid fa-file-csv text-teal-400"></i>
                     <span>Export CSV Data</span>
                 </button>
             </div>
@@ -311,12 +311,12 @@
             <!-- DYNAMIC ISLAND HEADER BAR -->
             <header class="glass-panel rounded-3xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
                 <div id="mobile-brand" class="hidden">
-                    <div id="mobile-brand-mark" class="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25"><i class="fa-solid fa-bolt"></i></div>
+                    <div id="mobile-brand-mark" class="bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-teal-500/25"><i class="fa-solid fa-bolt"></i></div>
                     <div><p class="font-display font-bold text-base leading-tight text-white">ExpenseFlow</p><p id="mobile-screen-title" class="text-[10px] mt-0.5">Dashboard &amp; Ledger</p></div>
                 </div>
                 <div class="flex items-center gap-4 w-full sm:w-auto">
                     <!-- Dynamic Island Capsule -->
-                    <div class="dynamic-island px-4 py-2 rounded-full flex items-center gap-3 border border-indigo-500/30">
+                    <div class="dynamic-island px-4 py-2 rounded-full flex items-center gap-3 border border-teal-500/30">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
                         <div class="text-xs">
                             <span class="text-slate-400 font-medium">Daily Limit Status: </span>
@@ -328,7 +328,7 @@
                 <!-- Controls & Notifications -->
                 <div class="flex items-center gap-3 self-end sm:self-auto">
                     <button onclick="requestNotificationPermission()" class="px-3 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-bell text-indigo-400"></i>
+                        <i class="fa-solid fa-bell text-teal-400"></i>
                         <span>Alerts</span>
                     </button>
                     <div class="text-right">
@@ -366,9 +366,9 @@
                         <p class="text-[11px] text-slate-400 mt-1" id="kpi-expense-comparison">Selected month</p>
                     </div>
                     <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
-                        <div class="absolute -right-2 -bottom-2 text-indigo-500/10 text-6xl font-bold"><i class="fa-solid fa-wallet"></i></div>
+                        <div class="absolute -right-2 -bottom-2 text-teal-500/10 text-6xl font-bold"><i class="fa-solid fa-wallet"></i></div>
                         <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Net Cashflow</p>
-                        <h3 class="text-2xl font-bold font-display text-indigo-400 mt-2" id="kpi-cashflow">₹0.00</h3>
+                        <h3 class="text-2xl font-bold font-display text-teal-400 mt-2" id="kpi-cashflow">₹0.00</h3>
                         <p class="text-[11px] text-slate-400 mt-1">Income minus Expense</p>
                     </div>
                     <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
@@ -389,22 +389,22 @@
                         <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
                             <span class="text-xs font-semibold text-slate-200 flex-1">☕ Chai / Tea</span>
                             <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-chai-amount" type="number" min="0.01" step="0.01" value="20" aria-label="Chai or tea amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
-                            <button type="button" onclick="applyPreset('Chai / Coffee', document.getElementById('preset-chai-amount').value, 'Dining Out')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                            <button type="button" onclick="applyPreset('Chai / Coffee', document.getElementById('preset-chai-amount').value, 'Dining Out')" class="px-2.5 py-2 rounded-xl bg-teal-500/20 text-teal-200 text-xs font-bold hover:bg-teal-500/40">Use</button>
                         </div>
                         <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
                             <span class="text-xs font-semibold text-slate-200 flex-1">🚕 Auto / Taxi</span>
                             <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-taxi-amount" type="number" min="0.01" step="0.01" value="50" aria-label="Auto or taxi amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
-                            <button type="button" onclick="applyPreset('Auto / Taxi Fare', document.getElementById('preset-taxi-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                            <button type="button" onclick="applyPreset('Auto / Taxi Fare', document.getElementById('preset-taxi-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-teal-500/20 text-teal-200 text-xs font-bold hover:bg-teal-500/40">Use</button>
                         </div>
                         <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
                             <span class="text-xs font-semibold text-slate-200 flex-1">🍿 Snacks</span>
                             <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-snacks-amount" type="number" min="0.01" step="0.01" value="150" aria-label="Snacks amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
-                            <button type="button" onclick="applyPreset('Snacks / Evening', document.getElementById('preset-snacks-amount').value, 'Groceries')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                            <button type="button" onclick="applyPreset('Snacks / Evening', document.getElementById('preset-snacks-amount').value, 'Groceries')" class="px-2.5 py-2 rounded-xl bg-teal-500/20 text-teal-200 text-xs font-bold hover:bg-teal-500/40">Use</button>
                         </div>
                         <div class="glass-card rounded-2xl p-2.5 flex items-center gap-2">
                             <span class="text-xs font-semibold text-slate-200 flex-1">⛽ Petrol / Fuel</span>
                             <label class="flex items-center gap-1 text-xs text-slate-400">₹<input id="preset-fuel-amount" type="number" min="0.01" step="0.01" value="500" aria-label="Petrol or fuel amount" class="glass-input rounded-lg px-2 py-1 w-20 text-xs"></label>
-                            <button type="button" onclick="applyPreset('Petrol / Fuel', document.getElementById('preset-fuel-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/40">Use</button>
+                            <button type="button" onclick="applyPreset('Petrol / Fuel', document.getElementById('preset-fuel-amount').value, 'Transport')" class="px-2.5 py-2 rounded-xl bg-teal-500/20 text-teal-200 text-xs font-bold hover:bg-teal-500/40">Use</button>
                         </div>
                     </div>
                 </div>
@@ -463,7 +463,7 @@
                                         <input type="date" id="tx-date" required class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
                                     </div>
                                 </div>
-                                <button type="submit" class="w-full py-3 mt-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all">
+                                <button type="submit" class="w-full py-3 mt-2 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold text-sm shadow-lg shadow-teal-500/25 transition-all">
                                     <i class="fa-solid fa-plus mr-2"></i> Log Entry
                                 </button>
                             </form>
@@ -605,7 +605,7 @@
                         <h3 class="font-display font-bold text-lg text-white">SIP Investments</h3>
                         <p class="text-xs text-slate-400 mt-1">SIPs are tracked in this app only. Due monthly contributions are recorded automatically when you open the app.</p>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
-                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Monthly commitment</p><p id="sip-total-monthly" class="text-sm font-bold text-purple-300 mt-1">₹0</p></div>
+                            <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Monthly commitment</p><p id="sip-total-monthly" class="text-sm font-bold text-cyan-300 mt-1">₹0</p></div>
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Total invested</p><p id="sip-total-invested" class="text-sm font-bold text-white mt-1">₹0</p></div>
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Current value</p><p id="sip-current-value" class="text-sm font-bold text-cyan-300 mt-1">₹0</p></div>
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Gain / loss</p><p id="sip-gain-loss" class="text-sm font-bold mt-1">₹0</p></div>
@@ -616,7 +616,7 @@
                             <label class="flex-1 text-[11px] text-slate-400">Twelve Data API key for Indian stock quotes
                                 <input id="market-api-key" type="password" autocomplete="off" placeholder="Enter your API key (stored on this device)" class="glass-input rounded-xl px-3 py-2 text-xs w-full mt-1">
                             </label>
-                            <button type="button" onclick="saveMarketApiKey()" class="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/30">Save key</button>
+                            <button type="button" onclick="saveMarketApiKey()" class="px-4 py-2 rounded-xl bg-teal-500/20 text-teal-200 text-xs font-bold hover:bg-teal-500/30">Save key</button>
                             <button type="button" onclick="refreshInvestmentPrices()" class="px-4 py-2 rounded-xl bg-cyan-500/20 text-cyan-100 text-xs font-bold hover:bg-cyan-500/30"><i class="fa-solid fa-rotate mr-1"></i>Refresh prices</button>
                         </div>
                         <p id="investment-price-status" aria-live="polite" class="text-[10px] text-slate-500">Mutual fund NAV comes from AMFI. Stock quotes need a Twelve Data API key.</p>
@@ -628,7 +628,7 @@
                         <input type="date" id="sip-start-date" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs" aria-label="SIP start date">
                         <input type="text" id="sip-scheme-code" placeholder="AMFI scheme code (optional)" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" id="sip-units" min="0" step="0.000001" placeholder="Units held (optional)" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
-                        <button type="submit" class="py-2.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs">Add SIP</button>
+                        <button type="submit" class="py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs">Add SIP</button>
                     </form>
                     <div id="sip-contribution-history" class="glass-card p-4 rounded-2xl text-xs text-slate-300"></div>
                     <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
@@ -666,7 +666,7 @@
                             <button type="button" onclick="changeCalendarMonth(-1)" aria-label="Previous month" class="w-9 h-9 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-white/10"><i class="fa-solid fa-chevron-left"></i></button>
                             <span id="calendar-month-label" class="min-w-32 text-center text-sm font-bold text-white"></span>
                             <button type="button" onclick="changeCalendarMonth(1)" aria-label="Next month" class="w-9 h-9 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-white/10"><i class="fa-solid fa-chevron-right"></i></button>
-                            <button type="button" onclick="goToCurrentCalendarMonth()" class="px-3 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-xs font-semibold hover:bg-indigo-500/25">Today</button>
+                            <button type="button" onclick="goToCurrentCalendarMonth()" class="px-3 h-9 rounded-xl bg-teal-500/15 border border-teal-400/20 text-teal-200 text-xs font-semibold hover:bg-teal-500/25">Today</button>
                         </div>
                     </div>
                     <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[10px] sm:text-xs">
@@ -676,19 +676,19 @@
                         <!-- Dynamic Calendar -->
                     </div>
                     <div class="flex flex-wrap gap-x-5 gap-y-2 border-t border-white/10 pt-4 text-[11px] text-slate-400">
-                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-pink-400"></i>SIP investment</span>
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-teal-400"></i>SIP investment</span>
                         <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-cyan-400"></i>Subscription due</span>
-                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-indigo-400"></i>Today</span>
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-teal-400"></i>Today</span>
                     </div>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 border-t border-white/10 pt-5">
                         <form onsubmit="addCalendarSip(event)" class="glass-card rounded-2xl p-4 space-y-3">
-                            <h4 class="text-sm font-bold text-pink-200 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i>Add a monthly SIP</h4>
+                            <h4 class="text-sm font-bold text-teal-200 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i>Add a monthly SIP</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <input id="calendar-sip-name" type="text" placeholder="Fund name" required class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input id="calendar-sip-amount" type="number" min="0.01" step="0.01" placeholder="Monthly amount" required class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input id="calendar-sip-day" type="number" min="1" max="31" placeholder="Debit day (1–31)" required class="glass-input rounded-xl px-3 py-2 text-xs">
                             </div>
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-pink-500/20 text-pink-100 text-xs font-bold hover:bg-pink-500/30">Add SIP to calendar</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-teal-500/20 text-teal-100 text-xs font-bold hover:bg-teal-500/30">Add SIP to calendar</button>
                         </form>
                         <form onsubmit="addCalendarSubscription(event)" class="glass-card rounded-2xl p-4 space-y-3">
                             <h4 class="text-sm font-bold text-cyan-200 flex items-center gap-2"><i class="fa-solid fa-receipt"></i>Add a subscription</h4>
@@ -850,10 +850,10 @@
 
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if (activeBtn) {
-                activeBtn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10";
+                activeBtn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-teal-600/30 border border-teal-500/40 shadow-lg shadow-teal-500/10";
             }
             const isPrimary = ['dashboard', 'networth', 'sip', 'calendar'].includes(tabId);
-            if (!isPrimary) moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-indigo-600/30 border border-indigo-500/40 shadow-lg shadow-indigo-500/10";
+            if (!isPrimary) moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-teal-600/30 border border-teal-500/40 shadow-lg shadow-teal-500/10";
             const titles = { dashboard: 'Dashboard & Ledger', sms: 'SMS Auto-Parser', networth: 'Net Worth', sip: 'SIP Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
             document.getElementById('mobile-screen-title').innerText = titles[tabId] || 'ExpenseFlow';
         }
@@ -1246,11 +1246,11 @@
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-white">${s.name}</span>
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full">Date: ${s.date}th</span>
+                            <span class="text-[10px] bg-cyan-500/20 text-cyan-300 font-bold px-2 py-0.5 rounded-full">Date: ${s.date}th</span>
                             <button type="button" onclick="deleteSipItem(${s.id})" aria-label="Delete ${s.name}" title="Delete SIP" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20 transition-colors"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
-                    <p class="text-lg font-bold text-purple-400">${currSym}${s.amount.toLocaleString()} / mo</p>
+                    <p class="text-lg font-bold text-cyan-400">${currSym}${s.amount.toLocaleString()} / mo</p>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
                         <p class="text-slate-400">Invested <span class="text-white">${currSym}${((Number(s.invested) || 0) + sipContributions.filter(item => item.sipId === s.id).reduce((sum, item) => sum + (Number(item.amount) || 0), 0)).toLocaleString()}</span></p>
                         <p class="text-slate-400">Value <span class="text-cyan-300">${currSym}${(Number(s.currentValue) || 0).toLocaleString()}</span></p>
@@ -1258,19 +1258,19 @@
                     <p class="text-[10px] text-slate-500">Auto-recorded ${sipContributions.filter(item => item.sipId === s.id).length} monthly contribution(s) · NAV code: ${s.schemeCode || 'not set'} · ${Number(s.units) || 0} units</p>
                     ${s.quote ? `<p class="text-[10px] text-slate-500">Latest NAV ${currSym}${Number(s.quote).toLocaleString()} · ${s.quoteDate || ''}</p>` : ''}
                     <details class="pt-2 border-t border-white/10">
-                        <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update invested amount and current value</summary>
+                        <summary class="cursor-pointer text-[11px] font-semibold text-teal-300">Update invested amount and current value</summary>
                         <form onsubmit="updateSipValuation(event, ${s.id})" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
                             <input name="invested" type="number" min="0" step="0.01" value="${Number(s.invested) || 0}" aria-label="Total invested in ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                             <input name="currentValue" type="number" min="0" step="0.01" value="${Number(s.currentValue) || 0}" aria-label="Current value of ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                             <input name="schemeCode" type="text" value="${s.schemeCode || ''}" aria-label="AMFI scheme code for ${s.name}" placeholder="AMFI scheme code" class="glass-input rounded-xl px-3 py-2 text-xs">
                             <input name="units" type="number" min="0" step="0.000001" value="${Number(s.units) || 0}" aria-label="Units held in ${s.name}" placeholder="Units held" class="glass-input rounded-xl px-3 py-2 text-xs">
-                            <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
+                            <button type="submit" class="rounded-xl bg-teal-500/20 px-3 py-2 text-xs font-bold text-teal-200 hover:bg-teal-500/30">Save values</button>
                         </form>
                     </details>
                 </div>
             `).join('');
             const history = sipContributions.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
-            document.getElementById('sip-contribution-history').innerHTML = `<p class="font-bold text-white mb-2">Recent app-only SIP entries</p>${history.length ? history.map(item => `<div class="flex justify-between gap-3 py-1 border-t border-white/5"><span>${item.sipName} · ${item.date.slice(0, 7)}</span><span class="text-purple-200">${currSym}${Number(item.amount).toLocaleString()}</span></div>`).join('') : '<p class="text-slate-500">No monthly entries recorded yet.</p>'}`;
+            document.getElementById('sip-contribution-history').innerHTML = `<p class="font-bold text-white mb-2">Recent app-only SIP entries</p>${history.length ? history.map(item => `<div class="flex justify-between gap-3 py-1 border-t border-white/5"><span>${item.sipName} · ${item.date.slice(0, 7)}</span><span class="text-cyan-200">${currSym}${Number(item.amount).toLocaleString()}</span></div>`).join('') : '<p class="text-slate-500">No monthly entries recorded yet.</p>'}`;
         }
 
         function updateSipValuation(e, id) {
@@ -1417,14 +1417,14 @@
                         </div>
                         ${item.quote ? `<p class="text-[10px] text-slate-500">Market price ${currSym}${Number(item.quote).toLocaleString()} · ${item.changePercent == null ? `NAV ${item.quoteDate || ''}` : `30-day trend ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%`}</p>` : ''}
                         <details class="pt-2 border-t border-white/10">
-                            <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update valuation</summary>
+                            <summary class="cursor-pointer text-[11px] font-semibold text-teal-300">Update valuation</summary>
                             <form onsubmit="updateOneTimeInvestment(event, ${item.id})" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
                                 <input name="invested" type="number" min="0" step="0.01" value="${item.invested}" aria-label="Amount invested in ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input name="currentValue" type="number" min="0" step="0.01" value="${item.currentValue}" aria-label="Current value of ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input name="symbol" type="text" value="${item.symbol || ''}" aria-label="Market symbol or AMFI code for ${item.name}" placeholder="Symbol / AMFI code" class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input name="units" type="number" min="0" step="0.000001" value="${Number(item.units) || 0}" aria-label="Shares or units held in ${item.name}" placeholder="Shares / units" class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <select name="marketType" aria-label="Asset type for ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs"><option value="stock" ${(item.marketType || 'stock') === 'stock' ? 'selected' : ''}>Indian stock</option><option value="mutualFund" ${item.marketType === 'mutualFund' ? 'selected' : ''}>Mutual fund</option></select>
-                                <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
+                                <button type="submit" class="rounded-xl bg-teal-500/20 px-3 py-2 text-xs font-bold text-teal-200 hover:bg-teal-500/30">Save values</button>
                             </form>
                         </details>
                     </div>
@@ -1502,13 +1502,13 @@
                 });
                 const isPast = dateKey < todayKey;
                 const dayEvents = [
-                    ...daySips.map(sip => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-pink-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-pink-200" title="${sip.name}: ${currSym}${Number(sip.amount).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-chart-line mr-1"></i><span class="hidden sm:inline">${sip.name}</span><span class="sm:hidden">SIP</span></span><button type="button" onclick="deleteSipItem(${sip.id})" aria-label="Delete SIP ${sip.name}" title="Delete SIP" class="shrink-0 px-1 text-pink-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`),
+                    ...daySips.map(sip => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-teal-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-teal-200" title="${sip.name}: ${currSym}${Number(sip.amount).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-chart-line mr-1"></i><span class="hidden sm:inline">${sip.name}</span><span class="sm:hidden">SIP</span></span><button type="button" onclick="deleteSipItem(${sip.id})" aria-label="Delete SIP ${sip.name}" title="Delete SIP" class="shrink-0 px-1 text-teal-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`),
                     ...dayBills.map(bill => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-cyan-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-cyan-200" title="${bill.name}: ${currSym}${Number(bill.cost).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-receipt mr-1"></i><span class="hidden sm:inline">${bill.name}</span><span class="sm:hidden">Bill</span></span><button type="button" onclick="deleteSubscription(${bill.id})" aria-label="Delete subscription ${bill.name}" title="Delete subscription" class="shrink-0 px-1 text-cyan-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`)
                 ].join('');
                 html += `
-                    <div class="min-w-0 min-h-16 sm:min-h-24 rounded-xl border p-1.5 sm:p-2 flex flex-col gap-1.5 ${isToday ? 'border-indigo-400/70 bg-indigo-500/10 shadow-lg shadow-indigo-500/5' : 'border-white/5 bg-slate-950/30'} ${isPast && !isToday ? 'opacity-60' : ''}">
+                    <div class="min-w-0 min-h-16 sm:min-h-24 rounded-xl border p-1.5 sm:p-2 flex flex-col gap-1.5 ${isToday ? 'border-teal-400/70 bg-teal-500/10 shadow-lg shadow-teal-500/5' : 'border-white/5 bg-slate-950/30'} ${isPast && !isToday ? 'opacity-60' : ''}">
                         <div class="flex items-center justify-between">
-                            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold ${isToday ? 'bg-indigo-500 text-white' : 'text-slate-300'}">${day}</span>
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold ${isToday ? 'bg-teal-500 text-white' : 'text-slate-300'}">${day}</span>
                             ${daySips.length + dayBills.length ? `<span class="text-[9px] text-slate-500">${daySips.length + dayBills.length}</span>` : ''}
                         </div>
                         <div class="space-y-1 min-w-0">${dayEvents}</div>
@@ -1567,7 +1567,7 @@
                             <label class="flex items-center gap-1 text-slate-400">${currSym}<input type="number" min="1" step="1" value="${limit}" aria-label="${cat} monthly budget" onchange="updateBudget('${cat}', this.value)" class="glass-input rounded-lg px-2 py-1 w-24 text-right text-xs"></label>
                         </div>
                         <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
-                            <div class="h-full ${pct >= 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-400' : 'bg-gradient-to-r from-indigo-500 to-cyan-400'} rounded-full" style="width: ${pct}%"></div>
+                            <div class="h-full ${pct >= 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-400' : 'bg-gradient-to-r from-teal-500 to-cyan-400'} rounded-full" style="width: ${pct}%"></div>
                         </div>
                         <p class="flex justify-between text-[11px] text-slate-400"><span>${currSym}${spent.toLocaleString()} spent · ${status}</span><span>${pct}%</span></p>
                     </div>
@@ -1655,7 +1655,7 @@
                     labels: ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'General'],
                     datasets: [{
                         data: [30, 25, 20, 15, 10],
-                        backgroundColor: ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981']
+                        backgroundColor: ['#0d9488', '#14b8a6', '#2dd4bf', '#22d3ee', '#06b6d4']
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
@@ -1678,7 +1678,7 @@
                 const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
                 categoryChart.data.labels = entries.map(([category]) => category);
                 categoryChart.data.datasets[0].data = entries.map(([, amount]) => amount);
-                categoryChart.data.datasets[0].backgroundColor = entries.map((_, index) => ['#6366f1', '#ec4899', '#06b6d4', '#f59e0b', '#10b981', '#8b5cf6', '#f97316', '#14b8a6'][index % 8]);
+                categoryChart.data.datasets[0].backgroundColor = entries.map((_, index) => ['#0d9488', '#14b8a6', '#2dd4bf', '#22d3ee', '#06b6d4', '#0f766e', '#f59e0b', '#10b981'][index % 8]);
                 categoryChart.update();
             }
         }
