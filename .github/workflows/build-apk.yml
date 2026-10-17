@@ -36,13 +36,46 @@ jobs:
       - name: Make Gradle Executable
         run: chmod +x android/gradlew
 
-      - name: Build Android APK
+      - name: Prepare persistent APK signing
+        id: release-signing
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.EXPENSEFLOW_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.EXPENSEFLOW_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.EXPENSEFLOW_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.EXPENSEFLOW_KEY_PASSWORD }}
         run: |
-          cd android
-          ./gradlew assembleDebug --stacktrace
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Persistent signing is not configured; building a debug APK."
+            exit 0
+          fi
+          if [[ -z "$ANDROID_KEYSTORE_PASSWORD" || -z "$ANDROID_KEY_ALIAS" || -z "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "Keystore signing secrets are incomplete." >&2
+            exit 1
+          fi
+          keystore_path="$RUNNER_TEMP/expenseflow-release.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          {
+            echo "EXPENSEFLOW_KEYSTORE_PATH=$keystore_path"
+            echo "EXPENSEFLOW_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "EXPENSEFLOW_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "EXPENSEFLOW_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build signed Android APK
+        if: steps.release-signing.outputs.enabled == 'true'
+        run: cd android && ./gradlew assembleRelease --stacktrace
+
+      - name: Build debug Android APK
+        if: steps.release-signing.outputs.enabled != 'true'
+        run: cd android && ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ExpenseFlow-Android-App
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/release/app-release.apk
