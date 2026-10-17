@@ -560,6 +560,7 @@
                 <div class="glass-panel p-6 rounded-3xl space-y-5">
                     <div>
                         <h3 class="font-display font-bold text-lg text-white">SIP Investments</h3>
+                        <p class="text-xs text-slate-400 mt-1">SIPs are tracked in this app only. Due monthly contributions are recorded automatically when you open the app.</p>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Monthly commitment</p><p id="sip-total-monthly" class="text-sm font-bold text-purple-300 mt-1">₹0</p></div>
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Total invested</p><p id="sip-total-invested" class="text-sm font-bold text-white mt-1">₹0</p></div>
@@ -567,12 +568,26 @@
                             <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">Gain / loss</p><p id="sip-gain-loss" class="text-sm font-bold mt-1">₹0</p></div>
                         </div>
                     </div>
+                    <div class="glass-card p-4 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                            <label class="flex-1 text-[11px] text-slate-400">Twelve Data API key for Indian stock quotes
+                                <input id="market-api-key" type="password" autocomplete="off" placeholder="Enter your API key (stored on this device)" class="glass-input rounded-xl px-3 py-2 text-xs w-full mt-1">
+                            </label>
+                            <button type="button" onclick="saveMarketApiKey()" class="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-200 text-xs font-bold hover:bg-indigo-500/30">Save key</button>
+                            <button type="button" onclick="refreshInvestmentPrices()" class="px-4 py-2 rounded-xl bg-cyan-500/20 text-cyan-100 text-xs font-bold hover:bg-cyan-500/30"><i class="fa-solid fa-rotate mr-1"></i>Refresh prices</button>
+                        </div>
+                        <p id="investment-price-status" aria-live="polite" class="text-[10px] text-slate-500">Mutual fund NAV comes from AMFI. Stock quotes need a Twelve Data API key.</p>
+                    </div>
                     <form onsubmit="addSipItem(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <input type="text" id="sip-name" placeholder="Fund name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" min="0.01" step="0.01" id="sip-amount" placeholder="Monthly amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" min="1" max="31" id="sip-date" placeholder="Debit day" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="date" id="sip-start-date" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs" aria-label="SIP start date">
+                        <input type="text" id="sip-scheme-code" placeholder="AMFI scheme code (optional)" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" id="sip-units" min="0" step="0.000001" placeholder="Units held (optional)" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <button type="submit" class="py-2.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs">Add SIP</button>
                     </form>
+                    <div id="sip-contribution-history" class="glass-card p-4 rounded-2xl text-xs text-slate-300"></div>
                     <div id="sip-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
 
@@ -583,6 +598,9 @@
                     </div>
                     <form onsubmit="addOneTimeInvestment(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         <input type="text" id="investment-name" placeholder="Investment name" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <select id="investment-market-type" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs"><option value="stock">Indian stock</option><option value="mutualFund">Mutual fund</option></select>
+                        <input type="text" id="investment-symbol" placeholder="NSE symbol or AMFI code" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" id="investment-units" min="0" step="0.000001" placeholder="Shares / units" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" id="investment-invested" min="0.01" step="0.01" placeholder="Amount invested" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" id="investment-current-value" min="0" step="0.01" placeholder="Current value" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="date" id="investment-date" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
@@ -734,6 +752,7 @@
             { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
             { id: 2, name: 'Smallcap Discovery', amount: 2500, date: 15 }
         ];
+        let sipContributions = JSON.parse(localStorage.getItem('ef_sip_contributions')) || [];
         let oneTimeInvestments = JSON.parse(localStorage.getItem('ef_one_time_investments')) || [];
 
         let splits = JSON.parse(localStorage.getItem('ef_splits')) || [];
@@ -751,10 +770,15 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('dashboard-month').value = getCurrentMonth();
+            document.getElementById('sip-start-date').value = localDateString(new Date());
+            document.getElementById('market-api-key').value = localStorage.getItem('ef_market_api_key') || '';
+            sips.forEach(sip => { if (!sip.startDate) sip.startDate = localDateString(new Date()); });
+            processDueSipContributions();
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
             initCharts();
             renderApp();
+            setInterval(() => { if (processDueSipContributions()) renderApp(); }, 60000);
             document.addEventListener('onSMSArrive', handleIncomingSMS);
             document.addEventListener('deviceready', () => {
                 smsNativeReady = true;
@@ -786,6 +810,11 @@
         function getCurrentMonth() {
             const now = new Date();
             return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function localDateString(date) {
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return local.toISOString().slice(0, 10);
         }
 
         function setTxType(type) {
@@ -836,6 +865,7 @@
             localStorage.setItem('ef_transactions', JSON.stringify(transactions));
             localStorage.setItem('ef_networth', JSON.stringify(networthItems));
             localStorage.setItem('ef_sips', JSON.stringify(sips));
+            localStorage.setItem('ef_sip_contributions', JSON.stringify(sipContributions));
             localStorage.setItem('ef_one_time_investments', JSON.stringify(oneTimeInvestments));
             localStorage.setItem('ef_splits', JSON.stringify(splits));
             localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
@@ -1093,25 +1123,54 @@
         }
 
         // SIP Tracker
+        function processDueSipContributions() {
+            const today = localDateString(new Date());
+            let changed = false;
+            sips.forEach(sip => {
+                const start = sip.startDate || today;
+                const startMonth = start.slice(0, 7);
+                const nowMonth = today.slice(0, 7);
+                const [firstYear, firstMonth] = startMonth.split('-').map(Number);
+                const [lastYear, lastMonth] = nowMonth.split('-').map(Number);
+                for (let cursor = new Date(firstYear, firstMonth - 1, 1); cursor <= new Date(lastYear, lastMonth - 1, 1); cursor.setMonth(cursor.getMonth() + 1)) {
+                    const year = cursor.getFullYear();
+                    const month = cursor.getMonth();
+                    const due = `${year}-${String(month + 1).padStart(2, '0')}-${String(Math.min(Number(sip.date) || 1, new Date(year, month + 1, 0).getDate())).padStart(2, '0')}`;
+                    if (due < start || due > today) continue;
+                    const key = `${sip.id}:${due.slice(0, 7)}`;
+                    if (sipContributions.some(item => item.key === key)) continue;
+                    sipContributions.push({ id: Date.now() + sipContributions.length, key, sipId: sip.id, sipName: sip.name, amount: Number(sip.amount) || 0, date: due, recordedAt: today });
+                    changed = true;
+                }
+            });
+            if (changed) localStorage.setItem('ef_sip_contributions', JSON.stringify(sipContributions));
+            return changed;
+        }
+
         function addSipItem(e) {
             e.preventDefault();
             const name = document.getElementById('sip-name').value;
             const amount = parseFloat(document.getElementById('sip-amount').value);
             const date = parseInt(document.getElementById('sip-date').value);
-
-            sips.push({ id: Date.now(), name, amount, date, invested: 0, currentValue: 0 });
+            const startDate = document.getElementById('sip-start-date').value;
+            const schemeCode = document.getElementById('sip-scheme-code').value.trim();
+            const units = Number(document.getElementById('sip-units').value) || 0;
+            sips.push({ id: Date.now(), name, amount, date, startDate, schemeCode, units, invested: 0, currentValue: 0 });
+            processDueSipContributions();
             saveAndRender();
             e.target.reset();
+            document.getElementById('sip-start-date').value = localDateString(new Date());
         }
 
         function deleteSipItem(id) {
             sips = sips.filter(sip => sip.id !== id);
+            sipContributions = sipContributions.filter(item => item.sipId !== id);
             saveAndRender();
         }
 
         function renderSIPs() {
             const total = sips.reduce((a,b) => a + b.amount, 0);
-            const investedTotal = sips.reduce((sum, sip) => sum + (Number(sip.invested) || 0), 0);
+            const investedTotal = sips.reduce((sum, sip) => sum + (Number(sip.invested) || 0), 0) + sipContributions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
             const currentTotal = sips.reduce((sum, sip) => sum + (Number(sip.currentValue) || 0), 0);
             const gainLoss = currentTotal - investedTotal;
             document.getElementById('sip-total-monthly').innerText = `${currSym}${total.toLocaleString()}`;
@@ -1133,19 +1192,25 @@
                     </div>
                     <p class="text-lg font-bold text-purple-400">${currSym}${s.amount.toLocaleString()} / mo</p>
                     <div class="grid grid-cols-2 gap-2 text-[11px]">
-                        <p class="text-slate-400">Invested <span class="text-white">${currSym}${(Number(s.invested) || 0).toLocaleString()}</span></p>
+                        <p class="text-slate-400">Invested <span class="text-white">${currSym}${((Number(s.invested) || 0) + sipContributions.filter(item => item.sipId === s.id).reduce((sum, item) => sum + (Number(item.amount) || 0), 0)).toLocaleString()}</span></p>
                         <p class="text-slate-400">Value <span class="text-cyan-300">${currSym}${(Number(s.currentValue) || 0).toLocaleString()}</span></p>
                     </div>
+                    <p class="text-[10px] text-slate-500">Auto-recorded ${sipContributions.filter(item => item.sipId === s.id).length} monthly contribution(s) · NAV code: ${s.schemeCode || 'not set'} · ${Number(s.units) || 0} units</p>
+                    ${s.quote ? `<p class="text-[10px] text-slate-500">Latest NAV ${currSym}${Number(s.quote).toLocaleString()} · ${s.quoteDate || ''}</p>` : ''}
                     <details class="pt-2 border-t border-white/10">
                         <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update invested amount and current value</summary>
-                        <form onsubmit="updateSipValuation(event, ${s.id})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                        <form onsubmit="updateSipValuation(event, ${s.id})" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
                             <input name="invested" type="number" min="0" step="0.01" value="${Number(s.invested) || 0}" aria-label="Total invested in ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                             <input name="currentValue" type="number" min="0" step="0.01" value="${Number(s.currentValue) || 0}" aria-label="Current value of ${s.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                            <input name="schemeCode" type="text" value="${s.schemeCode || ''}" aria-label="AMFI scheme code for ${s.name}" placeholder="AMFI scheme code" class="glass-input rounded-xl px-3 py-2 text-xs">
+                            <input name="units" type="number" min="0" step="0.000001" value="${Number(s.units) || 0}" aria-label="Units held in ${s.name}" placeholder="Units held" class="glass-input rounded-xl px-3 py-2 text-xs">
                             <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
                         </form>
                     </details>
                 </div>
             `).join('');
+            const history = sipContributions.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
+            document.getElementById('sip-contribution-history').innerHTML = `<p class="font-bold text-white mb-2">Recent app-only SIP entries</p>${history.length ? history.map(item => `<div class="flex justify-between gap-3 py-1 border-t border-white/5"><span>${item.sipName} · ${item.date.slice(0, 7)}</span><span class="text-purple-200">${currSym}${Number(item.amount).toLocaleString()}</span></div>`).join('') : '<p class="text-slate-500">No monthly entries recorded yet.</p>'}`;
         }
 
         function updateSipValuation(e, id) {
@@ -1154,7 +1219,85 @@
             if (!sip) return;
             sip.invested = Math.max(0, Number(e.target.elements.invested.value) || 0);
             sip.currentValue = Math.max(0, Number(e.target.elements.currentValue.value) || 0);
+            sip.schemeCode = e.target.elements.schemeCode.value.trim();
+            sip.units = Math.max(0, Number(e.target.elements.units.value) || 0);
             saveAndRender();
+        }
+
+        function saveMarketApiKey() {
+            const key = document.getElementById('market-api-key').value.trim();
+            if (key) localStorage.setItem('ef_market_api_key', key);
+            else localStorage.removeItem('ef_market_api_key');
+            document.getElementById('investment-price-status').innerText = key ? 'Stock quote key saved on this device.' : 'Stock quote key cleared.';
+        }
+
+        async function marketGet(url) {
+            const nativeHttp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+            if (nativeHttp && typeof nativeHttp.get === 'function') {
+                const result = await nativeHttp.get({ url, connectTimeout: 15000, readTimeout: 15000 });
+                if (result.status >= 400) throw new Error(`Market data request failed (${result.status}).`);
+                return typeof result.data === 'string' ? result.data : result.data;
+            }
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Market data request failed (${response.status}).`);
+            return response.text();
+        }
+
+        async function getAmfiNav(schemeCode) {
+            const data = await marketGet('https://portal.amfiindia.com/spages/NAVAll.txt');
+            const text = typeof data === 'string' ? data : JSON.stringify(data);
+            const row = text.split(/\r?\n/).find(line => line.split(';')[0].trim() === String(schemeCode).trim());
+            if (!row) throw new Error(`AMFI scheme code ${schemeCode} was not found.`);
+            const columns = row.split(';');
+            const nav = Number(columns[6]);
+            if (!Number.isFinite(nav) || nav <= 0) throw new Error('AMFI did not return a valid NAV for this fund.');
+            return { price: nav, date: columns[7] || '' };
+        }
+
+        async function getStockTrend(symbol, apiKey) {
+            const params = new URLSearchParams({ symbol, exchange: 'NSE', interval: '1day', outputsize: '30', apikey: apiKey });
+            const data = await marketGet(`https://api.twelvedata.com/time_series?${params.toString()}`);
+            const result = typeof data === 'string' ? JSON.parse(data) : data;
+            if (result.status === 'error' || !Array.isArray(result.values) || !result.values.length) throw new Error(result.message || `No quote returned for ${symbol}.`);
+            const latest = Number(result.values[0].close);
+            const oldest = Number(result.values[result.values.length - 1].close);
+            if (!Number.isFinite(latest) || latest <= 0) throw new Error(`Invalid quote returned for ${symbol}.`);
+            return { price: latest, changePercent: Number.isFinite(oldest) && oldest > 0 ? ((latest - oldest) / oldest) * 100 : null, date: result.values[0].datetime || '' };
+        }
+
+        async function refreshInvestmentPrices() {
+            const status = document.getElementById('investment-price-status');
+            const apiKey = localStorage.getItem('ef_market_api_key') || '';
+            const targets = [
+                ...sips.filter(sip => sip.schemeCode).map(item => ({ type: 'mutualFund', item })),
+                ...oneTimeInvestments.filter(item => item.symbol).map(item => ({ type: item.marketType || 'stock', item }))
+            ];
+            if (!targets.length) {
+                status.innerText = 'Add an AMFI scheme code or stock symbol and units to refresh prices.';
+                return;
+            }
+            status.innerText = 'Refreshing market data…';
+            let updated = 0;
+            const errors = [];
+            for (const target of targets) {
+                try {
+                    let quote;
+                    if (target.type === 'mutualFund') quote = await getAmfiNav(target.item.schemeCode || target.item.symbol);
+                    else {
+                        if (!apiKey) throw new Error('Save a Twelve Data API key to refresh stock prices.');
+                        quote = await getStockTrend(target.item.symbol, apiKey);
+                    }
+                    target.item.quote = quote.price;
+                    target.item.quoteDate = quote.date;
+                    target.item.changePercent = quote.changePercent;
+                    if (Number(target.item.units) > 0) target.item.currentValue = Number(target.item.units) * quote.price;
+                    updated++;
+                } catch (error) {
+                    errors.push(`${target.item.name}: ${error.message}`);
+                }
+            }
+            saveAndRender();
+            status.innerText = errors.length ? `Updated ${updated} holding(s). ${errors.slice(0, 2).join(' ')}` : `Updated ${updated} holding(s). Quotes reflect the latest available market data.`;
         }
 
         function addOneTimeInvestment(e) {
@@ -1164,7 +1307,10 @@
             const currentValue = Number(document.getElementById('investment-current-value').value);
             const date = document.getElementById('investment-date').value;
             if (!name || !Number.isFinite(invested) || invested <= 0 || !Number.isFinite(currentValue) || currentValue < 0 || !date) return;
-            oneTimeInvestments.unshift({ id: Date.now(), name, invested, currentValue, date });
+            const marketType = document.getElementById('investment-market-type').value;
+            const symbol = document.getElementById('investment-symbol').value.trim().toUpperCase();
+            const units = Number(document.getElementById('investment-units').value) || 0;
+            oneTimeInvestments.unshift({ id: Date.now(), name, invested, currentValue, date, marketType, symbol, units });
             e.target.reset();
             saveAndRender();
         }
@@ -1180,6 +1326,9 @@
             if (!investment) return;
             investment.invested = Math.max(0, Number(e.target.elements.invested.value) || 0);
             investment.currentValue = Math.max(0, Number(e.target.elements.currentValue.value) || 0);
+            investment.symbol = e.target.elements.symbol.value.trim().toUpperCase();
+            investment.units = Math.max(0, Number(e.target.elements.units.value) || 0);
+            investment.marketType = e.target.elements.marketType.value;
             saveAndRender();
         }
 
@@ -1206,11 +1355,15 @@
                             <p class="text-slate-400">Value<br><span class="text-cyan-300 font-bold">${currSym}${item.currentValue.toLocaleString()}</span></p>
                             <p class="text-slate-400">Gain/loss<br><span class="${itemGain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${itemGain >= 0 ? '+' : '-'}${currSym}${Math.abs(itemGain).toLocaleString()}</span></p>
                         </div>
+                        ${item.quote ? `<p class="text-[10px] text-slate-500">Market price ${currSym}${Number(item.quote).toLocaleString()} · ${item.changePercent == null ? `NAV ${item.quoteDate || ''}` : `30-day trend ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%`}</p>` : ''}
                         <details class="pt-2 border-t border-white/10">
                             <summary class="cursor-pointer text-[11px] font-semibold text-indigo-300">Update valuation</summary>
-                            <form onsubmit="updateOneTimeInvestment(event, ${item.id})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                            <form onsubmit="updateOneTimeInvestment(event, ${item.id})" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
                                 <input name="invested" type="number" min="0" step="0.01" value="${item.invested}" aria-label="Amount invested in ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
                                 <input name="currentValue" type="number" min="0" step="0.01" value="${item.currentValue}" aria-label="Current value of ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input name="symbol" type="text" value="${item.symbol || ''}" aria-label="Market symbol or AMFI code for ${item.name}" placeholder="Symbol / AMFI code" class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <input name="units" type="number" min="0" step="0.000001" value="${Number(item.units) || 0}" aria-label="Shares or units held in ${item.name}" placeholder="Shares / units" class="glass-input rounded-xl px-3 py-2 text-xs">
+                                <select name="marketType" aria-label="Asset type for ${item.name}" class="glass-input rounded-xl px-3 py-2 text-xs"><option value="stock" ${(item.marketType || 'stock') === 'stock' ? 'selected' : ''}>Indian stock</option><option value="mutualFund" ${item.marketType === 'mutualFund' ? 'selected' : ''}>Mutual fund</option></select>
                                 <button type="submit" class="rounded-xl bg-indigo-500/20 px-3 py-2 text-xs font-bold text-indigo-200 hover:bg-indigo-500/30">Save values</button>
                             </form>
                         </details>
