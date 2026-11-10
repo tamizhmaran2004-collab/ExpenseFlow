@@ -542,7 +542,7 @@
 
             </section>
 
-            <!-- TAB 2: BANK SMS AUTO-PARSER & SIMULATOR -->
+            <!-- TAB 2: AUTOMATIC BANK SMS DETECTION -->
             <section id="tab-page-sms" class="tab-page hidden space-y-6">
                 <div class="glass-panel p-6 rounded-3xl space-y-4">
                     <div class="flex items-center gap-3">
@@ -550,8 +550,8 @@
                             <i class="fa-solid fa-comment-sms"></i>
                         </div>
                         <div>
-                            <h3 class="font-display font-bold text-lg text-white">Bank SMS Auto-Expense Parser</h3>
-                            <p class="text-xs text-slate-400">Automatically log bank transaction alerts from incoming SMS on this device, or paste a message below.</p>
+                            <h3 class="font-display font-bold text-lg text-white">Automatic Bank SMS Detection</h3>
+                            <p class="text-xs text-slate-400">Automatically add completed bank transactions from incoming SMS on this device.</p>
                         </div>
                     </div>
 
@@ -563,27 +563,10 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="block text-xs font-semibold text-slate-300">Raw Bank SMS Message:</label>
-                        <textarea id="sms-text-input" rows="3" placeholder="e.g. Rs 450.00 debited from A/C **9876 on 16-Oct-26 at Starbucks via UPI." class="w-full glass-input rounded-2xl p-4 text-xs font-mono"></textarea>
-                        
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="parseAndLogSMS()" class="px-5 py-2.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                <span>Parse & Auto-Log Expense</span>
-                            </button>
-                            <button onclick="loadSampleSMS('swiggy')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Swiggy ₹250</button>
-                            <button onclick="loadSampleSMS('fuel')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Fuel ₹500</button>
-                            <button onclick="loadSampleSMS('salary')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Salary Credit</button>
-                            <button onclick="loadSampleSMS('indianBankSent')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Indian Bank Sent</button>
-                            <button onclick="loadSampleSMS('bankReceived')" class="px-3.5 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white">Sample Bank Received</button>
-                        </div>
-                    </div>
-
                     <div class="pt-4 border-t border-white/10">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Parser Execution Log</h4>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detection Activity</h4>
                         <div id="sms-log-output" class="p-4 rounded-2xl bg-slate-950/80 border border-white/10 font-mono text-xs text-cyan-300 space-y-1">
-                            &gt; Parser ready. Enter or select an SMS text above.
+                            &gt; Automatic detection activity will appear here.
                         </div>
                     </div>
                 </div>
@@ -1071,13 +1054,8 @@
                 localStorage.setItem('ef_sms_seen', JSON.stringify(seenMessages.slice(-500)));
                 updateSmsDetectionStatus('Bank transaction detected and saved to your ledger.');
             } else {
-                updateSmsDetectionStatus('SMS received but skipped. Check the parser log for the reason.', true);
+                updateSmsDetectionStatus('SMS received but skipped. Check Detection Activity for the reason.', true);
             }
-        }
-
-        function parseAndLogSMS() {
-            const raw = document.getElementById('sms-text-input').value;
-            autoParseSMS(raw);
         }
 
         function categorizeSms(smsText, type) {
@@ -1150,17 +1128,6 @@
             } else {
                 logBox.innerText = '> Could not extract a transaction amount from this SMS.';
             }
-        }
-
-        function loadSampleSMS(key) {
-            const samples = {
-                swiggy: "Rs 250.00 debited from A/C **1234 on 16-Oct-26 at Swiggy via UPI Ref 98765.",
-                fuel: "INR 500.00 spent on your Credit Card at BPCL Petrol Pump on 16-Oct-26.",
-                salary: "Rs 85000.00 credited to A/C **5678 on 01-Oct-26 by Salary Deposit.",
-                indianBankSent: "Sent Rs.22.00 from A/c *1423 on 17-10-26 to PRABAKARAN.RRN 665623407730.Avl Bal Rs.15059.11.Not you?SMS BLOCK to 9289592895-Indian Bank",
-                bankReceived: "Received Rs.1,250.00 in A/c *1423 on 17-10-26 from ACME PAYMENTS.Avl Bal Rs.16309.11-Indian Bank"
-            };
-            document.getElementById('sms-text-input').value = samples[key];
         }
 
         // Net Worth Balance Sheet
