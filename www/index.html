@@ -338,9 +338,9 @@
 
                 <!-- Controls & Notifications -->
                 <div class="flex items-center gap-3 self-end sm:self-auto">
-                    <button onclick="requestNotificationPermission()" class="px-3 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white flex items-center gap-2">
+                    <button id="sip-alerts-button" onclick="toggleSipReminders()" class="px-3 py-2 rounded-2xl glass-card text-xs font-medium text-slate-300 hover:text-white flex items-center gap-2" title="Manage SIP due reminders">
                         <i class="fa-solid fa-bell text-teal-400"></i>
-                        <span>Alerts</span>
+                        <span id="sip-alerts-label">SIP alerts off</span>
                     </button>
                     <div class="text-right">
                         <p class="text-xs font-medium text-slate-400" id="live-date-str">Fri, Oct 16, 2026</p>
@@ -920,6 +920,8 @@
             document.addEventListener('onSMSArrive', handleIncomingSMS);
             document.addEventListener('deviceready', () => {
                 smsNativeReady = true;
+                updateSipReminderButton();
+                if (localStorage.getItem('ef_sip_reminders_enabled') === 'true') syncSipReminders();
                 if (localStorage.getItem('ef_sms_auto_enabled') === 'true') startSmsDetection();
                 else updateSmsDetectionStatus('Automatic detection is off.');
             }, { once: true });
@@ -1346,12 +1348,14 @@
             e.target.reset();
             document.getElementById('sip-start-date').value = localDateString(new Date());
             refreshInvestmentPrices({ automatic: true, includeNav: true });
+            if (localStorage.getItem('ef_sip_reminders_enabled') === 'true') syncSipReminders();
         }
 
         function deleteSipItem(id) {
             sips = sips.filter(sip => sip.id !== id);
             sipContributions = sipContributions.filter(item => item.sipId !== id);
             saveAndRender();
+            if (localStorage.getItem('ef_sip_reminders_enabled') === 'true') syncSipReminders();
         }
 
         function renderSIPs() {
@@ -1682,6 +1686,7 @@
             sips.push({ id: Date.now(), name, amount, date });
             e.target.reset();
             saveAndRender();
+            if (localStorage.getItem('ef_sip_reminders_enabled') === 'true') syncSipReminders();
         }
 
         function addCalendarSubscription(e) {
@@ -1967,11 +1972,97 @@
             a.click();
         }
 
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                Notification.requestPermission().then(perm => {
-                    alert(`Notification permission status: ${perm}`);
-                });
+        function localNotificationsPlugin() {
+            return window.Capacitor?.Plugins?.LocalNotifications || window.Capacitor?.registerPlugin?.('LocalNotifications');
+        }
+
+        function updateSipReminderButton() {
+            const label = document.getElementById('sip-alerts-label');
+            if (!label) return;
+            const enabled = localStorage.getItem('ef_sip_reminders_enabled') === 'true';
+            label.innerText = enabled ? 'SIP alerts on' : 'SIP alerts off';
+        }
+
+        async function toggleSipReminders() {
+            const plugin = localNotificationsPlugin();
+            if (!plugin) {
+                alert('SIP reminders need the latest Android app build.');
+                return;
+            }
+
+            if (localStorage.getItem('ef_sip_reminders_enabled') === 'true') {
+                localStorage.setItem('ef_sip_reminders_enabled', 'false');
+                await cancelSipReminders(plugin);
+                updateSipReminderButton();
+                alert('SIP due reminders are off.');
+                return;
+            }
+
+            try {
+                let permission = await plugin.checkPermissions();
+                if (permission.display !== 'granted') permission = await plugin.requestPermissions();
+                if (permission.display !== 'granted') {
+                    alert('Allow notifications in Android settings to receive SIP due reminders.');
+                    return;
+                }
+                localStorage.setItem('ef_sip_reminders_enabled', 'true');
+                updateSipReminderButton();
+                await syncSipReminders();
+                alert('SIP reminders are on. You will get a reminder at 9:00 AM on each SIP due date.');
+            } catch (error) {
+                console.error('Could not enable SIP reminders:', error);
+                alert(`Could not enable SIP reminders: ${error.message || String(error)}`);
+            }
+        }
+
+        function sipReminderNotificationId(key) {
+            let hash = 2166136261;
+            for (let index = 0; index < key.length; index++) hash = Math.imul(hash ^ key.charCodeAt(index), 16777619);
+            return (hash >>> 0) & 0x7fffffff || 1;
+        }
+
+        async function cancelSipReminders(plugin = localNotificationsPlugin()) {
+            if (!plugin) return;
+            const pending = await plugin.getPending();
+            const reminders = (pending.notifications || []).filter(notification => notification.extra?.kind === 'sip-due');
+            if (reminders.length) await plugin.cancel({ notifications: reminders.map(notification => ({ id: notification.id })) });
+        }
+
+        async function syncSipReminders() {
+            if (localStorage.getItem('ef_sip_reminders_enabled') !== 'true') return;
+            const plugin = localNotificationsPlugin();
+            if (!plugin) return;
+            try {
+                const permission = await plugin.checkPermissions();
+                if (permission.display !== 'granted') return;
+                await plugin.createChannel({ id: 'sip-reminders', name: 'SIP due reminders', description: 'Monthly SIP due-date reminders', importance: 4 });
+                await cancelSipReminders(plugin);
+
+                const notifications = [];
+                const now = new Date();
+                for (const sip of sips) {
+                    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+                        const monthStart = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+                        const lastDay = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+                        const dueDay = Math.min(Math.max(1, Number(sip.date) || 1), lastDay);
+                        const dueAt = new Date(monthStart.getFullYear(), monthStart.getMonth(), dueDay, 9, 0, 0, 0);
+                        if (dueAt <= now) continue;
+                        const monthKey = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
+                        const key = `${sip.id}:${monthKey}`;
+                        notifications.push({
+                            id: sipReminderNotificationId(key),
+                            title: 'SIP due today',
+                            body: `${sip.name}: ${currSym}${Number(sip.amount).toLocaleString()} is due today.`,
+                            schedule: { at: dueAt, allowWhileIdle: true },
+                            channelId: 'sip-reminders',
+                            isExactNotification: false,
+                            extra: { kind: 'sip-due', sipId: sip.id, monthKey: monthKey }
+                        });
+                    }
+                }
+                if (notifications.length) await plugin.schedule({ notifications });
+            } catch (error) {
+                console.error('Could not schedule SIP reminders:', error);
             }
         }
     </script>

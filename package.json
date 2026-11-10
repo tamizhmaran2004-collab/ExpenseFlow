@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "ExpenseFlow Desktop App",
   "main": "main.js",
- "scripts": {
-  "start": "electron .",
-  "build": "node -e \"require('fs').copyFileSync('index.html', 'www/index.html')\""
-},
- "devDependencies": {
+  "scripts": {
+    "start": "electron .",
+    "build": "node -e \"require('fs').copyFileSync('index.html', 'www/index.html')\""
+  },
+  "devDependencies": {
     "electron": "^44.4.5",
     "electron-packager": "^14.2.1"
   },
@@ -15,6 +15,7 @@
     "@capacitor/android": "^8.5.2",
     "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.5.2",
+    "@capacitor/local-notifications": "^8.3.1",
     "asar": "^2.1.0",
     "author-regex": "^1.0.0",
     "balanced-match": "^1.0.2",
