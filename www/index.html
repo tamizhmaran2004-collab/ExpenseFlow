@@ -184,6 +184,19 @@
         #app-sidebar-brand > div:first-child { background-image: linear-gradient(135deg, #8b5cf6, #3b82f6) !important; box-shadow: 0 10px 28px rgba(99, 102, 241, .24) !important; }
         .ambient-orb[class~="bg-teal-600/30"] { background-color: rgba(124, 58, 237, .22) !important; }
         .ambient-orb[class~="bg-cyan-600/25"], .ambient-orb[class~="bg-cyan-600/20"] { background-color: rgba(37, 99, 235, .18) !important; }
+        html.privacy-start-locked #app-shell, html.privacy-start-locked .ambient-orb, html.privacy-start-locked #mobile-more-menu { visibility: hidden !important; }
+        html.privacy-start-locked #privacy-lock-screen { display: flex !important; }
+        #app-shell.balances-hidden #dashboard-kpis .dashboard-kpi-value,
+        #app-shell.balances-hidden #insight-savings-rate,
+        #app-shell.balances-hidden #insight-top-category-amount,
+        #app-shell.balances-hidden #insight-daily-average,
+        #app-shell.balances-hidden #weekly-recap-total,
+        #app-shell.balances-hidden #weekly-recap-change,
+        #app-shell.balances-hidden #weekly-recap-category,
+        #app-shell.balances-hidden #island-spend-status,
+        #app-shell.balances-hidden .privacy-sensitive-value,
+        #app-shell.balances-hidden #tx-table-body td:nth-child(5),
+        #app-shell.balances-hidden #dashboard-analytics .dashboard-chart-frame { filter: blur(8px); user-select: none; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
         @media (max-width: 767px) {
@@ -279,6 +292,7 @@
     </style>
 </head>
 <body class="min-h-screen relative flex flex-col antialiased selection:bg-violet-500 selection:text-white">
+    <script>if (localStorage.getItem('ef_privacy_lock_enabled') === 'true') document.documentElement.classList.add('privacy-start-locked');</script>
 
     <!-- Ambient Glowing Orbs -->
     <div class="ambient-orb w-[450px] h-[450px] bg-teal-600/30 top-[-100px] left-[-100px] animate-pulse-glow"></div>
@@ -365,6 +379,7 @@
                     <button onclick="exportDataBackup()" class="more-nav-item rounded-xl bg-teal-500/15 border border-teal-400/20 px-3 py-2.5 text-xs font-semibold text-teal-100"><i class="fa-solid fa-cloud-arrow-down mr-1.5"></i>Back up data</button>
                     <button onclick="document.getElementById('restore-backup-input').click()" class="more-nav-item rounded-xl glass-card px-3 py-2.5 text-xs font-semibold text-slate-200"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Restore backup</button>
                 </div>
+                <button id="privacy-lock-toggle-mobile" onclick="toggleAppPrivacyLock()" class="more-nav-item mt-2 w-full rounded-xl glass-card px-3 py-2.5 text-left text-xs font-semibold text-slate-200"><i class="fa-solid fa-fingerprint text-violet-300 mr-2"></i><span>Set up app lock</span></button>
                 <p class="text-[10px] leading-relaxed text-slate-500 mt-2">Android restore uses your device backup settings. Keep exported backup files private; they contain your app data.</p>
             </div>
 
@@ -387,6 +402,8 @@
                     <button onclick="exportDataBackup()" class="rounded-xl bg-teal-500/15 border border-teal-400/20 px-2 py-2.5 text-[11px] font-semibold text-teal-100"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Backup</button>
                     <button onclick="document.getElementById('restore-backup-input').click()" class="rounded-xl glass-card px-2 py-2.5 text-[11px] font-semibold text-slate-200"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>Restore</button>
                 </div>
+                <button id="privacy-lock-toggle" onclick="toggleAppPrivacyLock()" class="w-full rounded-xl glass-card px-3 py-2.5 text-left text-[11px] font-semibold text-slate-200"><i class="fa-solid fa-fingerprint text-violet-300 mr-2"></i><span>Set up app lock</span></button>
+                <p class="text-[10px] text-slate-500">Uses your phone’s fingerprint or device PIN. Data remains stored locally on this device.</p>
                 <p class="text-[10px] leading-relaxed text-slate-500">Keep backups private; they contain your app data.</p>
             </div>
             <input id="restore-backup-input" type="file" accept=".json,application/json" class="hidden" onchange="importDataBackup(event)">
@@ -438,6 +455,7 @@
                         <label class="text-xs font-semibold text-slate-300 flex items-center justify-between sm:justify-start gap-3 rounded-2xl bg-slate-950/35 border border-white/5 px-3 py-2">Month
                             <input type="month" id="dashboard-month" onchange="renderApp()" aria-label="Select dashboard month" class="glass-input rounded-xl px-3 py-2 text-sm">
                         </label>
+                        <button id="dashboard-hide-balances" type="button" onclick="toggleDashboardPrivacy()" class="rounded-2xl glass-card px-3 py-2 text-xs font-semibold text-slate-200"><i class="fa-solid fa-eye-slash mr-1.5"></i>Hide balances</button>
                         <button type="button" onclick="exportMonthlyReport()" class="rounded-2xl bg-teal-500/15 border border-teal-400/20 px-3 py-2 text-xs font-bold text-teal-200 hover:bg-teal-500/25"><i class="fa-solid fa-file-arrow-down mr-1.5"></i>Export report</button>
                     </div>
                 </div>
@@ -485,6 +503,38 @@
                         <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Top category</p><p id="weekly-recap-category" class="text-sm font-bold text-white mt-1">No spending yet</p></div>
                     </div>
                 </div>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-4">
+                    <div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-400/10 text-indigo-200"><i class="fa-solid fa-scale-balanced"></i></span><div><h3 class="text-sm font-bold text-white">Account balance check</h3><p class="text-[10px] text-slate-500 mt-1">Compare a statement balance with your opening balance and logged transactions.</p></div></div>
+                    <p class="text-[10px] leading-relaxed text-slate-500">Enter the opening balance before transactions on the opening date. For a credit card, enter the amount owed as a positive number. The statement balance is treated as end-of-day.</p>
+                    <form onsubmit="saveAccountReconciliation(event)" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2.5">
+                        <input id="reconcile-account" type="text" list="known-reconcile-accounts" oninput="loadReconciliationDraft()" placeholder="Account name" aria-label="Account name" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <datalist id="known-reconcile-accounts"></datalist>
+                        <input id="reconcile-opening-balance" type="number" step="0.01" placeholder="Opening balance" aria-label="Opening balance before start date" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="reconcile-opening-date" type="date" aria-label="Opening balance date" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="reconcile-current-balance" type="number" step="0.01" placeholder="Current statement balance" aria-label="Current statement balance" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="reconcile-balance-date" type="date" aria-label="Statement balance date" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <button type="submit" class="sm:col-span-2 xl:col-span-5 rounded-xl bg-indigo-500/20 px-3 py-2.5 text-xs font-bold text-indigo-100 hover:bg-indigo-500/30"><i class="fa-solid fa-check mr-1"></i>Save and compare balance</button>
+                    </form>
+                    <div id="account-reconciliation-list" class="grid grid-cols-1 xl:grid-cols-2 gap-3"></div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+                    <div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-400/10 text-violet-200"><i class="fa-solid fa-wand-magic-sparkles"></i></span><div><h3 class="text-sm font-bold text-white">Next 30 days forecast</h3><p class="text-[10px] text-slate-500 mt-0.5">Scheduled SIPs, subscriptions, and future-dated ledger entries.</p></div></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Expected outflow</p><p id="forecast-outflow" class="privacy-sensitive-value text-lg font-bold text-rose-300 mt-1">₹0</p></div>
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Known income</p><p id="forecast-income" class="privacy-sensitive-value text-lg font-bold text-emerald-300 mt-1">₹0</p></div>
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Projected balance</p><p id="forecast-balance" class="privacy-sensitive-value text-lg font-bold text-white mt-1">Add an account check</p></div>
+                    </div>
+                    <p id="forecast-note" class="text-[10px] text-slate-500">Estimates use saved recurring schedules and your last reconciled account balances.</p>
+                    <div id="forecast-events" class="space-y-1"></div>
+                </div>
+
+                <details class="glass-panel rounded-3xl p-4 sm:p-5">
+                    <summary class="cursor-pointer text-sm font-bold text-white">Remembered merchant categories</summary>
+                    <p class="text-[10px] text-slate-500 mt-2">Categories you chose to remember from transaction entry.</p>
+                    <div id="merchant-category-rules" class="mt-3 space-y-2"></div>
+                </details>
 
                 <!-- One-Tap Smart Presets Bar -->
                 <div class="glass-panel p-4 rounded-3xl">
@@ -534,7 +584,7 @@
                             <form id="tx-form" onsubmit="addTransaction(event)" class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
-                                    <input type="text" id="tx-desc" placeholder="e.g. Swiggy Lunch Order" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-sm">
+                                    <input type="text" id="tx-desc" oninput="suggestMerchantCategory()" placeholder="e.g. Swiggy Lunch Order" required class="w-full glass-input rounded-2xl px-4 py-2.5 text-sm">
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -543,7 +593,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
-                                        <select id="tx-category" class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
+                                        <select id="tx-category" onchange="updateMerchantRuleHint()" class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
                                             <option value="Groceries" class="bg-slate-900">Groceries</option>
                                             <option value="Dining Out" class="bg-slate-900">Dining Out</option>
                                             <option value="Salary" class="bg-slate-900">Salary</option>
@@ -554,6 +604,10 @@
                                             <option value="General" class="bg-slate-900">General</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="rounded-2xl border border-white/5 bg-slate-950/25 px-3 py-2.5">
+                                    <label class="flex items-center gap-2 text-[11px] font-medium text-slate-300"><input id="remember-merchant-category" type="checkbox" onchange="updateMerchantRuleHint()" class="h-4 w-4 rounded border-slate-600">Remember this category for this merchant</label>
+                                    <p id="merchant-rule-hint" class="text-[10px] text-slate-500 mt-1">When selected, future matching transactions use this category automatically.</p>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -955,6 +1009,16 @@
         </main>
     </div>
 
+    <div id="privacy-lock-screen" class="hidden fixed inset-0 z-[120] items-center justify-center bg-slate-950/95 px-5" role="dialog" aria-modal="true" aria-labelledby="privacy-lock-title">
+        <div class="w-full max-w-sm rounded-3xl border border-violet-400/20 bg-slate-900 p-6 text-center shadow-2xl shadow-violet-950/30">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/15 text-2xl text-violet-200"><i class="fa-solid fa-lock"></i></div>
+            <h2 id="privacy-lock-title" class="mt-4 font-display text-xl font-bold text-white">ExpenseFlow is locked</h2>
+            <p class="mt-2 text-xs leading-relaxed text-slate-400">Unlock with your fingerprint or the PIN, pattern, or password set on this phone.</p>
+            <button id="privacy-unlock-button" type="button" onclick="unlockExpenseFlow()" class="mt-5 w-full rounded-2xl bg-violet-500 px-4 py-3 text-sm font-bold text-white hover:bg-violet-400"><i class="fa-solid fa-fingerprint mr-2"></i>Unlock ExpenseFlow</button>
+            <p id="privacy-lock-status" aria-live="polite" class="mt-3 text-[11px] text-slate-400">Your app data stays on this device.</p>
+        </div>
+    </div>
+
     <!-- APPLICATION LOGIC JavaScript -->
     <script>
         // Global State
@@ -967,6 +1031,7 @@
         let smsWatching = false;
         let investmentRefreshTimer = null;
         let investmentRefreshInProgress = false;
+        let privacyLockBackgroundedAt = 0;
 
         // Persistent Collections
         let transactions = JSON.parse(localStorage.getItem('ef_transactions')) || [
@@ -998,13 +1063,18 @@
         ];
 
         let categoryCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { 'Groceries': 15000, 'Dining Out': 8000, 'Transport': 6000, 'Entertainment': 5000 };
+        let accountReconciliations = JSON.parse(localStorage.getItem('ef_account_reconciliations') || '[]');
+        let merchantCategoryRules = JSON.parse(localStorage.getItem('ef_merchant_category_rules') || '{}');
 
         // Initialization
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('dashboard-month').value = getCurrentMonth();
             document.getElementById('sip-start-date').value = localDateString(new Date());
+            document.getElementById('reconcile-opening-date').value = localDateString(new Date());
+            document.getElementById('reconcile-balance-date').value = localDateString(new Date());
             document.getElementById('upstox-analytics-token').value = localStorage.getItem('ef_upstox_analytics_token') || '';
+            initializePrivacyControls();
             sips.forEach(sip => { if (!sip.startDate) sip.startDate = localDateString(new Date()); });
             processDueSipContributions();
             updateLiveClock();
@@ -1013,7 +1083,16 @@
             renderApp();
             startInvestmentPriceAutoRefresh();
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+                if (document.hidden) {
+                    privacyLockBackgroundedAt = Date.now();
+                    return;
+                }
+                refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+                if (localStorage.getItem('ef_privacy_lock_enabled') === 'true' && privacyLockBackgroundedAt && Date.now() - privacyLockBackgroundedAt >= 30000) {
+                    showPrivacyLockScreen();
+                    unlockExpenseFlow();
+                }
+                privacyLockBackgroundedAt = 0;
             });
             setInterval(() => { if (processDueSipContributions()) renderApp(); }, 60000);
             document.addEventListener('onSMSArrive', handleIncomingSMS);
@@ -1093,11 +1172,16 @@
 
         function addTransaction(e) {
             e.preventDefault();
-            const desc = document.getElementById('tx-desc').value;
+            const desc = document.getElementById('tx-desc').value.trim();
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
             const account = document.getElementById('tx-account').value;
             const date = document.getElementById('tx-date').value;
+
+            if (document.getElementById('remember-merchant-category').checked) {
+                const merchantKey = normalizeMerchantKey(desc);
+                if (merchantKey) merchantCategoryRules[merchantKey] = category;
+            }
 
             transactions.unshift({ id: Date.now(), desc, amount, type: txType, category, account, date });
             saveAndRender();
@@ -1127,6 +1211,8 @@
             localStorage.setItem('ef_subscriptions', JSON.stringify(subscriptions));
             localStorage.setItem('ef_goals', JSON.stringify(goals));
             localStorage.setItem('ef_budget_caps', JSON.stringify(categoryCaps));
+            localStorage.setItem('ef_account_reconciliations', JSON.stringify(accountReconciliations));
+            localStorage.setItem('ef_merchant_category_rules', JSON.stringify(merchantCategoryRules));
 
             // Calculators
             const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
@@ -1244,9 +1330,335 @@
             renderSubscriptions();
             renderGoals();
             updateCharts(inc, exp, monthTransactions);
+            renderAccountReconciliations();
+            renderCashflowForecast();
+            renderMerchantCategoryRules();
+            updateDashboardPrivacyButton();
         }
 
         function saveAndRender() { renderApp(); }
+
+        function normalizeMerchantKey(value) {
+            return String(value || '').replace(/^\s*\[sms\]\s*/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function rememberedMerchantCategory(description) {
+            const normalized = normalizeMerchantKey(description);
+            if (!normalized) return null;
+            if (merchantCategoryRules[normalized]) return merchantCategoryRules[normalized];
+            const match = Object.entries(merchantCategoryRules)
+                .filter(([merchant]) => merchant.length >= 3 && normalized.includes(merchant))
+                .sort((a, b) => b[0].length - a[0].length)[0];
+            return match?.[1] || null;
+        }
+
+        function suggestMerchantCategory() {
+            const description = document.getElementById('tx-desc').value;
+            const category = rememberedMerchantCategory(description);
+            if (category && [...document.getElementById('tx-category').options].some(option => option.value === category)) {
+                document.getElementById('tx-category').value = category;
+                document.getElementById('merchant-rule-hint').innerText = `Remembered merchant rule: ${category}. You can still change it.`;
+                return;
+            }
+            updateMerchantRuleHint();
+        }
+
+        function updateMerchantRuleHint() {
+            const description = document.getElementById('tx-desc').value;
+            const matchedCategory = rememberedMerchantCategory(description);
+            const hint = document.getElementById('merchant-rule-hint');
+            if (matchedCategory) hint.innerText = `A saved rule uses ${matchedCategory}; you can change it for this transaction.`;
+            else if (document.getElementById('remember-merchant-category').checked) hint.innerText = `This merchant will be saved as ${document.getElementById('tx-category').value}.`;
+            else hint.innerText = 'When selected, future matching transactions use this category automatically.';
+        }
+
+        function renderMerchantCategoryRules() {
+            const container = document.getElementById('merchant-category-rules');
+            const entries = Object.entries(merchantCategoryRules).sort((a, b) => a[0].localeCompare(b[0]));
+            container.innerHTML = entries.length ? entries.map(([merchant, category], index) => `
+                <div class="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-slate-950/25 px-3 py-2">
+                    <p class="min-w-0 truncate text-xs text-slate-300"><span class="font-semibold text-white">${escapeHtml(merchant)}</span><span class="text-slate-500"> → </span>${escapeHtml(category)}</p>
+                    <button type="button" onclick="deleteMerchantCategoryRule(${index})" aria-label="Delete rule for ${escapeHtml(merchant)}" class="shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-500/10">Remove</button>
+                </div>
+            `).join('') : '<p class="rounded-xl border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-slate-500">No remembered merchant categories yet.</p>';
+        }
+
+        function deleteMerchantCategoryRule(index) {
+            const merchant = Object.keys(merchantCategoryRules).sort((a, b) => a.localeCompare(b))[index];
+            if (!merchant) return;
+            delete merchantCategoryRules[merchant];
+            saveAndRender();
+        }
+
+        function normalizedAccountName(value) {
+            return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function accountTransactionChange(account, transaction) {
+            const amount = Number(transaction.amount) || 0;
+            const isCreditCard = /credit\s*card/i.test(account);
+            if (isCreditCard) return transaction.type === 'income' ? -amount : amount;
+            return transaction.type === 'income' ? amount : -amount;
+        }
+
+        function saveAccountReconciliation(e) {
+            e.preventDefault();
+            const account = document.getElementById('reconcile-account').value.trim();
+            const openingBalance = Number(document.getElementById('reconcile-opening-balance').value);
+            const openingDate = document.getElementById('reconcile-opening-date').value;
+            const currentBalance = Number(document.getElementById('reconcile-current-balance').value);
+            const balanceDate = document.getElementById('reconcile-balance-date').value;
+            const today = localDateString(new Date());
+            if (!account || !openingDate || !balanceDate || !Number.isFinite(openingBalance) || !Number.isFinite(currentBalance) || balanceDate < openingDate || balanceDate > today) {
+                alert('Enter an account, valid balances, and dates. The statement date must be today or earlier and on or after the opening date.');
+                return;
+            }
+            const key = normalizedAccountName(account);
+            const record = { key, account, openingBalance, openingDate, currentBalance, balanceDate };
+            const existingIndex = accountReconciliations.findIndex(item => item.key === key || normalizedAccountName(item.account) === key);
+            if (existingIndex >= 0) accountReconciliations[existingIndex] = record;
+            else accountReconciliations.push(record);
+            e.target.reset();
+            document.getElementById('reconcile-opening-date').value = today;
+            document.getElementById('reconcile-balance-date').value = today;
+            saveAndRender();
+        }
+
+        function loadReconciliationDraft() {
+            const key = normalizedAccountName(document.getElementById('reconcile-account').value);
+            const record = accountReconciliations.find(item => item.key === key || normalizedAccountName(item.account) === key);
+            if (!record) return;
+            document.getElementById('reconcile-opening-balance').value = record.openingBalance;
+            document.getElementById('reconcile-opening-date').value = record.openingDate;
+            document.getElementById('reconcile-current-balance').value = record.currentBalance;
+            document.getElementById('reconcile-balance-date').value = record.balanceDate;
+        }
+
+        function deleteAccountReconciliation(index) {
+            if (!accountReconciliations[index]) return;
+            accountReconciliations.splice(index, 1);
+            saveAndRender();
+        }
+
+        function reconciliationExpectedBalance(record) {
+            const movement = transactions.filter(transaction => normalizedAccountName(transaction.account) === record.key && transaction.date >= record.openingDate && transaction.date <= record.balanceDate)
+                .reduce((sum, transaction) => sum + accountTransactionChange(record.account, transaction), 0);
+            return Number(record.openingBalance || 0) + movement;
+        }
+
+        function renderAccountReconciliations() {
+            const accountList = document.getElementById('known-reconcile-accounts');
+            const names = [...new Set(transactions.map(transaction => String(transaction.account || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            accountList.innerHTML = names.map(name => `<option value="${escapeHtml(name)}"></option>`).join('');
+            const container = document.getElementById('account-reconciliation-list');
+            container.innerHTML = accountReconciliations.length ? accountReconciliations.map((record, index) => {
+                const expected = reconciliationExpectedBalance(record);
+                const difference = Number(record.currentBalance) - expected;
+                const matchingTransactions = transactions.filter(transaction => normalizedAccountName(transaction.account) === record.key && transaction.date >= record.openingDate && transaction.date <= record.balanceDate).length;
+                const message = Math.abs(difference) < 0.01 ? 'Statement matches your ledger' : `Statement is ${difference > 0 ? 'higher' : 'lower'} by ${currSym}${Math.abs(difference).toLocaleString()}`;
+                const color = Math.abs(difference) < 0.01 ? 'text-emerald-300' : 'text-amber-300';
+                const balanceLabel = /credit\s*card/i.test(record.account) ? 'Outstanding balance' : 'Current balance';
+                return `<div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3">
+                    <div class="flex items-start justify-between gap-3"><div class="min-w-0"><h4 class="truncate text-xs font-bold text-white">${escapeHtml(record.account)}</h4><p class="text-[10px] text-slate-500 mt-1">Checked as of ${escapeHtml(record.balanceDate)} · ${matchingTransactions} ledger transactions</p></div><button type="button" onclick="deleteAccountReconciliation(${index})" aria-label="Remove ${escapeHtml(record.account)} balance check" class="shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-500/10">Remove</button></div>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-[10px]"><p class="text-slate-500">Ledger estimate<br><span class="privacy-sensitive-value mt-1 inline-block text-sm font-bold text-slate-200">${currSym}${expected.toLocaleString()}</span></p><p class="text-slate-500">${balanceLabel}<br><span class="privacy-sensitive-value mt-1 inline-block text-sm font-bold text-white">${currSym}${Number(record.currentBalance).toLocaleString()}</span></p></div>
+                    <p class="privacy-sensitive-value mt-2 text-[11px] font-semibold ${color}">${message}</p>
+                </div>`;
+            }).join('') : '<p class="xl:col-span-2 rounded-2xl border border-dashed border-white/10 px-4 py-5 text-center text-[11px] text-slate-500">No accounts reconciled yet. Start with an account’s opening balance and current statement balance.</p>';
+        }
+
+        function nextMonthlyDate(day, referenceDate) {
+            const base = new Date(referenceDate);
+            base.setHours(0, 0, 0, 0);
+            for (let offset = 0; offset < 3; offset++) {
+                const month = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+                const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+                const candidate = new Date(month.getFullYear(), month.getMonth(), Math.min(Math.max(1, Number(day) || 1), lastDay), 12, 0, 0, 0);
+                if (candidate >= base) return candidate;
+            }
+            return null;
+        }
+
+        function hasRecordedOutflow(name, date, amount) {
+            const expectedName = normalizeMerchantKey(name);
+            return transactions.some(transaction => transaction.type === 'expense' && transaction.date === date && Math.abs((Number(transaction.amount) || 0) - amount) < 0.01 && (normalizeMerchantKey(transaction.desc).includes(expectedName) || expectedName.includes(normalizeMerchantKey(transaction.desc))));
+        }
+
+        function renderCashflowForecast() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayKey = localDateString(today);
+            const horizon = new Date(today);
+            horizon.setDate(horizon.getDate() + 30);
+            const horizonKey = localDateString(horizon);
+            const events = [];
+
+            sips.forEach(sip => {
+                const sipReference = sip.startDate && sip.startDate > todayKey ? new Date(`${sip.startDate}T00:00:00`) : today;
+                let due = nextMonthlyDate(sip.date, sipReference);
+                for (let occurrence = 0; due && occurrence < 3; occurrence++) {
+                    const dueKey = localDateString(due);
+                    if (dueKey > horizonKey) break;
+                    const key = `${sip.id}:${dueKey.slice(0, 7)}`;
+                    const amount = Number(sip.amount) || 0;
+                    const name = `${sip.name} SIP`;
+                    if ((!sip.startDate || dueKey >= sip.startDate) && !sipContributions.some(item => item.key === key) && !hasRecordedOutflow(name, dueKey, amount)) {
+                        events.push({ name, date: dueKey, amount, type: 'expense', kind: 'SIP' });
+                    }
+                    due = nextMonthlyDate(sip.date, new Date(due.getFullYear(), due.getMonth() + 1, 1));
+                }
+            });
+
+            subscriptions.forEach(subscription => {
+                if (!subscription.due) return;
+                const reference = new Date(`${subscription.due}T12:00:00`);
+                if (Number.isNaN(reference.getTime())) return;
+                const amount = Number(subscription.cost) || 0;
+                let due = nextMonthlyDate(reference.getDate(), today);
+                for (let occurrence = 0; due && occurrence < 3; occurrence++) {
+                    const dueKey = localDateString(due);
+                    if (dueKey > horizonKey) break;
+                    if (!hasRecordedOutflow(subscription.name, dueKey, amount)) events.push({ name: subscription.name, date: dueKey, amount, type: 'expense', kind: 'Subscription' });
+                    due = nextMonthlyDate(reference.getDate(), new Date(due.getFullYear(), due.getMonth() + 1, 1));
+                }
+            });
+
+            const futureTransactions = transactions.filter(transaction => typeof transaction.date === 'string' && transaction.date > todayKey && transaction.date <= horizonKey);
+            const plannedRecurring = [...events];
+            for (const transaction of futureTransactions) {
+                const amount = Number(transaction.amount) || 0;
+                const description = String(transaction.desc || 'Planned transaction');
+                const normalizedName = normalizeMerchantKey(description);
+                const duplicate = transaction.type === 'expense' && plannedRecurring.some(event => event.date === transaction.date && Math.abs(event.amount - amount) < 0.01 && (normalizedName.includes(normalizeMerchantKey(event.name)) || normalizeMerchantKey(event.name).includes(normalizedName)));
+                if (!duplicate) events.push({ name: description, date: transaction.date, amount, type: transaction.type, kind: 'Planned' });
+            }
+
+            const outflow = events.filter(event => event.type === 'expense').reduce((sum, event) => sum + event.amount, 0);
+            const income = events.filter(event => event.type === 'income').reduce((sum, event) => sum + event.amount, 0);
+            document.getElementById('forecast-outflow').innerText = `${currSym}${outflow.toLocaleString()}`;
+            document.getElementById('forecast-income').innerText = `${currSym}${income.toLocaleString()}`;
+
+            const reconciledAccounts = accountReconciliations;
+            const balanceElement = document.getElementById('forecast-balance');
+            const note = document.getElementById('forecast-note');
+            if (reconciledAccounts.length) {
+                const reconciledNet = reconciledAccounts.reduce((total, record) => total + (/(credit\s*card|loan)/i.test(record.account) ? -1 : 1) * (Number(record.currentBalance) || 0), 0);
+                const movementsSinceCheck = reconciledAccounts.reduce((total, record) => total + transactions.filter(transaction => normalizedAccountName(transaction.account) === record.key && transaction.date > record.balanceDate && transaction.date <= todayKey).reduce((sum, transaction) => sum + (transaction.type === 'income' ? 1 : -1) * (Number(transaction.amount) || 0), 0), 0);
+                const projected = reconciledNet + movementsSinceCheck + income - outflow;
+                balanceElement.innerText = `${currSym}${projected.toLocaleString()}`;
+                const latestCheck = reconciledAccounts.map(record => record.balanceDate).sort().at(-1);
+                note.innerText = `Estimate from ${reconciledAccounts.length} reconciled account${reconciledAccounts.length === 1 ? '' : 's'} (latest statement ${latestCheck}); untracked accounts are excluded.`;
+            } else {
+                balanceElement.innerText = 'Add an account check';
+                note.innerText = 'Reconcile an account to estimate your projected balance. Outflows and known income are still shown.';
+            }
+
+            events.sort((a, b) => a.date.localeCompare(b.date));
+            const eventsContainer = document.getElementById('forecast-events');
+            eventsContainer.innerHTML = events.length ? events.slice(0, 6).map(event => `<div class="flex items-center justify-between gap-3 border-t border-white/5 py-2 text-[10px]"><span class="min-w-0 truncate text-slate-300">${escapeHtml(event.name)} <span class="text-slate-500">· ${event.kind}</span></span><span class="privacy-sensitive-value shrink-0 text-slate-400">${event.date} · ${event.type === 'income' ? '+' : '−'}${currSym}${event.amount.toLocaleString()}</span></div>`).join('') : '<p class="border-t border-white/5 py-3 text-[11px] text-slate-500">No scheduled cash movements in the next 30 days.</p>';
+        }
+
+        function updateDashboardPrivacyButton() {
+            const hidden = localStorage.getItem('ef_hide_dashboard_balances') === 'true';
+            document.getElementById('app-shell').classList.toggle('balances-hidden', hidden);
+            const button = document.getElementById('dashboard-hide-balances');
+            if (button) button.innerHTML = hidden ? '<i class="fa-solid fa-eye mr-1.5"></i>Show balances' : '<i class="fa-solid fa-eye-slash mr-1.5"></i>Hide balances';
+        }
+
+        function toggleDashboardPrivacy() {
+            const hidden = localStorage.getItem('ef_hide_dashboard_balances') !== 'true';
+            localStorage.setItem('ef_hide_dashboard_balances', String(hidden));
+            updateDashboardPrivacyButton();
+        }
+
+        function privacyBiometricPlugin() {
+            return window.Capacitor?.Plugins?.BiometricAuthNative || window.Capacitor?.registerPlugin?.('BiometricAuthNative');
+        }
+
+        async function authenticateWithDevice() {
+            if (!window.Capacitor?.isNativePlatform?.()) throw new Error('App lock is available in the installed Android app.');
+            const plugin = privacyBiometricPlugin();
+            if (!plugin) throw new Error('The biometric plugin is missing. Install the latest Android build.');
+            const availability = await plugin.checkBiometry();
+            if (!availability.isAvailable && !availability.deviceIsSecure) throw new Error('Set up a fingerprint or screen lock PIN on your phone first.');
+            await plugin.internalAuthenticate({
+                reason: 'Unlock your personal finance data',
+                allowDeviceCredential: true,
+                cancelTitle: 'Cancel',
+                iosFallbackTitle: 'Use passcode',
+                androidTitle: 'Unlock ExpenseFlow',
+                androidSubtitle: 'Verify it is you to view your finances',
+                androidConfirmationRequired: false
+            });
+        }
+
+        function updatePrivacyLockControls() {
+            const enabled = localStorage.getItem('ef_privacy_lock_enabled') === 'true';
+            for (const id of ['privacy-lock-toggle', 'privacy-lock-toggle-mobile']) {
+                const button = document.getElementById(id);
+                if (!button) continue;
+                button.innerHTML = `<i class="fa-solid fa-${enabled ? 'lock' : 'fingerprint'} text-violet-300 mr-2"></i><span>${enabled ? 'Disable app lock' : 'Set up app lock'}</span>`;
+            }
+        }
+
+        function initializePrivacyControls() {
+            updatePrivacyLockControls();
+            updateDashboardPrivacyButton();
+            if (localStorage.getItem('ef_privacy_lock_enabled') === 'true') {
+                showPrivacyLockScreen();
+                setTimeout(unlockExpenseFlow, 250);
+            }
+        }
+
+        async function toggleAppPrivacyLock() {
+            try {
+                await authenticateWithDevice();
+                const enabled = localStorage.getItem('ef_privacy_lock_enabled') === 'true';
+                localStorage.setItem('ef_privacy_lock_enabled', String(!enabled));
+                updatePrivacyLockControls();
+                if (enabled) {
+                    document.getElementById('privacy-lock-screen').classList.add('hidden');
+                    document.getElementById('privacy-lock-screen').classList.remove('flex');
+                    document.documentElement.classList.remove('privacy-start-locked');
+                    document.getElementById('privacy-lock-status').innerText = 'App lock is off.';
+                } else {
+                    document.getElementById('privacy-lock-status').innerText = 'App lock is on. The app will ask for your phone authentication when reopened.';
+                }
+            } catch (error) {
+                alert(error.message || 'Could not update the app lock.');
+            }
+        }
+
+        function showPrivacyLockScreen() {
+            const overlay = document.getElementById('privacy-lock-screen');
+            if (!overlay) return;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            document.documentElement.classList.add('privacy-start-locked');
+        }
+
+        async function unlockExpenseFlow() {
+            if (localStorage.getItem('ef_privacy_lock_enabled') !== 'true') {
+                document.getElementById('privacy-lock-screen').classList.add('hidden');
+                document.getElementById('privacy-lock-screen').classList.remove('flex');
+                document.documentElement.classList.remove('privacy-start-locked');
+                return;
+            }
+            const status = document.getElementById('privacy-lock-status');
+            const button = document.getElementById('privacy-unlock-button');
+            status.innerText = 'Waiting for phone authentication…';
+            button.disabled = true;
+            try {
+                await authenticateWithDevice();
+                document.getElementById('privacy-lock-screen').classList.add('hidden');
+                document.getElementById('privacy-lock-screen').classList.remove('flex');
+                document.documentElement.classList.remove('privacy-start-locked');
+                status.innerText = 'Unlocked.';
+            } catch (error) {
+                status.innerText = error.message || 'Authentication was cancelled. Tap unlock to try again.';
+            } finally {
+                button.disabled = false;
+            }
+        }
 
         // SMS Parser Engine
         function updateSmsDetectionStatus(message, isError = false) {
@@ -1398,7 +1810,7 @@
                     desc: `[SMS] ${merchant}`,
                     amount: amount,
                     type: type,
-                    category: categorizeSms(smsText, type),
+                    category: rememberedMerchantCategory(merchant) || categorizeSms(smsText, type),
                     account: accountSuffix ? `Bank Account ••••${accountSuffix}` : 'UPI / Wallet',
                     date: localDate
                 });
@@ -2200,7 +2612,7 @@
             const data = {};
             for (let index = 0; index < localStorage.length; index++) {
                 const key = localStorage.key(index);
-                if (key && key.startsWith('ef_')) data[key] = localStorage.getItem(key);
+                if (key && key.startsWith('ef_') && key !== 'ef_privacy_lock_enabled') data[key] = localStorage.getItem(key);
             }
             const backup = { application: 'ExpenseFlow', formatVersion: 1, exportedAt: new Date().toISOString(), data };
             const file = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
