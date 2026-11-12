@@ -578,6 +578,7 @@
                                             <option value="Utilities" class="bg-slate-900">Utilities</option>
                                             <option value="Entertainment" class="bg-slate-900">Entertainment</option>
                                             <option value="Shopping" class="bg-slate-900">Shopping</option>
+                                            <option value="Loan EMI" class="bg-slate-900">Loan EMI</option>
                                             <option value="General" class="bg-slate-900">General</option>
                                         </select>
                                     </div>
@@ -600,6 +601,11 @@
                                         <label class="block text-xs font-medium text-slate-400 mb-1">Date</label>
                                         <input type="date" id="tx-date" required class="w-full glass-input rounded-2xl px-3 py-2.5 text-sm">
                                     </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Receipt photo <span class="text-slate-500">(optional)</span></label>
+                                    <input type="file" id="tx-receipt" accept="image/*" capture="environment" onchange="showReceiptSelection()" class="w-full text-xs text-slate-400 file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-slate-200">
+                                    <p id="tx-receipt-name" class="mt-1 truncate text-[10px] text-slate-500"></p>
                                 </div>
                                 <button type="submit" class="w-full py-3 mt-2 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold text-sm shadow-lg shadow-teal-500/25 transition-all">
                                     <i class="fa-solid fa-plus mr-2"></i> Log Entry
@@ -644,6 +650,7 @@
                                 <option value="Utilities" class="bg-slate-900">Utilities</option>
                                 <option value="Entertainment" class="bg-slate-900">Entertainment</option>
                                 <option value="Shopping" class="bg-slate-900">Shopping</option>
+                                <option value="Loan EMI" class="bg-slate-900">Loan EMI</option>
                                 <option value="General" class="bg-slate-900">General</option>
                             </select>
                         </div>
@@ -676,6 +683,21 @@
                     <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300">Account utilities</p>
                     <h3 class="font-display font-bold text-2xl text-white mt-1">Money Tools</h3>
                     <p class="text-xs text-slate-400 mt-1">Reconcile balances, review upcoming cash flow, and manage learned merchant categories.</p>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-4">
+                    <div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-400/10 text-amber-200"><i class="fa-solid fa-file-invoice-dollar"></i></span><div><h3 class="text-sm font-bold text-white">Bills and EMI tracker</h3><p class="text-[10px] text-slate-500 mt-1">Track outstanding loan balances, monthly payments, and upcoming due dates.</p></div></div>
+                    <form onsubmit="addLoan(event)" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-2.5">
+                        <input id="loan-name" type="text" placeholder="Loan or bill name" aria-label="Loan or bill name" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="loan-principal" type="number" min="0.01" step="0.01" placeholder="Original amount" aria-label="Original amount" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="loan-remaining" type="number" min="0" step="0.01" placeholder="Remaining balance" aria-label="Remaining balance" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="loan-emi" type="number" min="0.01" step="0.01" placeholder="Monthly payment" aria-label="Monthly payment" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="loan-rate" type="number" min="0" step="0.01" placeholder="Annual interest %" aria-label="Annual interest rate percent" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <input id="loan-due" type="date" aria-label="Next due date" required class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                        <select id="loan-account" aria-label="Payment account" class="glass-input rounded-xl px-3 py-2.5 text-xs"><option>Bank Account</option><option>UPI / Wallet</option><option>Credit Card</option><option>Cash</option></select>
+                        <button type="submit" class="sm:col-span-2 xl:col-span-5 rounded-xl bg-amber-500/20 px-3 py-2.5 text-xs font-bold text-amber-100 hover:bg-amber-500/30"><i class="fa-solid fa-plus mr-1"></i>Add bill or EMI</button>
+                    </form>
+                    <div id="loan-list" class="grid grid-cols-1 xl:grid-cols-2 gap-3"></div>
                 </div>
 
                 <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-4">
@@ -1027,6 +1049,13 @@
         </main>
     </div>
 
+    <div id="receipt-viewer" class="hidden fixed inset-0 z-[110] items-center justify-center bg-slate-950/95 p-4" role="dialog" aria-modal="true" aria-label="Transaction receipt">
+        <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-slate-900 p-4 shadow-2xl">
+            <div class="mb-3 flex items-center justify-between"><h2 class="text-sm font-bold text-white">Receipt</h2><button type="button" onclick="closeReceiptViewer()" class="rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">Close</button></div>
+            <img id="receipt-viewer-image" alt="Attached transaction receipt" class="mx-auto max-h-[75vh] max-w-full rounded-xl object-contain">
+        </div>
+    </div>
+
     <div id="privacy-lock-screen" class="hidden fixed inset-0 z-[120] items-center justify-center bg-slate-950/95 px-5" role="dialog" aria-modal="true" aria-labelledby="privacy-lock-title">
         <div class="w-full max-w-sm rounded-3xl border border-violet-400/20 bg-slate-900 p-6 text-center shadow-2xl shadow-violet-950/30">
             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/15 text-2xl text-violet-200"><i class="fa-solid fa-lock"></i></div>
@@ -1083,6 +1112,8 @@
         let categoryCaps = JSON.parse(localStorage.getItem('ef_budget_caps')) || { 'Groceries': 15000, 'Dining Out': 8000, 'Transport': 6000, 'Entertainment': 5000 };
         let accountReconciliations = JSON.parse(localStorage.getItem('ef_account_reconciliations') || '[]');
         let merchantCategoryRules = JSON.parse(localStorage.getItem('ef_merchant_category_rules') || '{}');
+        let loans = JSON.parse(localStorage.getItem('ef_loans') || '[]');
+        let receiptViewerUrl = null;
 
         // Initialization
         window.addEventListener('DOMContentLoaded', () => {
@@ -1188,7 +1219,82 @@
             setTxType('expense');
         }
 
-        function addTransaction(e) {
+        function showReceiptSelection() {
+            const file = document.getElementById('tx-receipt').files[0];
+            document.getElementById('tx-receipt-name').innerText = file ? file.name : '';
+        }
+
+        function openReceiptDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('expenseflow-receipts', 1);
+                request.onupgradeneeded = () => {
+                    if (!request.result.objectStoreNames.contains('receipts')) request.result.createObjectStore('receipts', { keyPath: 'id' });
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error || new Error('Could not open receipt storage.'));
+            });
+        }
+
+        async function saveReceipt(id, blob) {
+            const database = await openReceiptDatabase();
+            try {
+                await new Promise((resolve, reject) => {
+                    const request = database.transaction('receipts', 'readwrite').objectStore('receipts').put({ id: String(id), blob });
+                    request.onsuccess = resolve;
+                    request.onerror = () => reject(request.error || new Error('Could not save receipt.'));
+                });
+            } finally { database.close(); }
+        }
+
+        async function getReceipt(id) {
+            const database = await openReceiptDatabase();
+            try {
+                return await new Promise((resolve, reject) => {
+                    const request = database.transaction('receipts').objectStore('receipts').get(String(id));
+                    request.onsuccess = () => resolve(request.result && request.result.blob);
+                    request.onerror = () => reject(request.error || new Error('Could not load receipt.'));
+                });
+            } finally { database.close(); }
+        }
+
+        async function deleteReceipt(id) {
+            const database = await openReceiptDatabase();
+            try {
+                await new Promise((resolve, reject) => {
+                    const request = database.transaction('receipts', 'readwrite').objectStore('receipts').delete(String(id));
+                    request.onsuccess = resolve;
+                    request.onerror = () => reject(request.error || new Error('Could not remove receipt.'));
+                });
+            } finally { database.close(); }
+        }
+
+        async function getAllReceipts() {
+            const database = await openReceiptDatabase();
+            try {
+                return await new Promise((resolve, reject) => {
+                    const request = database.transaction('receipts').objectStore('receipts').getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error || new Error('Could not read receipts.'));
+                });
+            } finally { database.close(); }
+        }
+
+        async function compressReceipt(file) {
+            if (!file.type.startsWith('image/')) throw new Error('Choose an image for the receipt.');
+            if (file.size > 15 * 1024 * 1024) throw new Error('Receipt images must be smaller than 15 MB.');
+            try {
+                const bitmap = await createImageBitmap(file);
+                const scale = Math.min(1, 1440 / Math.max(bitmap.width, bitmap.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(bitmap.width * scale);
+                canvas.height = Math.round(bitmap.height * scale);
+                canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                bitmap.close();
+                return await new Promise(resolve => canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', 0.78));
+            } catch (_) { return file; }
+        }
+
+        async function addTransaction(e) {
             e.preventDefault();
             const desc = document.getElementById('tx-desc').value.trim();
             const amount = parseFloat(document.getElementById('tx-amount').value);
@@ -1201,14 +1307,115 @@
                 if (merchantKey) merchantCategoryRules[merchantKey] = category;
             }
 
-            transactions.unshift({ id: Date.now(), desc, amount, type: txType, category, account, date });
+            const id = Date.now();
+            const receiptFile = document.getElementById('tx-receipt').files[0];
+            try {
+                if (receiptFile) await saveReceipt(id, await compressReceipt(receiptFile));
+            } catch (error) {
+                alert(error.message || 'Could not save the receipt. The transaction was not added.');
+                return;
+            }
+            transactions.unshift({ id, desc, amount, type: txType, category, account, date, ...(receiptFile ? { receiptId: id } : {}) });
             saveAndRender();
             document.getElementById('tx-form').reset();
             document.getElementById('tx-date').valueAsDate = new Date();
+            showReceiptSelection();
         }
 
-        function deleteTx(id) {
+        async function deleteTx(id) {
+            if (transactions.some(transaction => transaction.id === id && transaction.receiptId)) {
+                try { await deleteReceipt(id); } catch (error) { console.warn('Receipt cleanup failed:', error); }
+            }
             transactions = transactions.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        async function viewReceipt(id) {
+            try {
+                const blob = await getReceipt(id);
+                if (!blob) return alert('This receipt is not available on this device. Restore it from a backup if you have one.');
+                closeReceiptViewer();
+                receiptViewerUrl = URL.createObjectURL(blob);
+                document.getElementById('receipt-viewer-image').src = receiptViewerUrl;
+                document.getElementById('receipt-viewer').classList.remove('hidden');
+                document.getElementById('receipt-viewer').classList.add('flex');
+            } catch (_) { alert('Could not open this receipt.'); }
+        }
+
+        function closeReceiptViewer() {
+            document.getElementById('receipt-viewer').classList.add('hidden');
+            document.getElementById('receipt-viewer').classList.remove('flex');
+            document.getElementById('receipt-viewer-image').removeAttribute('src');
+            if (receiptViewerUrl) URL.revokeObjectURL(receiptViewerUrl);
+            receiptViewerUrl = null;
+        }
+
+        function addLoan(event) {
+            event.preventDefault();
+            const principal = Number(document.getElementById('loan-principal').value);
+            const remaining = Number(document.getElementById('loan-remaining').value);
+            const emi = Number(document.getElementById('loan-emi').value);
+            const name = document.getElementById('loan-name').value.trim();
+            const dueDate = document.getElementById('loan-due').value;
+            const rate = Number(document.getElementById('loan-rate').value) || 0;
+            if (!name || !Number.isFinite(principal) || principal <= 0 || !Number.isFinite(remaining) || remaining < 0 || remaining > principal || !Number.isFinite(emi) || emi <= 0 || !Number.isFinite(rate) || rate < 0 || !dueDate) return alert('Enter valid loan amounts and a due date. Remaining balance cannot exceed the original amount.');
+            loans.unshift({ id: Date.now(), name, principal, remaining, emi, rate, dueDate, account: document.getElementById('loan-account').value, lastPaidDate: '' });
+            event.target.reset();
+            saveAndRender();
+        }
+
+        function shiftMonthlyDate(dateString) {
+            const date = new Date(`${dateString}T12:00:00`);
+            const day = date.getDate();
+            date.setDate(1);
+            date.setMonth(date.getMonth() + 1);
+            date.setDate(Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()));
+            return localDateString(date);
+        }
+
+        function renderLoans() {
+            const container = document.getElementById('loan-list');
+            container.innerHTML = loans.length ? loans.map(loan => {
+                const principal = Number(loan.principal) || 0;
+                const remaining = Number(loan.remaining) || 0;
+                const progress = principal > 0 ? Math.min(100, Math.max(0, ((principal - remaining) / principal) * 100)) : 0;
+                const paidToday = loan.lastPaidDate === localDateString(new Date());
+                return `<article class="rounded-2xl border border-white/10 bg-slate-950/30 p-4 space-y-3"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h4 class="truncate text-sm font-bold text-white">${escapeHtml(loan.name)}</h4><p class="mt-1 text-[10px] text-slate-400">${Number(loan.rate) ? `${Number(loan.rate)}% interest` : 'Interest rate not set'} · ${escapeHtml(loan.account || 'Bank Account')}</p></div><button type="button" onclick="deleteLoan(${Number(loan.id)})" aria-label="Delete ${escapeHtml(loan.name)}" class="rounded-lg px-2 py-1 text-slate-500 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></div><div class="grid grid-cols-2 gap-3"><div><p class="text-[10px] text-slate-500">Outstanding</p><p class="privacy-sensitive-value text-base font-bold text-white">${currSym}${remaining.toLocaleString()}</p></div><div><p class="text-[10px] text-slate-500">Monthly payment</p><p class="privacy-sensitive-value text-base font-bold text-amber-200">${currSym}${Number(loan.emi).toLocaleString()}</p></div></div><div class="h-1.5 overflow-hidden rounded-full bg-white/10"><div class="h-full rounded-full bg-amber-400" style="width:${progress}%"></div></div><div class="flex items-center justify-between gap-2"><p class="text-[10px] text-slate-400">Next due ${escapeHtml(loan.dueDate || 'date not set')}</p><button type="button" onclick="recordLoanPayment(${Number(loan.id)})" ${remaining <= 0 || paidToday ? 'disabled' : ''} class="rounded-xl bg-amber-500/15 px-3 py-2 text-[10px] font-bold text-amber-100 disabled:opacity-40">${paidToday ? 'Paid today' : 'Record payment'}</button></div><details><summary class="cursor-pointer text-[10px] font-semibold text-slate-400">Edit loan details</summary><form onsubmit="updateLoan(event, ${Number(loan.id)})" class="mt-2 grid grid-cols-2 gap-2"><input name="remaining" type="number" min="0" max="${principal}" step="0.01" value="${remaining}" aria-label="Remaining balance" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="emi" type="number" min="0.01" step="0.01" value="${Number(loan.emi) || 0}" aria-label="Monthly payment" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="rate" type="number" min="0" step="0.01" value="${Number(loan.rate) || 0}" aria-label="Annual interest rate" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="dueDate" type="date" value="${escapeHtml(loan.dueDate || '')}" aria-label="Next due date" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><button type="submit" class="col-span-2 rounded-lg bg-white/10 px-3 py-2 text-[10px] font-bold text-slate-200">Save updates</button></form></details><p class="text-[9px] leading-relaxed text-slate-500">Record only after payment. Principal reduction is estimated using the interest rate entered.</p></article>`;
+            }).join('') : '<p class="rounded-2xl border border-dashed border-white/10 p-4 text-[11px] text-slate-500 sm:col-span-2">No bills or EMIs added yet.</p>';
+        }
+
+        function deleteLoan(id) {
+            loans = loans.filter(loan => loan.id !== id);
+            saveAndRender();
+        }
+
+        function updateLoan(event, id) {
+            event.preventDefault();
+            const loan = loans.find(item => item.id === id);
+            if (!loan) return;
+            const form = event.target;
+            const remaining = Number(form.elements.remaining.value);
+            const emi = Number(form.elements.emi.value);
+            const rate = Number(form.elements.rate.value) || 0;
+            const dueDate = form.elements.dueDate.value;
+            if (!Number.isFinite(remaining) || remaining < 0 || remaining > Number(loan.principal) || !Number.isFinite(emi) || emi <= 0 || !Number.isFinite(rate) || rate < 0 || !dueDate) return alert('Enter valid balance, payment, interest rate, and due date.');
+            Object.assign(loan, { remaining, emi, rate, dueDate });
+            saveAndRender();
+        }
+
+        function recordLoanPayment(id) {
+            const loan = loans.find(item => item.id === id);
+            if (!loan || Number(loan.remaining) <= 0) return;
+            const today = localDateString(new Date());
+            if (loan.lastPaidDate === today) return alert('A payment for this bill or EMI was already recorded today.');
+            const payment = Number(loan.emi) || 0;
+            if (payment <= 0) return alert('Set a monthly payment before recording it.');
+            const interest = (Number(loan.remaining) || 0) * (Number(loan.rate) || 0) / 1200;
+            const principalPaid = Math.min(Number(loan.remaining), Math.max(0, payment - interest));
+            loan.remaining = Math.max(0, Number(loan.remaining) - principalPaid);
+            loan.lastPaidDate = today;
+            loan.dueDate = shiftMonthlyDate(loan.dueDate || today);
+            transactions.unshift({ id: Date.now(), desc: `EMI · ${loan.name}`, amount: payment, type: 'expense', category: 'Loan EMI', account: loan.account || 'Bank Account', date: today });
             saveAndRender();
         }
 
@@ -1231,6 +1438,7 @@
             localStorage.setItem('ef_budget_caps', JSON.stringify(categoryCaps));
             localStorage.setItem('ef_account_reconciliations', JSON.stringify(accountReconciliations));
             localStorage.setItem('ef_merchant_category_rules', JSON.stringify(merchantCategoryRules));
+            localStorage.setItem('ef_loans', JSON.stringify(loans));
 
             // Calculators
             const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
@@ -1335,7 +1543,7 @@
                     <td class="dashboard-secondary-column p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10">${t.category}</span></td>
                     <td class="dashboard-secondary-column p-3.5 text-slate-400">${t.account}</td>
                     <td class="p-3.5 font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">${t.type === 'income' ? '+' : '-'}${currSym}${t.amount.toLocaleString()}</td>
-                    <td class="p-3.5 text-right"><button onclick="deleteTx(${t.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="p-3.5 text-right"><div class="flex justify-end gap-3">${t.receiptId ? `<button onclick="viewReceipt(${Number(t.receiptId)})" aria-label="View receipt" class="text-amber-300 hover:text-amber-100"><i class="fa-solid fa-receipt"></i></button>` : ''}<button onclick="deleteTx(${Number(t.id)})" aria-label="Delete transaction" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></div></td>
                 </tr>
             `).join('');
 
@@ -1349,6 +1557,7 @@
             renderGoals();
             updateCharts(inc, exp, monthTransactions);
             renderAccountReconciliations();
+            renderLoans();
             renderCashflowForecast();
             renderMerchantCategoryRules();
             updateDashboardPrivacyButton();
@@ -1536,6 +1745,20 @@
                     const dueKey = localDateString(due);
                     if (dueKey > horizonKey) break;
                     if (!hasRecordedOutflow(subscription.name, dueKey, amount)) events.push({ name: subscription.name, date: dueKey, amount, type: 'expense', kind: 'Subscription' });
+                    due = nextMonthlyDate(reference.getDate(), new Date(due.getFullYear(), due.getMonth() + 1, 1));
+                }
+            });
+
+            loans.forEach(loan => {
+                if (!(Number(loan.remaining) > 0) || !(Number(loan.emi) > 0) || !loan.dueDate) return;
+                const reference = new Date(`${loan.dueDate}T12:00:00`);
+                if (Number.isNaN(reference.getTime())) return;
+                let due = reference < today ? nextMonthlyDate(reference.getDate(), today) : reference;
+                for (let occurrence = 0; due && occurrence < 2; occurrence++) {
+                    const dueKey = localDateString(due);
+                    if (dueKey > horizonKey) break;
+                    const name = `${loan.name} EMI`;
+                    if (!hasRecordedOutflow(name, dueKey, Number(loan.emi))) events.push({ name, date: dueKey, amount: Number(loan.emi), type: 'expense', kind: 'EMI' });
                     due = nextMonthlyDate(reference.getDate(), new Date(due.getFullYear(), due.getMonth() + 1, 1));
                 }
             });
@@ -2626,13 +2849,34 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
-        function exportDataBackup() {
+        function blobToDataUrl(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error || new Error('Could not prepare receipt backup.'));
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function dataUrlToBlob(dataUrl) {
+            const [metadata, encoded] = String(dataUrl).split(',');
+            const mime = (metadata.match(/^data:([^;]+)/) || [])[1] || 'image/jpeg';
+            const binary = atob(encoded || '');
+            const bytes = new Uint8Array(binary.length);
+            for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+            return new Blob([bytes], { type: mime });
+        }
+
+        async function exportDataBackup() {
             const data = {};
             for (let index = 0; index < localStorage.length; index++) {
                 const key = localStorage.key(index);
                 if (key && key.startsWith('ef_') && key !== 'ef_privacy_lock_enabled') data[key] = localStorage.getItem(key);
             }
-            const backup = { application: 'ExpenseFlow', formatVersion: 1, exportedAt: new Date().toISOString(), data };
+            let receipts = [];
+            try { receipts = await Promise.all((await getAllReceipts()).map(async item => ({ id: item.id, dataUrl: await blobToDataUrl(item.blob) }))); }
+            catch (error) { alert(error.message || 'Could not include receipts in this backup.'); return; }
+            const backup = { application: 'ExpenseFlow', formatVersion: 1, exportedAt: new Date().toISOString(), data, receipts };
             const file = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(file);
             const link = document.createElement('a');
@@ -2648,19 +2892,24 @@
             const file = event.target.files && event.target.files[0];
             event.target.value = '';
             if (!file) return;
-            if (file.size > 20 * 1024 * 1024) {
+            if (file.size > 100 * 1024 * 1024) {
                 alert('This backup file is too large to restore.');
                 return;
             }
             try {
                 const backup = JSON.parse(await file.text());
-                if (backup.application !== 'ExpenseFlow' || backup.formatVersion !== 1 || !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)) {
+                if (backup.application !== 'ExpenseFlow' || backup.formatVersion !== 1 || !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data) || (backup.receipts !== undefined && !Array.isArray(backup.receipts))) {
                     throw new Error('This file is not a supported ExpenseFlow backup.');
                 }
                 const entries = Object.entries(backup.data).filter(([key, value]) => key.startsWith('ef_') && typeof value === 'string');
                 if (!entries.length) throw new Error('The backup does not contain ExpenseFlow data.');
-                if (!confirm(`Restore ${entries.length} data item(s) from ${file.name}? Matching data on this device will be replaced.`)) return;
+                const receiptCount = (backup.receipts || []).length;
+                if (!confirm(`Restore ${entries.length} data item(s) and ${receiptCount} receipt photo(s) from ${file.name}? Matching data on this device will be replaced.`)) return;
                 entries.forEach(([key, value]) => localStorage.setItem(key, value));
+                for (const receipt of (backup.receipts || [])) {
+                    if (!receipt || receipt.id === undefined || typeof receipt.dataUrl !== 'string' || !receipt.dataUrl.startsWith('data:image/')) throw new Error('A receipt in this backup is invalid.');
+                    await saveReceipt(receipt.id, dataUrlToBlob(receipt.dataUrl));
+                }
                 alert('Backup restored. ExpenseFlow will reload your data now.');
                 location.reload();
             } catch (error) {
