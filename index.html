@@ -858,7 +858,7 @@
                     <div class="absolute -right-8 -top-12 h-44 w-44 rounded-full bg-cyan-400/10 blur-2xl"></div>
                     <div class="relative">
                         <div class="flex items-center justify-between gap-3 mb-4">
-                            <div><p class="text-xs font-semibold uppercase tracking-widest text-cyan-100/70">Portfolio overview</p><p class="mt-1 text-[10px] text-slate-400">SIPs and one-time holdings together</p></div>
+                            <div><p class="text-xs font-semibold uppercase tracking-widest text-cyan-100/70">Portfolio overview</p><p class="mt-1 text-[10px] text-slate-400">Stocks, funds, SIPs, and fixed income together</p></div>
                             <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200 text-xl"><i class="fa-solid fa-chart-line"></i></span>
                         </div>
                         <p class="text-[10px] uppercase tracking-wide text-slate-400">Current market value</p>
@@ -877,6 +877,31 @@
                 <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
                     <div class="flex items-center justify-between gap-3"><div><h4 class="text-sm font-bold text-white">Portfolio allocation</h4><p class="text-[10px] text-slate-500 mt-1">Based on the current values of your saved holdings.</p></div><i class="fa-solid fa-chart-pie text-violet-300"></i></div>
                     <div id="investment-allocation" class="space-y-3"></div>
+                </div>
+
+                <details class="glass-panel rounded-3xl p-4 sm:p-5">
+                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3"><span><span class="block text-sm font-bold text-white">Maturity tracker</span><span id="fixed-income-count" class="block mt-1 text-[10px] text-slate-500">Track FDs, bonds, and maturity dates</span></span><i class="fa-solid fa-calendar-check text-amber-300"></i></summary>
+                    <div class="mt-4 space-y-4">
+                        <p class="text-[10px] leading-relaxed text-slate-500">Add the value you currently know and expected maturity proceeds. The app does not estimate interest; update values from your statement.</p>
+                        <form onsubmit="addFixedIncomeInvestment(event)" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 rounded-2xl border border-white/5 bg-slate-950/25 p-3.5">
+                            <input id="fixed-name" type="text" required placeholder="Investment name (FD / bond)" aria-label="Investment name" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-institution" type="text" placeholder="Bank or issuer" aria-label="Bank or issuer" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-invested" type="number" min="0.01" step="0.01" required placeholder="Amount invested" aria-label="Amount invested" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-current-value" type="number" min="0" step="0.01" placeholder="Current value (optional)" aria-label="Current value" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-maturity-value" type="number" min="0" step="0.01" placeholder="Expected maturity amount (optional)" aria-label="Expected maturity amount" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-rate" type="number" min="0" step="0.01" placeholder="Annual rate % (optional)" aria-label="Annual interest rate" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-start-date" type="date" required aria-label="Investment start date" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <input id="fixed-maturity-date" type="date" required aria-label="Maturity date" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                            <button type="submit" class="sm:col-span-2 xl:col-span-4 rounded-xl bg-amber-500/15 px-3 py-2.5 text-xs font-bold text-amber-100"><i class="fa-solid fa-plus mr-1"></i>Add maturity</button>
+                        </form>
+                        <div id="fixed-income-list" class="grid grid-cols-1 xl:grid-cols-2 gap-3"></div>
+                    </div>
+                </details>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h4 class="text-sm font-bold text-white">Monthly investment report</h4><p class="text-[10px] text-slate-500 mt-1">Selected-month activity plus your current portfolio snapshot.</p></div><div class="flex items-center gap-2"><input id="investment-report-month" type="month" onchange="renderInvestmentReport()" aria-label="Report month" class="glass-input rounded-xl px-3 py-2 text-xs"><button type="button" onclick="downloadInvestmentReport()" class="rounded-xl bg-teal-500/15 px-3 py-2 text-[10px] font-bold text-teal-100"><i class="fa-solid fa-download mr-1"></i>Download CSV</button></div></div>
+                    <p class="text-[9px] text-slate-500">Past month-end market values are not stored, so the report labels current values with today’s date.</p>
+                    <div id="investment-report-summary" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2"></div>
                 </div>
 
                 <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
@@ -992,7 +1017,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h3 class="font-display font-bold text-lg text-white">Bill &amp; SIP Calendar</h3>
-                            <p class="text-xs text-slate-400 mt-1">See upcoming subscription due dates and monthly SIPs.</p>
+                            <p class="text-xs text-slate-400 mt-1">See subscription dues, monthly SIPs, and investment maturities.</p>
                         </div>
                         <div class="flex items-center gap-2 self-start sm:self-auto">
                             <button type="button" onclick="changeCalendarMonth(-1)" aria-label="Previous month" class="w-9 h-9 rounded-xl glass-card text-slate-300 hover:text-white hover:bg-white/10"><i class="fa-solid fa-chevron-left"></i></button>
@@ -1010,6 +1035,7 @@
                     <div class="flex flex-wrap gap-x-5 gap-y-2 border-t border-white/10 pt-4 text-[11px] text-slate-400">
                         <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-teal-400"></i>SIP investment</span>
                         <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-cyan-400"></i>Subscription due</span>
+                        <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-amber-400"></i>Investment maturity</span>
                         <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-teal-400"></i>Today</span>
                     </div>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 border-t border-white/10 pt-5">
@@ -1167,6 +1193,7 @@
         let loans = JSON.parse(localStorage.getItem('ef_loans') || '[]');
         let dividends = JSON.parse(localStorage.getItem('ef_dividends') || '[]');
         let investmentCosts = JSON.parse(localStorage.getItem('ef_investment_costs') || '[]');
+        let fixedIncomeInvestments = JSON.parse(localStorage.getItem('ef_fixed_income') || '[]');
         let receiptViewerUrl = null;
 
         // Initialization
@@ -1178,6 +1205,11 @@
             document.getElementById('investment-date').valueAsDate = new Date();
             document.getElementById('dividend-date').valueAsDate = new Date();
             document.getElementById('investment-cost-date').valueAsDate = new Date();
+            document.getElementById('fixed-start-date').valueAsDate = new Date();
+            const defaultMaturityDate = new Date();
+            defaultMaturityDate.setFullYear(defaultMaturityDate.getFullYear() + 1);
+            document.getElementById('fixed-maturity-date').value = localDateString(defaultMaturityDate);
+            document.getElementById('investment-report-month').value = getCurrentMonth();
             document.getElementById('reconcile-opening-date').value = localDateString(new Date());
             document.getElementById('reconcile-balance-date').value = localDateString(new Date());
             document.getElementById('upstox-analytics-token').value = localStorage.getItem('ef_upstox_analytics_token') || '';
@@ -1500,6 +1532,7 @@
             localStorage.setItem('ef_loans', JSON.stringify(loans));
             localStorage.setItem('ef_dividends', JSON.stringify(dividends));
             localStorage.setItem('ef_investment_costs', JSON.stringify(investmentCosts));
+            localStorage.setItem('ef_fixed_income', JSON.stringify(fixedIncomeInvestments));
 
             // Calculators
             const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
@@ -1612,6 +1645,8 @@
             renderSIPs();
             renderOneTimeInvestments();
             renderInvestmentTrackers();
+            renderFixedIncomeInvestments();
+            renderInvestmentReport();
             renderCalendar();
             renderSplitter();
             renderBudgets();
@@ -1825,13 +1860,19 @@
                 }
             });
 
+            fixedIncomeInvestments.forEach(item => {
+                if (!item.maturityDate || item.maturityDate < todayKey || item.maturityDate > horizonKey) return;
+                const amount = Number(item.maturityValue) || Number(item.currentValue) || 0;
+                if (amount > 0) events.push({ name: `${item.name} maturity proceeds (estimate)`, date: item.maturityDate, amount, type: 'income', kind: 'Maturity' });
+            });
+
             const futureTransactions = transactions.filter(transaction => typeof transaction.date === 'string' && transaction.date > todayKey && transaction.date <= horizonKey);
             const plannedRecurring = [...events];
             for (const transaction of futureTransactions) {
                 const amount = Number(transaction.amount) || 0;
                 const description = String(transaction.desc || 'Planned transaction');
                 const normalizedName = normalizeMerchantKey(description);
-                const duplicate = transaction.type === 'expense' && plannedRecurring.some(event => event.date === transaction.date && Math.abs(event.amount - amount) < 0.01 && (normalizedName.includes(normalizeMerchantKey(event.name)) || normalizeMerchantKey(event.name).includes(normalizedName)));
+                const duplicate = plannedRecurring.some(event => event.type === transaction.type && event.date === transaction.date && Math.abs(event.amount - amount) < 0.01 && (normalizedName.includes(normalizeMerchantKey(event.name)) || normalizeMerchantKey(event.name).includes(normalizedName)));
                 if (!duplicate) events.push({ name: description, date: transaction.date, amount, type: transaction.type, kind: 'Planned' });
             }
 
@@ -2231,8 +2272,9 @@
         function renderSIPs() {
             const total = sips.reduce((sum, sip) => sum + (Number(sip.amount) || 0), 0);
             const sipInvested = sips.reduce((sum, sip) => sum + (Number(sip.invested) || 0), 0) + sipContributions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-            const investedTotal = sipInvested + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
-            const currentTotal = sips.reduce((sum, sip) => sum + (Number(sip.currentValue) || 0), 0) + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const fixedInvested = fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
+            const investedTotal = sipInvested + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0) + fixedInvested;
+            const currentTotal = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
             const dividendTotal = dividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
             const loggedCosts = investmentCosts.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
             const gainLoss = currentTotal - investedTotal + dividendTotal;
@@ -2240,7 +2282,7 @@
             document.getElementById('sip-total-monthly').innerText = `${currSym}${total.toLocaleString()}/mo`;
             document.getElementById('sip-total-invested').innerText = `${currSym}${investedTotal.toLocaleString()}`;
             document.getElementById('sip-current-value').innerText = `${currSym}${currentTotal.toLocaleString()}`;
-            document.getElementById('portfolio-holding-count').innerText = String(sips.length + oneTimeInvestments.length);
+            document.getElementById('portfolio-holding-count').innerText = String(sips.length + oneTimeInvestments.length + fixedIncomeInvestments.length);
             const gainLossElement = document.getElementById('sip-gain-loss');
             gainLossElement.innerText = `${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}`;
             gainLossElement.className = `text-sm font-bold mt-1 ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
@@ -2677,6 +2719,7 @@
         function investmentHoldingLabel(type, id) {
             if (type === 'sip') return sips.find(item => Number(item.id) === Number(id))?.name || '';
             if (type === 'holding') return oneTimeInvestments.find(item => Number(item.id) === Number(id))?.name || '';
+            if (type === 'fixed') return fixedIncomeInvestments.find(item => Number(item.id) === Number(id))?.name || '';
             return '';
         }
 
@@ -2684,7 +2727,8 @@
             const options = [];
             const holdings = [
                 ...sips.map(item => ({ type: 'sip', id: item.id, name: `${item.name} · SIP` })),
-                ...oneTimeInvestments.map(item => ({ type: 'holding', id: item.id, name: item.name }))
+                ...oneTimeInvestments.map(item => ({ type: 'holding', id: item.id, name: item.name })),
+                ...fixedIncomeInvestments.map(item => ({ type: 'fixed', id: item.id, name: `${item.name} · fixed income` }))
             ];
             if (selectedValue && !holdings.some(item => `${item.type}:${item.id}` === selectedValue)) {
                 options.push(`<option value="${escapeHtml(selectedValue)}" selected>${escapeHtml(archivedName || 'Removed holding')} · archived</option>`);
@@ -2758,11 +2802,152 @@
             saveAndRender();
         }
 
+        function addFixedIncomeInvestment(event) {
+            event.preventDefault();
+            const name = document.getElementById('fixed-name').value.trim();
+            const invested = Number(document.getElementById('fixed-invested').value);
+            const currentInput = document.getElementById('fixed-current-value').value;
+            const maturityInput = document.getElementById('fixed-maturity-value').value;
+            const currentValue = currentInput === '' ? invested : Number(currentInput);
+            const maturityValue = maturityInput === '' ? 0 : Number(maturityInput);
+            const rate = Number(document.getElementById('fixed-rate').value) || 0;
+            const startDate = document.getElementById('fixed-start-date').value;
+            const maturityDate = document.getElementById('fixed-maturity-date').value;
+            if (!name || !Number.isFinite(invested) || invested <= 0 || !Number.isFinite(currentValue) || currentValue < 0 || !Number.isFinite(maturityValue) || maturityValue < 0 || !Number.isFinite(rate) || rate < 0 || !startDate || !maturityDate || maturityDate <= startDate) return alert('Enter a name, valid amounts, and a maturity date after the start date.');
+            fixedIncomeInvestments.push({ id: Date.now(), name, institution: document.getElementById('fixed-institution').value.trim(), invested, currentValue, maturityValue, rate, startDate, maturityDate });
+            event.target.reset();
+            document.getElementById('fixed-start-date').valueAsDate = new Date();
+            const defaultMaturityDate = new Date();
+            defaultMaturityDate.setFullYear(defaultMaturityDate.getFullYear() + 1);
+            document.getElementById('fixed-maturity-date').value = localDateString(defaultMaturityDate);
+            saveAndRender();
+        }
+
+        function updateFixedIncomeInvestment(event, id) {
+            event.preventDefault();
+            const item = fixedIncomeInvestments.find(holding => Number(holding.id) === id);
+            if (!item) return;
+            const name = event.target.elements.name.value.trim();
+            const invested = Number(event.target.elements.invested.value);
+            const currentValue = Number(event.target.elements.currentValue.value);
+            const maturityInput = event.target.elements.maturityValue.value;
+            const maturityValue = maturityInput === '' ? 0 : Number(maturityInput);
+            const rate = Number(event.target.elements.rate.value) || 0;
+            const startDate = event.target.elements.startDate.value;
+            const maturityDate = event.target.elements.maturityDate.value;
+            if (!name || !Number.isFinite(invested) || invested <= 0 || !Number.isFinite(currentValue) || currentValue < 0 || !Number.isFinite(maturityValue) || maturityValue < 0 || !Number.isFinite(rate) || rate < 0 || !startDate || !maturityDate || maturityDate <= startDate) return alert('Enter valid values and a maturity date after the start date.');
+            Object.assign(item, { name, institution: event.target.elements.institution.value.trim(), invested, currentValue, maturityValue, rate, startDate, maturityDate });
+            saveAndRender();
+        }
+
+        function deleteFixedIncomeInvestment(id) {
+            fixedIncomeInvestments = fixedIncomeInvestments.filter(item => Number(item.id) !== id);
+            saveAndRender();
+        }
+
+        function renderFixedIncomeInvestments() {
+            const list = document.getElementById('fixed-income-list');
+            const count = document.getElementById('fixed-income-count');
+            count.innerText = `${fixedIncomeInvestments.length} tracked · FDs, bonds, and other fixed-term investments`;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const daysUntil = date => Math.ceil((new Date(`${date}T00:00:00`) - today) / 86400000);
+            const sorted = fixedIncomeInvestments.slice().sort((a, b) => String(a.maturityDate).localeCompare(String(b.maturityDate)));
+            list.innerHTML = sorted.length ? sorted.map(item => {
+                const safeName = escapeHtml(item.name);
+                const days = daysUntil(item.maturityDate);
+                const status = days < 0 ? `Matured ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago` : days === 0 ? 'Matures today' : `Matures in ${days} day${days === 1 ? '' : 's'}`;
+                const statusClass = days < 0 ? 'text-emerald-300' : days <= 30 ? 'text-amber-200' : 'text-slate-400';
+                const maturityAmount = Number(item.maturityValue) || 0;
+                return `<article class="rounded-2xl border border-amber-400/10 bg-slate-950/30 p-4 space-y-3"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h4 class="truncate text-xs font-bold text-white">${safeName}</h4><p class="mt-1 truncate text-[10px] text-slate-500">${escapeHtml(item.institution || 'Issuer not set')} · ${escapeHtml(item.startDate)} to ${escapeHtml(item.maturityDate)}</p></div><button type="button" onclick="deleteFixedIncomeInvestment(${Number(item.id)})" aria-label="Delete ${safeName}" class="rounded-lg px-2 py-1 text-slate-500 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></div><p class="${statusClass} text-[11px] font-semibold"><i class="fa-regular fa-calendar mr-1"></i>${status}</p><div class="grid grid-cols-3 gap-2 text-[10px]"><p class="text-slate-500">Invested<br><span class="privacy-sensitive-value mt-1 inline-block font-bold text-slate-200">${currSym}${Number(item.invested).toLocaleString()}</span></p><p class="text-slate-500">Current value<br><span class="privacy-sensitive-value mt-1 inline-block font-bold text-white">${currSym}${Number(item.currentValue).toLocaleString()}</span></p><p class="text-slate-500">Maturity estimate<br><span class="privacy-sensitive-value mt-1 inline-block font-bold text-amber-200">${maturityAmount ? `${currSym}${maturityAmount.toLocaleString()}` : 'Not entered'}</span></p></div><p class="text-[9px] text-slate-500">${Number(item.rate) ? `${Number(item.rate)}% annual rate · ` : ''}Values are manually entered.</p><details class="border-t border-white/5 pt-2"><summary class="cursor-pointer text-[10px] font-semibold text-amber-200">Edit maturity details</summary><form onsubmit="updateFixedIncomeInvestment(event, ${Number(item.id)})" class="mt-2 grid grid-cols-2 gap-2"><input name="name" type="text" required value="${safeName}" aria-label="Investment name" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="institution" type="text" value="${escapeHtml(item.institution || '')}" aria-label="Issuer" placeholder="Bank or issuer" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="invested" type="number" min="0.01" step="0.01" required value="${Number(item.invested) || 0}" aria-label="Amount invested" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="currentValue" type="number" min="0" step="0.01" required value="${Number(item.currentValue) || 0}" aria-label="Current value" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="maturityValue" type="number" min="0" step="0.01" value="${maturityAmount || ''}" aria-label="Expected maturity amount" placeholder="Maturity amount" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="rate" type="number" min="0" step="0.01" value="${Number(item.rate) || 0}" aria-label="Annual interest rate" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="startDate" type="date" required value="${escapeHtml(item.startDate)}" aria-label="Start date" class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="maturityDate" type="date" required value="${escapeHtml(item.maturityDate)}" aria-label="Maturity date" class="glass-input rounded-lg px-2 py-2 text-[10px]"><button type="submit" class="col-span-2 rounded-lg bg-amber-500/15 px-3 py-2 text-[10px] font-bold text-amber-100">Save changes</button></form></details></article>`;
+            }).join('') : '<p class="rounded-2xl border border-dashed border-white/10 p-4 text-[10px] text-slate-500 xl:col-span-2">No fixed-term investments tracked yet.</p>';
+        }
+
+        function getInvestmentReportData(month) {
+            const monthlySipContributions = sipContributions.filter(item => String(item.date || '').startsWith(`${month}-`));
+            const monthlyPurchases = oneTimeInvestments.filter(item => String(item.date || '').startsWith(`${month}-`));
+            const monthlyFixedInvestments = fixedIncomeInvestments.filter(item => String(item.startDate || '').startsWith(`${month}-`));
+            const monthlyDividends = dividends.filter(item => String(item.date || '').startsWith(`${month}-`));
+            const monthlyCosts = investmentCosts.filter(item => String(item.date || '').startsWith(`${month}-`));
+            const maturityDue = fixedIncomeInvestments.filter(item => String(item.maturityDate || '').startsWith(`${month}-`));
+            const allHoldings = [
+                ...sips.map(item => ({ name: `${item.name} · SIP`, type: 'Mutual fund SIP', invested: (Number(item.invested) || 0) + sipContributions.filter(entry => Number(entry.sipId) === Number(item.id)).reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0), currentValue: Number(item.currentValue) || 0 })),
+                ...oneTimeInvestments.map(item => ({ name: item.name, type: item.marketType === 'mutualFund' ? 'Mutual fund' : 'Stock', invested: Number(item.invested) || 0, currentValue: Number(item.currentValue) || 0 })),
+                ...fixedIncomeInvestments.map(item => ({ name: item.name, type: 'Fixed income', invested: Number(item.invested) || 0, currentValue: Number(item.currentValue) || 0, maturityDate: item.maturityDate, maturityValue: Number(item.maturityValue) || 0 }))
+            ];
+            const invested = allHoldings.reduce((sum, item) => sum + item.invested, 0);
+            const currentValue = allHoldings.reduce((sum, item) => sum + item.currentValue, 0);
+            const dividendsTotal = monthlyDividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const fees = monthlyCosts.filter(item => item.type === 'fee').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const taxes = monthlyCosts.filter(item => item.type === 'tax').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            return {
+                month, allHoldings, invested, currentValue,
+                sipContributions: monthlySipContributions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
+                purchases: monthlyPurchases.reduce((sum, item) => sum + (Number(item.invested) || 0), 0) + monthlyFixedInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0),
+                dividends: dividendsTotal, fees, taxes,
+                maturityDue: maturityDue.reduce((sum, item) => sum + ((Number(item.maturityValue) || 0) || (Number(item.currentValue) || 0)), 0),
+                asOf: localDateString(new Date())
+            };
+        }
+
+        function renderInvestmentReport() {
+            const input = document.getElementById('investment-report-month');
+            if (!input) return;
+            const month = input.value || getCurrentMonth();
+            const report = getInvestmentReportData(month);
+            const cards = [
+                ['SIP payments', report.sipContributions], ['Purchases', report.purchases], ['Dividends', report.dividends],
+                ['Fees', report.fees], ['Taxes paid', report.taxes], ['Maturities due*', report.maturityDue],
+                [`Current value · ${report.asOf}`, report.currentValue], ['Total invested', report.invested]
+            ];
+            document.getElementById('investment-report-summary').innerHTML = cards.map(([label, amount]) => `<div class="rounded-xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[9px] uppercase tracking-wide text-slate-500">${label}</p><p class="privacy-sensitive-value mt-1 text-xs font-bold text-slate-100">${currSym}${Number(amount).toLocaleString()}</p></div>`).join('');
+        }
+
+        function downloadInvestmentReport() {
+            const month = document.getElementById('investment-report-month').value || getCurrentMonth();
+            const report = getInvestmentReportData(month);
+            const monthName = new Date(`${month}-01T12:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+            const rows = [
+                ['ExpenseFlow Monthly Investment Report', monthName],
+                ['Current valuation as of', report.asOf],
+                ['SIP contributions recorded', report.sipContributions, currSym],
+                ['Stocks and fund purchases recorded', report.purchases, currSym],
+                ['Dividends recorded', report.dividends, currSym],
+                ['Fees recorded', report.fees, currSym],
+                ['Taxes paid and recorded', report.taxes, currSym],
+                ['Maturities due in selected month (estimate)', report.maturityDue, currSym],
+                ['Current portfolio value', report.currentValue, currSym],
+                ['Total invested', report.invested, currSym],
+                [],
+                ['Current holding', 'Type', 'Invested', 'Current value', 'Maturity date', 'Expected maturity amount', 'Currency'],
+                ...report.allHoldings.map(item => [item.name, item.type, item.invested, item.currentValue, item.maturityDate || '', item.maturityValue || '', currSym]),
+                [],
+                ['Activity type', 'Date', 'Holding', 'Amount', 'Currency'],
+                ...sipContributions.filter(item => String(item.date || '').startsWith(`${month}-`)).map(item => ['SIP payment', item.date, item.sipName, Number(item.amount) || 0, currSym]),
+                ...oneTimeInvestments.filter(item => String(item.date || '').startsWith(`${month}-`)).map(item => ['Purchase', item.date, item.name, Number(item.invested) || 0, currSym]),
+                ...fixedIncomeInvestments.filter(item => String(item.startDate || '').startsWith(`${month}-`)).map(item => ['Fixed income purchase', item.startDate, item.name, Number(item.invested) || 0, currSym]),
+                ...dividends.filter(item => String(item.date || '').startsWith(`${month}-`)).map(item => ['Dividend', item.date, item.holdingName || 'Portfolio-wide', Number(item.amount) || 0, currSym]),
+                ...investmentCosts.filter(item => String(item.date || '').startsWith(`${month}-`)).map(item => [item.type === 'tax' ? 'Tax paid' : 'Fee', item.date, item.holdingName || 'Portfolio-wide', Number(item.amount) || 0, currSym]),
+                ...fixedIncomeInvestments.filter(item => String(item.maturityDate || '').startsWith(`${month}-`)).map(item => ['Maturity due (estimate)', item.maturityDate, item.name, Number(item.maturityValue) || Number(item.currentValue) || 0, currSym])
+            ];
+            const csv = rows.map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+            const file = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ExpenseFlow_Investment_Report_${month}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
         function renderInvestmentTrackers() {
             const stockValue = oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
             const fundValue = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeInvestments.filter(item => item.marketType === 'mutualFund').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
-            const allocationTotal = stockValue + fundValue;
-            const allocations = [{ label: 'Stocks', value: stockValue, color: 'bg-cyan-400' }, { label: 'Mutual funds (including SIPs)', value: fundValue, color: 'bg-violet-400' }];
+            const fixedValue = fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const allocationTotal = stockValue + fundValue + fixedValue;
+            const allocations = [{ label: 'Stocks', value: stockValue, color: 'bg-cyan-400' }, { label: 'Mutual funds (including SIPs)', value: fundValue, color: 'bg-violet-400' }, { label: 'Fixed income', value: fixedValue, color: 'bg-amber-400' }];
             document.getElementById('investment-allocation').innerHTML = allocationTotal > 0 ? allocations.map(item => {
                 const percent = item.value > 0 ? item.value / allocationTotal * 100 : 0;
                 return `<div><div class="mb-1 flex items-center justify-between gap-3 text-[10px]"><span class="flex items-center gap-2 text-slate-300"><i class="h-2 w-2 rounded-full ${item.color}"></i>${item.label}</span><span class="privacy-sensitive-value text-slate-400">${currSym}${item.value.toLocaleString()} · ${percent.toFixed(1)}%</span></div><div class="h-2 overflow-hidden rounded-full bg-white/5"><div class="h-full rounded-full ${item.color}" style="width:${percent.toFixed(2)}%"></div></div></div>`;
@@ -2869,16 +3054,18 @@
                     const dueDate = new Date(`${subscription.due}T12:00:00`);
                     return !Number.isNaN(dueDate.getTime()) && dueDate.getDate() === day;
                 });
+                const dayMaturities = fixedIncomeInvestments.filter(item => item.maturityDate === dateKey);
                 const isPast = dateKey < todayKey;
                 const dayEvents = [
                     ...daySips.map(sip => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-teal-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-teal-200" title="${sip.name}: ${currSym}${Number(sip.amount).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-chart-line mr-1"></i><span class="hidden sm:inline">${sip.name}</span><span class="sm:hidden">SIP</span></span><button type="button" onclick="deleteSipItem(${sip.id})" aria-label="Delete SIP ${sip.name}" title="Delete SIP" class="shrink-0 px-1 text-teal-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`),
-                    ...dayBills.map(bill => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-cyan-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-cyan-200" title="${bill.name}: ${currSym}${Number(bill.cost).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-receipt mr-1"></i><span class="hidden sm:inline">${bill.name}</span><span class="sm:hidden">Bill</span></span><button type="button" onclick="deleteSubscription(${bill.id})" aria-label="Delete subscription ${bill.name}" title="Delete subscription" class="shrink-0 px-1 text-cyan-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`)
+                    ...dayBills.map(bill => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-cyan-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-cyan-200" title="${bill.name}: ${currSym}${Number(bill.cost).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-receipt mr-1"></i><span class="hidden sm:inline">${bill.name}</span><span class="sm:hidden">Bill</span></span><button type="button" onclick="deleteSubscription(${bill.id})" aria-label="Delete subscription ${bill.name}" title="Delete subscription" class="shrink-0 px-1 text-cyan-200/70 hover:text-white"><i class="fa-solid fa-trash"></i></button></div>`),
+                    ...dayMaturities.map(item => `<div class="min-w-0 flex items-center gap-1 rounded-md bg-amber-500/15 px-1 py-1 text-[9px] sm:text-[10px] font-medium text-amber-200" title="${escapeHtml(item.name)} maturity: ${currSym}${(Number(item.maturityValue) || Number(item.currentValue) || 0).toLocaleString()}"><span class="min-w-0 flex-1 truncate"><i class="fa-solid fa-building-columns mr-1"></i><span class="hidden sm:inline">${escapeHtml(item.name)}</span><span class="sm:hidden">Matures</span></span></div>`)
                 ].join('');
                 html += `
                     <div class="min-w-0 min-h-16 sm:min-h-24 rounded-xl border p-1.5 sm:p-2 flex flex-col gap-1.5 ${isToday ? 'border-teal-400/70 bg-teal-500/10 shadow-lg shadow-teal-500/5' : 'border-white/5 bg-slate-950/30'} ${isPast && !isToday ? 'opacity-60' : ''}">
                         <div class="flex items-center justify-between">
                             <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold ${isToday ? 'bg-teal-500 text-white' : 'text-slate-300'}">${day}</span>
-                            ${daySips.length + dayBills.length ? `<span class="text-[9px] text-slate-500">${daySips.length + dayBills.length}</span>` : ''}
+                            ${daySips.length + dayBills.length + dayMaturities.length ? `<span class="text-[9px] text-slate-500">${daySips.length + dayBills.length + dayMaturities.length}</span>` : ''}
                         </div>
                         <div class="space-y-1 min-w-0">${dayEvents}</div>
                     </div>
