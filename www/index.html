@@ -376,9 +376,12 @@
                         <h2 class="font-display font-bold text-xl text-white mt-1">Monthly Overview</h2>
                         <p class="text-xs text-slate-400 mt-1">Income, spending, and cash flow in one place.</p>
                     </div>
-                    <label class="text-xs font-semibold text-slate-300 flex items-center justify-between sm:justify-start gap-3 rounded-2xl bg-slate-950/35 border border-white/5 px-3 py-2">Month
-                        <input type="month" id="dashboard-month" onchange="renderApp()" aria-label="Select dashboard month" class="glass-input rounded-xl px-3 py-2 text-sm">
-                    </label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <label class="text-xs font-semibold text-slate-300 flex items-center justify-between sm:justify-start gap-3 rounded-2xl bg-slate-950/35 border border-white/5 px-3 py-2">Month
+                            <input type="month" id="dashboard-month" onchange="renderApp()" aria-label="Select dashboard month" class="glass-input rounded-xl px-3 py-2 text-sm">
+                        </label>
+                        <button type="button" onclick="exportMonthlyReport()" class="rounded-2xl bg-teal-500/15 border border-teal-400/20 px-3 py-2 text-xs font-bold text-teal-200 hover:bg-teal-500/25"><i class="fa-solid fa-file-arrow-down mr-1.5"></i>Export report</button>
+                    </div>
                 </div>
                 
                 <!-- KPI Financial Grid -->
@@ -414,6 +417,15 @@
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-fire text-amber-300"></i> Top category</div><p id="insight-top-category" class="text-sm font-bold text-white mt-2 truncate">No spending yet</p><p id="insight-top-category-amount" class="text-[10px] text-slate-500 mt-1">Selected month</p></div>
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-calendar-day text-cyan-300"></i> Daily average</div><p id="insight-daily-average" class="text-lg font-bold text-white mt-2">₹0</p><p id="insight-days-note" class="text-[10px] text-slate-500 mt-1">Daily spend this month</p></div>
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-receipt text-violet-300"></i> Activity</div><p id="insight-transaction-count" class="text-lg font-bold text-white mt-2">0</p><p class="text-[10px] text-slate-500 mt-1">Transactions this month</p></div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5">
+                    <div class="flex items-center gap-2 mb-3"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300"><i class="fa-solid fa-calendar-week"></i></span><div><h3 class="text-sm font-bold text-white">Weekly spending recap</h3><p id="weekly-recap-range" class="text-[10px] text-slate-500 mt-0.5">Last 7 days</p></div></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Spent this week</p><p id="weekly-recap-total" class="text-lg font-bold text-white mt-1">₹0</p></div>
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Compared with last week</p><p id="weekly-recap-change" class="text-sm font-bold text-slate-200 mt-1">No comparison yet</p></div>
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Top category</p><p id="weekly-recap-category" class="text-sm font-bold text-white mt-1">No spending yet</p></div>
+                    </div>
                 </div>
 
                 <!-- One-Tap Smart Presets Bar -->
@@ -719,6 +731,7 @@
                         </div>
                     </details>
                     <p id="investment-price-status" aria-live="polite" class="text-[10px] text-slate-500">Fund NAVs update from AMFI daily. Stocks refresh automatically every 5 minutes while the app is open.</p>
+                    <p class="text-[10px] text-slate-500">Each holding shows when this device last retrieved its quote and the market date supplied by the data source.</p>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
@@ -869,9 +882,10 @@
             <section id="tab-page-goals" class="tab-page hidden space-y-6">
                 <div class="glass-panel p-6 rounded-3xl space-y-4">
                     <h3 class="font-display font-bold text-lg text-white">Savings Goals</h3>
-                    <form onsubmit="addSavingsGoal(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <form onsubmit="addSavingsGoal(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <input type="text" id="goal-name" placeholder="Goal (e.g. New Phone)" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <input type="number" step="0.01" id="goal-target" placeholder="Target Amount" required class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
+                        <input type="number" min="0" step="0.01" id="goal-monthly-contribution" placeholder="Monthly saving (optional)" aria-label="Monthly goal contribution" class="glass-input rounded-2xl px-3.5 py-2.5 text-xs">
                         <button type="submit" class="py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-xs">Create Goal</button>
                     </form>
                     <div id="goals-list" class="space-y-4 pt-4">
@@ -1101,6 +1115,40 @@
             document.getElementById('insight-daily-average').innerText = `${currSym}${Math.round(exp / averageDays).toLocaleString()}`;
             document.getElementById('insight-days-note').innerText = selectedMonth === getCurrentMonth() ? `Average over ${averageDays} days` : `Average across ${daysInMonth} days`;
             document.getElementById('insight-transaction-count').innerText = monthTransactions.length.toLocaleString();
+
+            const today = new Date();
+            today.setHours(12, 0, 0, 0);
+            const dateAtOffset = daysAgo => {
+                const date = new Date(today);
+                date.setDate(date.getDate() - daysAgo);
+                return localDateString(date);
+            };
+            const weekStart = dateAtOffset(6);
+            const priorWeekStart = dateAtOffset(13);
+            const priorWeekEnd = dateAtOffset(7);
+            const weeklyExpenses = transactions.filter(t => t.type === 'expense' && t.date >= weekStart && t.date <= dateAtOffset(0));
+            const priorWeekExpenses = transactions.filter(t => t.type === 'expense' && t.date >= priorWeekStart && t.date <= priorWeekEnd);
+            const weeklyTotal = weeklyExpenses.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            const priorWeeklyTotal = priorWeekExpenses.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            const weeklyTopCategory = Object.entries(weeklyExpenses.reduce((totals, t) => {
+                const category = t.category || 'Other';
+                totals[category] = (totals[category] || 0) + (Number(t.amount) || 0);
+                return totals;
+            }, {})).sort((a, b) => b[1] - a[1])[0];
+            const weeklyStartLabel = new Date(`${weekStart}T12:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            const weeklyEndLabel = new Date(`${dateAtOffset(0)}T12:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            document.getElementById('weekly-recap-range').innerText = `${weeklyStartLabel} – ${weeklyEndLabel}`;
+            document.getElementById('weekly-recap-total').innerText = `${currSym}${weeklyTotal.toLocaleString()}`;
+            const weeklyChange = document.getElementById('weekly-recap-change');
+            if (priorWeeklyTotal > 0) {
+                const changePercent = Math.round(((weeklyTotal - priorWeeklyTotal) / priorWeeklyTotal) * 100);
+                weeklyChange.innerText = `${Math.abs(changePercent)}% ${changePercent > 0 ? 'higher' : changePercent < 0 ? 'lower' : 'same'} · ${currSym}${Math.abs(weeklyTotal - priorWeeklyTotal).toLocaleString()}`;
+                weeklyChange.className = `text-sm font-bold mt-1 ${changePercent > 0 ? 'text-rose-300' : changePercent < 0 ? 'text-emerald-300' : 'text-slate-200'}`;
+            } else {
+                weeklyChange.innerText = weeklyTotal > 0 ? 'No expenses in the previous 7 days' : 'No expenses in either period';
+                weeklyChange.className = 'text-[11px] font-semibold text-slate-400 mt-1';
+            }
+            document.getElementById('weekly-recap-category').innerText = weeklyTopCategory ? `${weeklyTopCategory[0]} · ${currSym}${weeklyTopCategory[1].toLocaleString()}` : 'No spending yet';
 
             // Dynamic Island Status
             const todayStr = localDateString(new Date());
@@ -1446,7 +1494,8 @@
                             <span class="rounded-full bg-white/5 px-2.5 py-1 text-[9px] text-slate-400">${Number(s.units) || 0} units</span>
                             <span class="rounded-full bg-white/5 px-2.5 py-1 text-[9px] text-slate-400">AMFI ${s.schemeCode ? String(s.schemeCode).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])) : 'code not set'}</span>
                         </div>
-                        ${s.quote ? `<p class="text-[10px] text-slate-500">Latest NAV ${currSym}${Number(s.quote).toLocaleString()} · ${s.quoteDate || ''}</p>` : ''}
+                        ${s.quote ? `<p class="text-[10px] text-slate-500">Latest NAV ${currSym}${Number(s.quote).toLocaleString()} · ${escapeHtml(s.quoteDate || '')}</p>` : ''}
+                        ${investmentFreshnessMarkup(s)}
                         <details class="pt-2 border-t border-white/10">
                             <summary class="cursor-pointer text-[11px] font-semibold text-teal-300">Edit valuation and fund details</summary>
                             <form onsubmit="updateSipValuation(event, ${Number(s.id)})" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
@@ -1543,6 +1592,25 @@
             return Date.now() - lastChecked >= 6 * 60 * 60 * 1000;
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        }
+
+        function investmentFreshnessMarkup(item) {
+            const source = item.quoteSource || ((item.marketType || 'stock') === 'mutualFund' || item.schemeCode ? 'AMFI' : 'Upstox');
+            const checkedAt = Date.parse(item.quoteCheckedAt || '');
+            let checkedLabel = 'Retrieval time not recorded';
+            if (Number.isFinite(checkedAt)) {
+                const elapsedMinutes = Math.max(0, Math.floor((Date.now() - checkedAt) / 60000));
+                checkedLabel = elapsedMinutes < 1 ? 'Retrieved just now' : elapsedMinutes < 60 ? `Retrieved ${elapsedMinutes} min ago` : elapsedMinutes < 1440 ? `Retrieved ${Math.floor(elapsedMinutes / 60)} hr ago` : `Retrieved ${Math.floor(elapsedMinutes / 1440)} days ago`;
+            } else if (!item.quote) {
+                checkedLabel = item.symbol || item.schemeCode ? 'Waiting for first market quote' : 'Manual valuation · no linked price source';
+            }
+            const marketDate = item.quoteDate ? ` · market data ${escapeHtml(item.quoteDate)}` : '';
+            const quoteLabel = item.quote ? `${checkedLabel} · ${escapeHtml(source)}${marketDate}` : checkedLabel;
+            return `<p class="text-[10px] text-slate-500 mt-1">${quoteLabel}</p>`;
+        }
+
         function startInvestmentPriceAutoRefresh() {
             if (investmentRefreshTimer) clearInterval(investmentRefreshTimer);
             refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
@@ -1575,6 +1643,7 @@
                     target.item.quote = quote.price;
                     target.item.quoteDate = quote.date;
                     target.item.quoteSource = 'AMFI';
+                    target.item.quoteCheckedAt = new Date().toISOString();
                     if (Number(target.item.units) > 0) target.item.currentValue = Number(target.item.units) * quote.price;
                     else errors.push(`${target.item.name}: add fund units to calculate current value.`);
                     updated++;
@@ -1611,6 +1680,7 @@
                             target.item.quote = price;
                             target.item.quoteDate = quote.timestamp || new Date().toISOString();
                             target.item.quoteSource = 'Upstox';
+                            target.item.quoteCheckedAt = new Date().toISOString();
                             const previousClose = Number(quote.ohlc?.close);
                             target.item.changePercent = Number.isFinite(previousClose) && previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null;
                             if (Number(target.item.units) > 0) target.item.currentValue = Number(target.item.units) * price;
@@ -1694,7 +1764,8 @@
                             <p class="text-slate-400">Value<br><span class="text-cyan-300 font-bold">${currSym}${item.currentValue.toLocaleString()}</span></p>
                             <p class="text-slate-400">Gain/loss<br><span class="${itemGain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${itemGain >= 0 ? '+' : '-'}${currSym}${Math.abs(itemGain).toLocaleString()}</span></p>
                         </div>
-                        ${item.quote ? `<p class="text-[10px] text-slate-500">${item.quoteSource === 'AMFI' ? 'Latest NAV' : 'Last traded'} ${currSym}${Number(item.quote).toLocaleString()} · ${item.quoteSource || (item.marketType === 'mutualFund' ? 'AMFI' : 'Upstox')} · ${item.changePercent == null ? (item.quoteDate || '') : `day change ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}% · ${item.quoteDate || ''}`}</p>` : ''}
+                        ${item.quote ? `<p class="text-[10px] text-slate-500">${item.quoteSource === 'AMFI' ? 'Latest NAV' : 'Last traded'} ${currSym}${Number(item.quote).toLocaleString()} · ${escapeHtml(item.quoteSource || (item.marketType === 'mutualFund' ? 'AMFI' : 'Upstox'))} · ${item.changePercent == null ? escapeHtml(item.quoteDate || '') : `day change ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}% · ${escapeHtml(item.quoteDate || '')}`}</p>` : ''}
+                        ${investmentFreshnessMarkup(item)}
                         <details class="pt-2 border-t border-white/10">
                             <summary class="cursor-pointer text-[11px] font-semibold text-teal-300">Update valuation</summary>
                             <form onsubmit="updateOneTimeInvestment(event, ${item.id})" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
@@ -1887,26 +1958,60 @@
         // Savings Goals
         function addSavingsGoal(e) {
             e.preventDefault();
-            const name = document.getElementById('goal-name').value;
-            const target = parseFloat(document.getElementById('goal-target').value);
+            const name = document.getElementById('goal-name').value.trim();
+            const target = Number(document.getElementById('goal-target').value);
+            const monthlyContribution = Number(document.getElementById('goal-monthly-contribution').value) || 0;
+            if (!name || !Number.isFinite(target) || target <= 0) return;
+            goals.push({ id: Date.now(), name, target, saved: 0, monthlyContribution });
+            e.target.reset();
+            saveAndRender();
+        }
 
-            goals.push({ id: Date.now(), name, target, saved: 0 });
+        function updateSavingsGoal(e, id) {
+            e.preventDefault();
+            const goal = goals.find(item => Number(item.id) === Number(id));
+            if (!goal) return;
+            goal.saved = Math.max(0, Number(e.target.elements.saved.value) || 0);
+            goal.monthlyContribution = Math.max(0, Number(e.target.elements.monthlyContribution.value) || 0);
             saveAndRender();
         }
 
         function renderGoals() {
             const container = document.getElementById('goals-list');
             container.innerHTML = goals.map(g => {
-                const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
+                const target = Math.max(0, Number(g.target) || 0);
+                const saved = Math.max(0, Number(g.saved) || 0);
+                const monthlyContribution = Math.max(0, Number(g.monthlyContribution) || 0);
+                const remaining = Math.max(0, target - saved);
+                const pct = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
+                let forecast = 'Add a monthly saving amount to estimate your target date.';
+                if (remaining === 0) forecast = 'Goal reached 🎉';
+                else if (monthlyContribution > 0) {
+                    const months = Math.ceil(remaining / monthlyContribution);
+                    const targetDate = new Date();
+                    targetDate.setDate(1);
+                    targetDate.setMonth(targetDate.getMonth() + months);
+                    const projectedMonth = targetDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+                    forecast = `At ${currSym}${monthlyContribution.toLocaleString()} per month: about ${months} ${months === 1 ? 'month' : 'months'} · ${projectedMonth}`;
+                }
+                const safeName = escapeHtml(g.name);
                 return `
-                    <div class="glass-card p-4 rounded-2xl space-y-2">
+                    <div class="glass-card p-4 rounded-2xl space-y-3">
                         <div class="flex justify-between text-xs font-bold">
-                            <span class="text-white">${g.name}</span>
-                            <span class="text-teal-400">${currSym}${g.saved.toLocaleString()} / ${currSym}${g.target.toLocaleString()} (${pct}%)</span>
+                            <span class="text-white">${safeName}</span>
+                            <span class="text-teal-400">${currSym}${saved.toLocaleString()} / ${currSym}${target.toLocaleString()} (${pct}%)</span>
                         </div>
                         <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden">
                             <div class="h-full bg-teal-400 rounded-full" style="width: ${pct}%"></div>
                         </div>
+                        <div class="rounded-xl border border-teal-400/10 bg-teal-400/5 p-3"><p class="text-[11px] font-semibold text-teal-100">${forecast}</p><p class="text-[10px] text-slate-500 mt-1">Estimate assumes the monthly amount stays the same; investment growth is not included.</p></div>
+                        <details class="border-t border-white/10 pt-2"><summary class="cursor-pointer text-[11px] font-semibold text-slate-300">Update saved amount or monthly pace</summary>
+                            <form onsubmit="updateSavingsGoal(event, ${Number(g.id)})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                                <input name="saved" type="number" min="0" step="0.01" value="${saved}" aria-label="Saved amount for ${safeName}" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <input name="monthlyContribution" type="number" min="0" step="0.01" value="${monthlyContribution || ''}" placeholder="Monthly saving" aria-label="Monthly saving for ${safeName}" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <button type="submit" class="rounded-xl bg-teal-500/15 px-3 py-2.5 text-xs font-bold text-teal-200 hover:bg-teal-500/25">Save progress</button>
+                            </form>
+                        </details>
                     </div>
                 `;
             }).join('');
@@ -1994,6 +2099,43 @@
                 document.getElementById('chart-categories-empty').classList.toggle('hidden', entries.length > 0);
                 categoryChart.update();
             }
+        }
+
+        function exportMonthlyReport() {
+            const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
+            const monthTransactions = transactions.filter(t => typeof t.date === 'string' && t.date.slice(0, 7) === selectedMonth);
+            const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            const expenses = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            const monthName = new Date(`${selectedMonth}-01T12:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+            const categoryTotals = monthTransactions.filter(t => t.type === 'expense').reduce((totals, t) => {
+                const category = t.category || 'Other';
+                totals[category] = (totals[category] || 0) + (Number(t.amount) || 0);
+                return totals;
+            }, {});
+            const reportRows = [
+                ['ExpenseFlow Monthly Report', monthName],
+                ['Income', income, currSym],
+                ['Expenses', expenses, currSym],
+                ['Net cash flow', income - expenses, currSym],
+                ['Savings rate', income > 0 ? `${Math.round(((income - expenses) / income) * 100)}%` : 'Not available'],
+                ['Transaction count', monthTransactions.length],
+                [],
+                ['Expense category', 'Amount', 'Currency'],
+                ...Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([category, amount]) => [category, amount, currSym]),
+                [],
+                ['Date', 'Description', 'Type', 'Category', 'Account', 'Amount', 'Currency'],
+                ...monthTransactions.slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).map(t => [t.date, t.desc, t.type, t.category || '', t.account || '', Number(t.amount) || 0, currSym])
+            ];
+            const csv = reportRows.map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+            const file = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ExpenseFlow_Monthly_Report_${selectedMonth}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
         function exportDataBackup() {
