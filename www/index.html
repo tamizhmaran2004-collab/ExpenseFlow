@@ -865,11 +865,18 @@
                         <p id="sip-current-value" class="privacy-sensitive-value text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">₹0</p>
                         <div class="grid grid-cols-2 xl:grid-cols-4 gap-2.5 mt-5">
                             <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-400">Total invested</p><p id="sip-total-invested" class="privacy-sensitive-value text-sm font-bold text-white mt-1">₹0</p></div>
-                            <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-400">Overall gain / loss</p><p id="sip-gain-loss" class="privacy-sensitive-value text-sm font-bold mt-1">₹0</p><p id="sip-gain-percent" class="text-[10px] text-slate-500 mt-1">—</p></div>
+                            <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-400">Return incl. dividends</p><p id="sip-gain-loss" class="privacy-sensitive-value text-sm font-bold mt-1">₹0</p><p id="sip-gain-percent" class="text-[10px] text-slate-500 mt-1">—</p></div>
                             <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-400">Monthly SIPs</p><p id="sip-total-monthly" class="privacy-sensitive-value text-sm font-bold text-cyan-200 mt-1">₹0</p></div>
                             <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-400">Active holdings</p><p id="portfolio-holding-count" class="text-sm font-bold text-white mt-1">0</p></div>
                         </div>
+                        <p id="portfolio-net-after-costs" class="privacy-sensitive-value mt-3 text-[10px] text-slate-400">Estimated return after logged dividends, fees, and taxes: ₹0</p>
+                        <p class="mt-1 text-[9px] text-slate-500">Estimates use values and transactions you enter; the app does not calculate tax liability.</p>
                     </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+                    <div class="flex items-center justify-between gap-3"><div><h4 class="text-sm font-bold text-white">Portfolio allocation</h4><p class="text-[10px] text-slate-500 mt-1">Based on the current values of your saved holdings.</p></div><i class="fa-solid fa-chart-pie text-violet-300"></i></div>
+                    <div id="investment-allocation" class="space-y-3"></div>
                 </div>
 
                 <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
@@ -942,6 +949,40 @@
                     <div id="investment-summary" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
                     <div class="flex items-center justify-between gap-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Your holdings</p><select id="investment-list-filter" onchange="renderOneTimeInvestments()" aria-label="Filter holdings" class="glass-input rounded-xl px-3 py-2 text-[10px]"><option value="all">All holdings</option><option value="stock">Stocks</option><option value="mutualFund">Mutual funds</option></select></div>
                     <div id="one-time-investment-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <details class="glass-panel rounded-3xl p-4 sm:p-5">
+                        <summary class="cursor-pointer list-none flex items-center justify-between gap-3"><span><span class="block text-sm font-bold text-white">Dividend tracker</span><span class="block mt-1 text-[10px] text-slate-500">Record payouts and review your dividend income.</span></span><i class="fa-solid fa-coins text-emerald-300"></i></summary>
+                        <div class="mt-4 space-y-3">
+                            <div class="grid grid-cols-2 gap-2"><div class="rounded-xl bg-slate-950/30 p-3"><p class="text-[9px] uppercase text-slate-500">All-time dividends</p><p id="dividend-total" class="privacy-sensitive-value mt-1 text-sm font-bold text-emerald-200">₹0</p></div><div class="rounded-xl bg-slate-950/30 p-3"><p class="text-[9px] uppercase text-slate-500">This year</p><p id="dividend-year-total" class="privacy-sensitive-value mt-1 text-sm font-bold text-white">₹0</p></div></div>
+                            <form onsubmit="addDividend(event)" class="grid grid-cols-2 gap-2 rounded-2xl border border-white/5 bg-slate-950/25 p-3">
+                                <select id="dividend-holding" aria-label="Dividend holding" class="glass-input col-span-2 rounded-xl px-3 py-2.5 text-xs"><option value="">Portfolio-wide / other</option></select>
+                                <input id="dividend-amount" type="number" min="0.01" step="0.01" required placeholder="Dividend amount" aria-label="Dividend amount" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <input id="dividend-date" type="date" required aria-label="Dividend payment date" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <input id="dividend-note" type="text" placeholder="Note (optional)" aria-label="Dividend note" class="glass-input col-span-2 rounded-xl px-3 py-2.5 text-xs">
+                                <button type="submit" class="col-span-2 rounded-xl bg-emerald-500/15 px-3 py-2.5 text-[10px] font-bold text-emerald-100">Add dividend</button>
+                            </form>
+                            <div id="dividend-history" class="max-h-64 space-y-2 overflow-y-auto"></div>
+                        </div>
+                    </details>
+
+                    <details class="glass-panel rounded-3xl p-4 sm:p-5">
+                        <summary class="cursor-pointer list-none flex items-center justify-between gap-3"><span><span class="block text-sm font-bold text-white">Fees and taxes</span><span class="block mt-1 text-[10px] text-slate-500">Log costs manually and see their effect on your recorded return.</span></span><i class="fa-solid fa-receipt text-amber-300"></i></summary>
+                        <div class="mt-4 space-y-3">
+                            <div class="grid grid-cols-3 gap-2"><div class="rounded-xl bg-slate-950/30 p-3"><p class="text-[9px] uppercase text-slate-500">Fees</p><p id="investment-fees-total" class="privacy-sensitive-value mt-1 text-xs font-bold text-white">₹0</p></div><div class="rounded-xl bg-slate-950/30 p-3"><p class="text-[9px] uppercase text-slate-500">Taxes</p><p id="investment-taxes-total" class="privacy-sensitive-value mt-1 text-xs font-bold text-white">₹0</p></div><div class="rounded-xl bg-slate-950/30 p-3"><p class="text-[9px] uppercase text-slate-500">Logged costs</p><p id="investment-costs-total" class="privacy-sensitive-value mt-1 text-xs font-bold text-amber-200">₹0</p></div></div>
+                            <p class="text-[9px] leading-relaxed text-slate-500">Enter a charge only if it is not already included in your invested amount. This is a record of amounts you enter, not a tax estimate.</p>
+                            <form onsubmit="addInvestmentCost(event)" class="grid grid-cols-2 gap-2 rounded-2xl border border-white/5 bg-slate-950/25 p-3">
+                                <select id="investment-cost-type" aria-label="Cost type" class="glass-input rounded-xl px-3 py-2.5 text-xs"><option value="fee">Fee / charge</option><option value="tax">Tax paid</option></select>
+                                <input id="investment-cost-amount" type="number" min="0.01" step="0.01" required placeholder="Amount" aria-label="Cost amount" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <select id="investment-cost-holding" aria-label="Related holding" class="glass-input col-span-2 rounded-xl px-3 py-2.5 text-xs"><option value="">Portfolio-wide / other</option></select>
+                                <input id="investment-cost-date" type="date" required aria-label="Cost date" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <input id="investment-cost-note" type="text" placeholder="Note (optional)" aria-label="Cost note" class="glass-input rounded-xl px-3 py-2.5 text-xs">
+                                <button type="submit" class="col-span-2 rounded-xl bg-amber-500/15 px-3 py-2.5 text-[10px] font-bold text-amber-100">Add cost entry</button>
+                            </form>
+                            <div id="investment-cost-history" class="max-h-64 space-y-2 overflow-y-auto"></div>
+                        </div>
+                    </details>
                 </div>
             </section>
 
@@ -1124,6 +1165,8 @@
         let accountReconciliations = JSON.parse(localStorage.getItem('ef_account_reconciliations') || '[]');
         let merchantCategoryRules = JSON.parse(localStorage.getItem('ef_merchant_category_rules') || '{}');
         let loans = JSON.parse(localStorage.getItem('ef_loans') || '[]');
+        let dividends = JSON.parse(localStorage.getItem('ef_dividends') || '[]');
+        let investmentCosts = JSON.parse(localStorage.getItem('ef_investment_costs') || '[]');
         let receiptViewerUrl = null;
 
         // Initialization
@@ -1133,6 +1176,8 @@
             document.getElementById('sip-start-date').value = localDateString(new Date());
             document.getElementById('sip-contribution-date').valueAsDate = new Date();
             document.getElementById('investment-date').valueAsDate = new Date();
+            document.getElementById('dividend-date').valueAsDate = new Date();
+            document.getElementById('investment-cost-date').valueAsDate = new Date();
             document.getElementById('reconcile-opening-date').value = localDateString(new Date());
             document.getElementById('reconcile-balance-date').value = localDateString(new Date());
             document.getElementById('upstox-analytics-token').value = localStorage.getItem('ef_upstox_analytics_token') || '';
@@ -1453,6 +1498,8 @@
             localStorage.setItem('ef_account_reconciliations', JSON.stringify(accountReconciliations));
             localStorage.setItem('ef_merchant_category_rules', JSON.stringify(merchantCategoryRules));
             localStorage.setItem('ef_loans', JSON.stringify(loans));
+            localStorage.setItem('ef_dividends', JSON.stringify(dividends));
+            localStorage.setItem('ef_investment_costs', JSON.stringify(investmentCosts));
 
             // Calculators
             const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
@@ -1564,6 +1611,7 @@
             renderNetWorth();
             renderSIPs();
             renderOneTimeInvestments();
+            renderInvestmentTrackers();
             renderCalendar();
             renderSplitter();
             renderBudgets();
@@ -2185,7 +2233,10 @@
             const sipInvested = sips.reduce((sum, sip) => sum + (Number(sip.invested) || 0), 0) + sipContributions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
             const investedTotal = sipInvested + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
             const currentTotal = sips.reduce((sum, sip) => sum + (Number(sip.currentValue) || 0), 0) + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
-            const gainLoss = currentTotal - investedTotal;
+            const dividendTotal = dividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const loggedCosts = investmentCosts.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const gainLoss = currentTotal - investedTotal + dividendTotal;
+            const netAfterCosts = gainLoss - loggedCosts;
             document.getElementById('sip-total-monthly').innerText = `${currSym}${total.toLocaleString()}/mo`;
             document.getElementById('sip-total-invested').innerText = `${currSym}${investedTotal.toLocaleString()}`;
             document.getElementById('sip-current-value').innerText = `${currSym}${currentTotal.toLocaleString()}`;
@@ -2194,6 +2245,9 @@
             gainLossElement.innerText = `${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}`;
             gainLossElement.className = `text-sm font-bold mt-1 ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
             document.getElementById('sip-gain-percent').innerText = investedTotal > 0 ? `${gainLoss >= 0 ? '+' : ''}${((gainLoss / investedTotal) * 100).toFixed(2)}% overall return` : 'Add invested amount to calculate return';
+            const netResult = document.getElementById('portfolio-net-after-costs');
+            netResult.innerText = `Estimated return after logged dividends, fees, and taxes: ${netAfterCosts >= 0 ? '+' : '-'}${currSym}${Math.abs(netAfterCosts).toLocaleString()}`;
+            netResult.className = `privacy-sensitive-value mt-3 text-[10px] ${netAfterCosts >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
 
             const sipCount = document.getElementById('sip-count');
             if (sipCount) sipCount.innerText = `${sips.length} ${sips.length === 1 ? 'active SIP' : 'active SIPs'}`;
@@ -2618,6 +2672,132 @@
                     </div>
                 `;
             }).join('') : `<p class="text-xs text-slate-500">${oneTimeInvestments.length ? 'No holdings match this filter.' : 'No one-time investments added yet.'}</p>`;
+        }
+
+        function investmentHoldingLabel(type, id) {
+            if (type === 'sip') return sips.find(item => Number(item.id) === Number(id))?.name || '';
+            if (type === 'holding') return oneTimeInvestments.find(item => Number(item.id) === Number(id))?.name || '';
+            return '';
+        }
+
+        function investmentHoldingOptions(selectedValue = '', archivedName = '') {
+            const options = [];
+            const holdings = [
+                ...sips.map(item => ({ type: 'sip', id: item.id, name: `${item.name} · SIP` })),
+                ...oneTimeInvestments.map(item => ({ type: 'holding', id: item.id, name: item.name }))
+            ];
+            if (selectedValue && !holdings.some(item => `${item.type}:${item.id}` === selectedValue)) {
+                options.push(`<option value="${escapeHtml(selectedValue)}" selected>${escapeHtml(archivedName || 'Removed holding')} · archived</option>`);
+            }
+            options.push(...holdings.map(item => {
+                const value = `${item.type}:${item.id}`;
+                return `<option value="${escapeHtml(value)}" ${value === selectedValue ? 'selected' : ''}>${escapeHtml(item.name)}</option>`;
+            }));
+            return '<option value="">Portfolio-wide / other</option>' + options.join('');
+        }
+
+        function holdingReferenceFromValue(value, archivedName = '') {
+            if (!value) return { holdingType: '', holdingId: null, holdingName: '' };
+            const [holdingType, rawId] = value.split(':');
+            const holdingId = Number(rawId);
+            return { holdingType, holdingId, holdingName: investmentHoldingLabel(holdingType, holdingId) || archivedName };
+        }
+
+        function addDividend(event) {
+            event.preventDefault();
+            const amount = Number(document.getElementById('dividend-amount').value);
+            const date = document.getElementById('dividend-date').value;
+            if (!Number.isFinite(amount) || amount <= 0 || !date || date > localDateString(new Date())) return alert('Enter a valid dividend amount and a payment date up to today.');
+            const reference = holdingReferenceFromValue(document.getElementById('dividend-holding').value);
+            dividends.unshift({ id: Date.now(), amount, date, note: document.getElementById('dividend-note').value.trim(), ...reference });
+            event.target.reset();
+            document.getElementById('dividend-date').valueAsDate = new Date();
+            saveAndRender();
+        }
+
+        function updateDividend(event, id) {
+            event.preventDefault();
+            const dividend = dividends.find(item => Number(item.id) === id);
+            if (!dividend) return;
+            const amount = Number(event.target.elements.amount.value);
+            const date = event.target.elements.date.value;
+            if (!Number.isFinite(amount) || amount <= 0 || !date || date > localDateString(new Date())) return alert('Enter a valid dividend amount and a payment date up to today.');
+            Object.assign(dividend, { amount, date, note: event.target.elements.note.value.trim(), ...holdingReferenceFromValue(event.target.elements.holding.value, dividend.holdingName) });
+            saveAndRender();
+        }
+
+        function deleteDividend(id) {
+            dividends = dividends.filter(item => Number(item.id) !== id);
+            saveAndRender();
+        }
+
+        function addInvestmentCost(event) {
+            event.preventDefault();
+            const amount = Number(document.getElementById('investment-cost-amount').value);
+            const date = document.getElementById('investment-cost-date').value;
+            if (!Number.isFinite(amount) || amount <= 0 || !date || date > localDateString(new Date())) return alert('Enter a valid fee or tax amount and a date up to today.');
+            investmentCosts.unshift({ id: Date.now(), type: document.getElementById('investment-cost-type').value, amount, date, note: document.getElementById('investment-cost-note').value.trim(), ...holdingReferenceFromValue(document.getElementById('investment-cost-holding').value) });
+            event.target.reset();
+            document.getElementById('investment-cost-date').valueAsDate = new Date();
+            saveAndRender();
+        }
+
+        function updateInvestmentCost(event, id) {
+            event.preventDefault();
+            const cost = investmentCosts.find(item => Number(item.id) === id);
+            if (!cost) return;
+            const amount = Number(event.target.elements.amount.value);
+            const date = event.target.elements.date.value;
+            if (!Number.isFinite(amount) || amount <= 0 || !date || date > localDateString(new Date())) return alert('Enter a valid amount and a date up to today.');
+            Object.assign(cost, { type: event.target.elements.type.value, amount, date, note: event.target.elements.note.value.trim(), ...holdingReferenceFromValue(event.target.elements.holding.value, cost.holdingName) });
+            saveAndRender();
+        }
+
+        function deleteInvestmentCost(id) {
+            investmentCosts = investmentCosts.filter(item => Number(item.id) !== id);
+            saveAndRender();
+        }
+
+        function renderInvestmentTrackers() {
+            const stockValue = oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const fundValue = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeInvestments.filter(item => item.marketType === 'mutualFund').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const allocationTotal = stockValue + fundValue;
+            const allocations = [{ label: 'Stocks', value: stockValue, color: 'bg-cyan-400' }, { label: 'Mutual funds (including SIPs)', value: fundValue, color: 'bg-violet-400' }];
+            document.getElementById('investment-allocation').innerHTML = allocationTotal > 0 ? allocations.map(item => {
+                const percent = item.value > 0 ? item.value / allocationTotal * 100 : 0;
+                return `<div><div class="mb-1 flex items-center justify-between gap-3 text-[10px]"><span class="flex items-center gap-2 text-slate-300"><i class="h-2 w-2 rounded-full ${item.color}"></i>${item.label}</span><span class="privacy-sensitive-value text-slate-400">${currSym}${item.value.toLocaleString()} · ${percent.toFixed(1)}%</span></div><div class="h-2 overflow-hidden rounded-full bg-white/5"><div class="h-full rounded-full ${item.color}" style="width:${percent.toFixed(2)}%"></div></div></div>`;
+            }).join('') : '<p class="rounded-xl border border-dashed border-white/10 p-3 text-[10px] text-slate-500">Add current values to see how your portfolio is split.</p>';
+
+            const dividendTotal = dividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const currentYear = String(new Date().getFullYear());
+            const yearTotal = dividends.filter(item => String(item.date || '').startsWith(`${currentYear}-`)).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            document.getElementById('dividend-total').innerText = `${currSym}${dividendTotal.toLocaleString()}`;
+            document.getElementById('dividend-year-total').innerText = `${currSym}${yearTotal.toLocaleString()}`;
+            const dividendHolding = document.getElementById('dividend-holding');
+            const dividendSelection = dividendHolding.value;
+            dividendHolding.innerHTML = investmentHoldingOptions(dividendSelection);
+            const dividendsHistory = dividends.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 10);
+            document.getElementById('dividend-history').innerHTML = dividendsHistory.length ? dividendsHistory.map(item => {
+                const selected = item.holdingType && item.holdingId != null ? `${item.holdingType}:${item.holdingId}` : '';
+                const holder = investmentHoldingLabel(item.holdingType, item.holdingId) || item.holdingName || 'Portfolio-wide / other';
+                return `<details class="rounded-xl border border-white/5 bg-slate-950/25 p-2.5"><summary class="flex cursor-pointer list-none items-center justify-between gap-2"><span class="min-w-0"><span class="block truncate text-[10px] font-semibold text-slate-200">${escapeHtml(holder)}</span><span class="text-[9px] text-slate-500">${escapeHtml(item.date)}</span></span><span class="privacy-sensitive-value shrink-0 text-[11px] font-bold text-emerald-200">+${currSym}${Number(item.amount).toLocaleString()}</span></summary><form onsubmit="updateDividend(event, ${Number(item.id)})" class="mt-2 grid grid-cols-2 gap-2"><input name="amount" type="number" min="0.01" step="0.01" value="${Number(item.amount) || 0}" aria-label="Dividend amount" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="date" type="date" value="${escapeHtml(item.date)}" aria-label="Dividend date" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><select name="holding" aria-label="Holding" class="glass-input col-span-2 rounded-lg px-2 py-2 text-[10px]">${investmentHoldingOptions(selected, item.holdingName)}</select><input name="note" type="text" value="${escapeHtml(item.note || '')}" aria-label="Note" placeholder="Note" class="glass-input col-span-2 rounded-lg px-2 py-2 text-[10px]"><button type="submit" class="rounded-lg bg-white/10 px-2 py-2 text-[10px] text-slate-200">Save</button><button type="button" onclick="deleteDividend(${Number(item.id)})" class="rounded-lg bg-rose-500/10 px-2 py-2 text-[10px] font-semibold text-rose-200">Delete</button></form></details>`;
+            }).join('') : '<p class="rounded-xl border border-dashed border-white/10 p-3 text-[10px] text-slate-500">No dividends recorded yet.</p>';
+
+            const feeTotal = investmentCosts.filter(item => item.type === 'fee').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const taxTotal = investmentCosts.filter(item => item.type === 'tax').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            document.getElementById('investment-fees-total').innerText = `${currSym}${feeTotal.toLocaleString()}`;
+            document.getElementById('investment-taxes-total').innerText = `${currSym}${taxTotal.toLocaleString()}`;
+            document.getElementById('investment-costs-total').innerText = `${currSym}${(feeTotal + taxTotal).toLocaleString()}`;
+            const costHolding = document.getElementById('investment-cost-holding');
+            const costSelection = costHolding.value;
+            costHolding.innerHTML = investmentHoldingOptions(costSelection);
+            const costHistory = investmentCosts.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 10);
+            document.getElementById('investment-cost-history').innerHTML = costHistory.length ? costHistory.map(item => {
+                const selected = item.holdingType && item.holdingId != null ? `${item.holdingType}:${item.holdingId}` : '';
+                const holder = investmentHoldingLabel(item.holdingType, item.holdingId) || item.holdingName || 'Portfolio-wide / other';
+                const typeLabel = item.type === 'tax' ? 'Tax paid' : 'Fee / charge';
+                return `<details class="rounded-xl border border-white/5 bg-slate-950/25 p-2.5"><summary class="flex cursor-pointer list-none items-center justify-between gap-2"><span class="min-w-0"><span class="block truncate text-[10px] font-semibold text-slate-200">${typeLabel} · ${escapeHtml(holder)}</span><span class="text-[9px] text-slate-500">${escapeHtml(item.date)}</span></span><span class="privacy-sensitive-value shrink-0 text-[11px] font-bold text-amber-200">−${currSym}${Number(item.amount).toLocaleString()}</span></summary><form onsubmit="updateInvestmentCost(event, ${Number(item.id)})" class="mt-2 grid grid-cols-2 gap-2"><select name="type" aria-label="Cost type" class="glass-input rounded-lg px-2 py-2 text-[10px]"><option value="fee" ${item.type !== 'tax' ? 'selected' : ''}>Fee / charge</option><option value="tax" ${item.type === 'tax' ? 'selected' : ''}>Tax paid</option></select><input name="amount" type="number" min="0.01" step="0.01" value="${Number(item.amount) || 0}" aria-label="Cost amount" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><input name="date" type="date" value="${escapeHtml(item.date)}" aria-label="Cost date" required class="glass-input rounded-lg px-2 py-2 text-[10px]"><select name="holding" aria-label="Holding" class="glass-input rounded-lg px-2 py-2 text-[10px]">${investmentHoldingOptions(selected, item.holdingName)}</select><input name="note" type="text" value="${escapeHtml(item.note || '')}" aria-label="Note" placeholder="Note" class="glass-input col-span-2 rounded-lg px-2 py-2 text-[10px]"><button type="submit" class="rounded-lg bg-white/10 px-2 py-2 text-[10px] text-slate-200">Save</button><button type="button" onclick="deleteInvestmentCost(${Number(item.id)})" class="rounded-lg bg-rose-500/10 px-2 py-2 text-[10px] font-semibold text-rose-200">Delete</button></form></details>`;
+            }).join('') : '<p class="rounded-xl border border-dashed border-white/10 p-3 text-[10px] text-slate-500">No fees or taxes recorded yet.</p>';
         }
 
         // Calendar
