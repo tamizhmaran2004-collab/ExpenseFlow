@@ -378,6 +378,7 @@
                     <button onclick="switchTab('budgets')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-bullseye text-rose-300 mr-2"></i>Budget Caps</button>
                     <button onclick="switchTab('subscriptions')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-rotate text-blue-300 mr-2"></i>Subscriptions</button>
                     <button onclick="switchTab('goals')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-piggy-bank text-teal-300 mr-2"></i>Savings Goals</button>
+                    <button onclick="switchTab('insights')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-triangle-exclamation text-amber-300 mr-2"></i>Spending Insights</button>
                 </div>
                 <div class="mt-3 border-t border-white/10 pt-3 flex items-center justify-between gap-3">
                     <label for="mobile-currency-select" class="text-xs text-slate-400">Currency</label>
@@ -493,7 +494,7 @@
                         <div class="absolute -right-2 -bottom-2 text-cyan-500/10 text-6xl font-bold"><i class="fa-solid fa-vault"></i></div>
                         <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Net Worth</p>
                         <h3 class="dashboard-kpi-value text-2xl font-bold font-display text-cyan-400 mt-2" id="kpi-networth">₹0.00</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Assets minus Liabilities</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Assets, investments, and debts</p>
                     </div>
                 </div>
 
@@ -763,6 +764,22 @@
                 </div>
             </section>
 
+            <!-- Spending anomaly review -->
+            <section id="tab-page-insights" class="tab-page hidden space-y-6">
+                <div class="px-1">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300">Review your spending</p>
+                    <h3 class="font-display font-bold text-2xl text-white mt-1">Spending Insights</h3>
+                    <p class="text-xs text-slate-400 mt-1">Possible duplicates, unusual purchases, and subscription price changes. Alerts are prompts to review, not proof of an error.</p>
+                </div>
+                <section class="glass-panel rounded-3xl p-4 sm:p-5" aria-labelledby="spending-anomaly-title">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i></span><div><h3 id="spending-anomaly-title" class="text-sm font-bold text-white">Spending alerts</h3><p class="text-[10px] text-slate-500 mt-0.5">Based on the transactions and subscriptions you entered</p></div></div>
+                        <span id="spending-anomaly-count" class="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-slate-300">0 alerts</span>
+                    </div>
+                    <div id="spending-anomaly-list" aria-live="polite" class="grid grid-cols-1 lg:grid-cols-2 gap-2"></div>
+                </section>
+            </section>
+
             <!-- TAB 4: NET WORTH BALANCE SHEET -->
             <section id="tab-page-networth" class="tab-page hidden space-y-6">
                 <div class="space-y-5">
@@ -771,7 +788,7 @@
                             <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300">Your balance sheet</p>
                             <h3 class="font-display font-bold text-2xl text-white mt-1">Net Worth</h3>
                         </div>
-                        <p class="text-xs text-slate-400">A clear view of what you own and owe.</p>
+                        <p class="text-xs text-slate-400">Track monthly changes in cash, investments, assets, and debt.</p>
                     </div>
 
                     <div class="relative overflow-hidden rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 via-cyan-950/70 to-slate-900 p-6 sm:p-8 shadow-xl shadow-cyan-950/20">
@@ -779,8 +796,8 @@
                         <div class="relative flex items-start justify-between gap-4">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-widest text-cyan-100/70">Net worth</p>
-                                <p id="nw-position-sum" class="mt-3 text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">₹0</p>
-                                <p class="mt-2 text-xs text-slate-400">Total assets minus total liabilities</p>
+                                <p id="nw-position-sum" class="privacy-sensitive-value mt-3 text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">₹0</p>
+                                <p class="mt-2 text-xs text-slate-400">Includes tracked investments and loan balances</p>
                             </div>
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200 text-xl">
                                 <i class="fa-solid fa-scale-balanced"></i>
@@ -792,8 +809,8 @@
                         <div class="glass-card rounded-2xl p-4 border border-emerald-400/10">
                             <div class="flex items-center justify-between gap-3">
                                 <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-200/70">Assets</p>
-                                    <p id="nw-assets-sum" class="mt-2 text-xl font-bold text-emerald-300">₹0</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-200/70">Assets incl. investments</p>
+                                    <p id="nw-assets-sum" class="privacy-sensitive-value mt-2 text-xl font-bold text-emerald-300">₹0</p>
                                 </div>
                                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300"><i class="fa-solid fa-arrow-trend-up"></i></span>
                             </div>
@@ -801,12 +818,23 @@
                         <div class="glass-card rounded-2xl p-4 border border-rose-400/10">
                             <div class="flex items-center justify-between gap-3">
                                 <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-rose-200/70">Liabilities</p>
-                                    <p id="nw-liabilities-sum" class="mt-2 text-xl font-bold text-rose-300">₹0</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-rose-200/70">Debt incl. loans</p>
+                                    <p id="nw-liabilities-sum" class="privacy-sensitive-value mt-2 text-xl font-bold text-rose-300">₹0</p>
                                 </div>
                                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-400/10 text-rose-300"><i class="fa-solid fa-arrow-trend-down"></i></span>
                             </div>
                         </div>
+                    </div>
+                    <p class="px-1 text-[10px] leading-relaxed text-slate-500">When portfolio values are tracked, they replace balance-sheet rows labelled as investments to avoid double-counting. Loan balances are included unless an equivalent debt is already listed.</p>
+
+                    <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div><h4 class="text-sm font-bold text-white">Net-worth history</h4><p id="nw-history-caption" class="text-[10px] text-slate-500 mt-1">Monthly snapshots are saved automatically as your tracked balances change.</p></div>
+                            <p id="nw-history-change" class="text-xs font-bold text-slate-300">Building your history</p>
+                        </div>
+                        <div id="nw-history-chart" class="privacy-sensitive-value min-h-[170px] overflow-hidden rounded-2xl bg-slate-950/30 p-2" role="img" aria-label="Monthly net-worth history chart"></div>
+                        <div id="nw-history-breakdown" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                        <p id="nw-history-driver" class="text-[10px] leading-relaxed text-slate-500">Monthly changes will show whether cash, investments, other assets, or debt moved your net worth most.</p>
                     </div>
 
                     <form onsubmit="addNetWorthItem(event)" class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
@@ -1164,6 +1192,7 @@
         let liveStockRetryTimer = null;
         let liveStockRetryDelay = 1500;
         let liveStockSaveTimer = null;
+        let netWorthHistoryRefreshTimer = null;
         let privacyLockBackgroundedAt = 0;
 
         // Persistent Collections
@@ -1178,6 +1207,7 @@
             { id: 2, name: 'Mutual Funds', value: 340000, type: 'asset' },
             { id: 3, name: 'Credit Card Loan', value: 15000, type: 'liability' }
         ];
+        let netWorthHistory = JSON.parse(localStorage.getItem('ef_net_worth_history') || '[]');
 
         let sips = JSON.parse(localStorage.getItem('ef_sips')) || [
             { id: 1, name: 'Nifty 50 Index Fund', amount: 5000, date: 5 },
@@ -1284,7 +1314,7 @@
             }
             const isPrimary = ['dashboard', 'networth', 'sip', 'calendar'].includes(tabId);
             if (!isPrimary) moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
-            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
+            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
             document.getElementById('mobile-screen-title').innerText = titles[tabId] || 'ExpenseFlow';
         }
 
@@ -1549,6 +1579,7 @@
             localStorage.setItem('ef_dividends', JSON.stringify(dividends));
             localStorage.setItem('ef_investment_costs', JSON.stringify(investmentCosts));
             localStorage.setItem('ef_fixed_income', JSON.stringify(fixedIncomeInvestments));
+            localStorage.setItem('ef_net_worth_history', JSON.stringify(netWorthHistory));
 
             // Calculators
             const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
@@ -1559,8 +1590,9 @@
             const previousMonthExpenses = transactions.filter(t => t.type === 'expense' && typeof t.date === 'string' && t.date.slice(0, 7) === previousMonth).reduce((sum, t) => sum + t.amount, 0);
             const inc = monthTransactions.filter(t => t.type === 'income').reduce((a,b) => a + b.amount, 0);
             const exp = monthTransactions.filter(t => t.type === 'expense').reduce((a,b) => a + b.amount, 0);
-            let assets = networthItems.filter(i => i.type === 'asset').reduce((a,b) => a + b.value, 0);
-            let liab = networthItems.filter(i => i.type === 'liability').reduce((a,b) => a + b.value, 0);
+            const netWorthSnapshot = recordNetWorthSnapshot();
+            let assets = netWorthSnapshot.assets;
+            let liab = netWorthSnapshot.debts;
 
             document.getElementById('kpi-income').innerText = `${currSym}${inc.toLocaleString()}`;
             document.getElementById('kpi-expense').innerText = `${currSym}${exp.toLocaleString()}`;
@@ -1575,6 +1607,7 @@
             }
             document.getElementById('kpi-cashflow').innerText = `${currSym}${(inc - exp).toLocaleString()}`;
             document.getElementById('kpi-networth').innerText = `${currSym}${(assets - liab).toLocaleString()}`;
+            renderSpendingAnomalies();
 
             const savingsRate = inc > 0 ? Math.round(((inc - exp) / inc) * 100) : null;
             const savingsRateElement = document.getElementById('insight-savings-rate');
@@ -1680,6 +1713,92 @@
 
         function normalizeMerchantKey(value) {
             return String(value || '').replace(/^\s*\[sms\]\s*/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function renderSpendingAnomalies() {
+            const container = document.getElementById('spending-anomaly-list');
+            if (!container) return;
+            const alerts = [];
+            const today = new Date();
+            today.setHours(12, 0, 0, 0);
+            const todayKey = localDateString(today);
+            const expenses = transactions.filter(item => item.type === 'expense' && Number(item.amount) > 0 && /^\d{4}-\d{2}-\d{2}$/.test(item.date || '') && item.date <= todayKey);
+            const dateOffset = days => {
+                const date = new Date(today);
+                date.setDate(date.getDate() - days);
+                return localDateString(date);
+            };
+            const dateDistance = (first, second) => Math.abs((Date.parse(`${first}T12:00:00`) - Date.parse(`${second}T12:00:00`)) / 86400000);
+            const money = value => `${currSym}${Math.round(Number(value) || 0).toLocaleString()}`;
+
+            const duplicateGroups = new Map();
+            expenses.forEach(item => {
+                const description = normalizeMerchantKey(item.desc);
+                if (description.length < 4) return;
+                const key = `${description}|${Math.round(Number(item.amount) * 100)}`;
+                if (!duplicateGroups.has(key)) duplicateGroups.set(key, []);
+                duplicateGroups.get(key).push(item);
+            });
+            duplicateGroups.forEach(group => {
+                const sorted = group.slice().sort((a, b) => a.date.localeCompare(b.date));
+                for (let index = 1; index < sorted.length; index++) {
+                    const earlier = sorted[index - 1];
+                    const later = sorted[index];
+                    if (dateDistance(earlier.date, later.date) <= 1) {
+                        alerts.push({ type: 'duplicate', date: later.date, title: 'Possible duplicate charge', detail: `${escapeHtml(later.desc)} appears twice for ${money(later.amount)} within a day.` });
+                        break;
+                    }
+                }
+            });
+
+            expenses.filter(item => item.date >= dateOffset(30)).forEach(item => {
+                const comparable = expenses.filter(previous => previous.id !== item.id
+                    && previous.category === item.category
+                    && previous.date < item.date
+                    && previous.date >= dateOffset(120))
+                    .map(previous => Number(previous.amount) || 0)
+                    .sort((a, b) => a - b);
+                if (comparable.length < 3) return;
+                const middle = Math.floor(comparable.length / 2);
+                const median = comparable.length % 2 ? comparable[middle] : (comparable[middle - 1] + comparable[middle]) / 2;
+                if (Number(item.amount) >= Math.max(500, median * 2.5) && Number(item.amount) - median >= 500) {
+                    alerts.push({ type: 'unusual', date: item.date, title: 'Unusually large purchase', detail: `${escapeHtml(item.desc)} was ${money(item.amount)}, well above your usual ${escapeHtml(item.category || 'uncategorized')} purchase of about ${money(median)}.` });
+                }
+            });
+
+            const transactionMatchesSubscription = (transaction, subscription) => {
+                const description = normalizeMerchantKey(transaction.desc);
+                const name = normalizeMerchantKey(subscription.name);
+                if (!description || !name) return false;
+                if (description.includes(name) || name.includes(description)) return true;
+                return name.split(' ').filter(token => token.length >= 4).some(token => description.split(' ').includes(token));
+            };
+            subscriptions.forEach(subscription => {
+                const matches = expenses.filter(item => transactionMatchesSubscription(item, subscription)).sort((a, b) => b.date.localeCompare(a.date));
+                const latest = matches[0];
+                if (!latest || latest.date < dateOffset(60)) return;
+                const savedCost = Number(subscription.cost) || 0;
+                let previousAmount = savedCost;
+                let previousLabel = 'saved price';
+                if (matches[1] && dateDistance(latest.date, matches[1].date) >= 20 && dateDistance(latest.date, matches[1].date) <= 45) {
+                    previousAmount = Number(matches[1].amount) || savedCost;
+                    previousLabel = 'previous charge';
+                }
+                if (previousAmount > 0 && Number(latest.amount) - previousAmount >= 10 && Number(latest.amount) > previousAmount * 1.05) {
+                    alerts.push({ type: 'subscription', date: latest.date, title: 'Subscription price may have increased', detail: `${escapeHtml(subscription.name)} was charged ${money(latest.amount)} versus ${money(previousAmount)} (${previousLabel}).` });
+                }
+            });
+
+            const rank = { subscription: 0, duplicate: 1, unusual: 2 };
+            alerts.sort((a, b) => (rank[a.type] - rank[b.type]) || b.date.localeCompare(a.date));
+            const visibleAlerts = alerts.slice(0, 6);
+            document.getElementById('spending-anomaly-count').innerText = `${alerts.length} ${alerts.length === 1 ? 'alert' : 'alerts'}`;
+            container.innerHTML = visibleAlerts.length ? visibleAlerts.map(alert => {
+                const style = alert.type === 'duplicate' ? 'border-amber-400/15 bg-amber-400/5 text-amber-200'
+                    : alert.type === 'subscription' ? 'border-violet-400/15 bg-violet-400/5 text-violet-200'
+                    : 'border-rose-400/15 bg-rose-400/5 text-rose-200';
+                return `<article class="rounded-2xl border ${style} p-3"><div class="flex items-start justify-between gap-2"><p class="text-[11px] font-bold">${escapeHtml(alert.title)}</p><time class="shrink-0 text-[9px] text-slate-500">${escapeHtml(alert.date)}</time></div><p class="privacy-sensitive-value mt-1 text-[10px] leading-relaxed text-slate-300">${alert.detail}</p></article>`;
+            }).join('') : '<p class="rounded-2xl border border-dashed border-white/10 p-4 text-center text-[11px] text-slate-500 lg:col-span-2">No unusual spending patterns found in recent transactions. Alerts are prompts to review, not proof of an error.</p>';
         }
 
         function rememberedMerchantCategory(description) {
@@ -2200,9 +2319,129 @@
             saveAndRender();
         }
 
+        function calculateNetWorthBreakdown() {
+            const assetItems = networthItems.filter(item => item.type === 'asset');
+            const liabilityItems = networthItems.filter(item => item.type === 'liability');
+            const isInvestmentRow = item => /investment|mutual\s*fund|stocks?|shares?|equity|portfolio|\bsip\b|\betf\b|bonds?/i.test(String(item.name || ''));
+            const manuallyListedInvestments = assetItems.filter(isInvestmentRow).reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+            const otherAssetRows = assetItems.filter(item => !isInvestmentRow(item));
+            const trackedInvestments = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0)
+                + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0)
+                + fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const investmentValue = trackedInvestments > 0 ? trackedInvestments : manuallyListedInvestments;
+            const cash = otherAssetRows.filter(item => /cash|bank|savings?|wallet/i.test(String(item.name || ''))).reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+            const otherAssets = otherAssetRows.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+            const manualDebts = liabilityItems.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+            const additionalLoanDebt = loans.filter(loan => {
+                const loanName = normalizeMerchantKey(loan.name);
+                if (!loanName) return true;
+                return !liabilityItems.some(item => {
+                    const itemName = normalizeMerchantKey(item.name);
+                    return itemName === loanName || (itemName.length >= 6 && loanName.length >= 6 && (itemName.includes(loanName) || loanName.includes(itemName)));
+                });
+            }).reduce((sum, loan) => sum + (Number(loan.remaining) || 0), 0);
+            const debts = manualDebts + additionalLoanDebt;
+            const assets = otherAssets + investmentValue;
+            return { cash, otherAssets: Math.max(0, otherAssets - cash), investments: investmentValue, assets, debts, netWorth: assets - debts };
+        }
+
+        function recordNetWorthSnapshot() {
+            const month = getCurrentMonth();
+            const date = localDateString(new Date());
+            const snapshot = { month, date, ...calculateNetWorthBreakdown() };
+            const existingIndex = netWorthHistory.findIndex(item => item.month === month);
+            if (existingIndex >= 0) netWorthHistory[existingIndex] = snapshot;
+            else netWorthHistory.push(snapshot);
+            netWorthHistory = netWorthHistory
+                .filter(item => /^\d{4}-\d{2}$/.test(item.month) && Number.isFinite(Number(item.netWorth)))
+                .sort((a, b) => a.month.localeCompare(b.month))
+                .slice(-24);
+            localStorage.setItem('ef_net_worth_history', JSON.stringify(netWorthHistory));
+            return snapshot;
+        }
+
+        function scheduleNetWorthHistoryRefresh() {
+            if (netWorthHistoryRefreshTimer) return;
+            netWorthHistoryRefreshTimer = setTimeout(() => {
+                netWorthHistoryRefreshTimer = null;
+                const snapshot = recordNetWorthSnapshot();
+                const setText = (id, value) => { const node = document.getElementById(id); if (node) node.innerText = value; };
+                setText('kpi-networth', `${currSym}${snapshot.netWorth.toLocaleString()}`);
+                setText('nw-assets-sum', `${currSym}${snapshot.assets.toLocaleString()}`);
+                setText('nw-liabilities-sum', `${currSym}${snapshot.debts.toLocaleString()}`);
+                setText('nw-position-sum', `${currSym}${snapshot.netWorth.toLocaleString()}`);
+                renderNetWorthHistory();
+            }, 10000);
+        }
+
+        function renderNetWorthHistory() {
+            const chart = document.getElementById('nw-history-chart');
+            if (!chart) return;
+            const history = netWorthHistory.slice(-12);
+            const latest = history[history.length - 1];
+            const previous = history.length > 1 ? history[history.length - 2] : null;
+            const amountText = value => `${currSym}${Math.round(Number(value) || 0).toLocaleString()}`;
+            const changeNode = document.getElementById('nw-history-change');
+            const driverNode = document.getElementById('nw-history-driver');
+            const captionNode = document.getElementById('nw-history-caption');
+            if (latest && previous) {
+                const change = Number(latest.netWorth) - Number(previous.netWorth);
+                changeNode.innerText = `${change >= 0 ? '+' : '−'}${amountText(Math.abs(change))} since ${new Date(`${previous.month}-01T12:00:00`).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`;
+                changeNode.className = `text-xs font-bold ${change >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+                const drivers = [
+                    { label: 'Cash', impact: Number(latest.cash) - Number(previous.cash) },
+                    { label: 'Other assets', impact: Number(latest.otherAssets) - Number(previous.otherAssets) },
+                    { label: 'Investments', impact: Number(latest.investments) - Number(previous.investments) },
+                    { label: 'Debt', impact: Number(previous.debts) - Number(latest.debts) }
+                ].sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact));
+                const driver = drivers[0];
+                driverNode.innerText = Math.abs(driver.impact) > 0.01
+                    ? `${driver.label} was the biggest change, ${driver.impact >= 0 ? 'adding' : 'reducing'} ${amountText(Math.abs(driver.impact))} to net worth since the previous snapshot.`
+                    : 'Your tracked balances were unchanged since the previous snapshot.';
+                captionNode.innerText = `Monthly snapshots · latest saved ${latest.date}`;
+            } else {
+                changeNode.innerText = 'History started';
+                changeNode.className = 'text-xs font-bold text-slate-300';
+                driverNode.innerText = 'Your first snapshot is saved. As balances change in future months, this view will show the biggest contributors.';
+                captionNode.innerText = latest ? `First monthly snapshot · ${latest.date}` : 'Monthly snapshots are saved automatically as your tracked balances change.';
+            }
+
+            const cards = latest ? [
+                ['Cash', latest.cash, 'text-cyan-200'],
+                ['Other assets', latest.otherAssets, 'text-emerald-200'],
+                ['Investments', latest.investments, 'text-violet-200'],
+                ['Debt', latest.debts, 'text-rose-200']
+            ] : [];
+            document.getElementById('nw-history-breakdown').innerHTML = cards.map(([label, value, color]) => `<div class="rounded-xl border border-white/5 bg-slate-950/30 p-2.5"><p class="text-[9px] uppercase tracking-wide text-slate-500">${label}</p><p class="privacy-sensitive-value mt-1 text-xs font-bold ${color}">${amountText(value)}</p></div>`).join('');
+
+            if (!history.length) {
+                chart.innerHTML = '<p class="py-14 text-center text-xs text-slate-500">Your monthly net-worth history will appear here.</p>';
+                return;
+            }
+            const width = 600;
+            const top = 20;
+            const bottom = 152;
+            const left = 38;
+            const right = 582;
+            const values = history.map(item => Number(item.netWorth) || 0);
+            const minValue = Math.min(0, ...values);
+            const maxValue = Math.max(0, ...values);
+            const valueRange = maxValue - minValue || 1;
+            const points = history.map((item, index) => ({
+                x: history.length === 1 ? (left + right) / 2 : left + index * (right - left) / (history.length - 1),
+                y: bottom - ((Number(item.netWorth) - minValue) / valueRange) * (bottom - top),
+                item
+            }));
+            const path = points.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+            const labels = points.map(point => `<text x="${point.x.toFixed(1)}" y="184" text-anchor="middle" fill="#94a3b8" font-size="9">${new Date(`${point.item.month}-01T12:00:00`).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })}</text>`).join('');
+            const dots = points.map(point => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="3.5" fill="#67e8f9"><title>${point.item.month}: ${amountText(point.item.netWorth)}</title></circle>`).join('');
+            chart.innerHTML = `<svg viewBox="0 0 ${width} 196" class="block h-[190px] w-full" role="img" aria-label="Net worth over the last ${history.length} recorded months"><line x1="${left}" y1="20" x2="${right}" y2="20" stroke="rgba(148,163,184,.12)"/><line x1="${left}" y1="86" x2="${right}" y2="86" stroke="rgba(148,163,184,.12)"/><line x1="${left}" y1="152" x2="${right}" y2="152" stroke="rgba(148,163,184,.12)"/><path d="${path}" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+        }
+
         function renderNetWorth() {
-            let assets = networthItems.filter(i => i.type === 'asset').reduce((a,b) => a + b.value, 0);
-            let liab = networthItems.filter(i => i.type === 'liability').reduce((a,b) => a + b.value, 0);
+            const breakdown = recordNetWorthSnapshot();
+            const assets = breakdown.assets;
+            const liab = breakdown.debts;
             const assetItems = networthItems.filter(i => i.type === 'asset');
             const liabilityItems = networthItems.filter(i => i.type === 'liability');
 
@@ -2232,6 +2471,7 @@
 
             document.getElementById('nw-assets-list').innerHTML = renderItems(assetItems, 'asset');
             document.getElementById('nw-liabilities-list').innerHTML = renderItems(liabilityItems, 'liability');
+            renderNetWorthHistory();
         }
 
         // SIP Tracker
@@ -2795,6 +3035,7 @@
             if (gainSummary) gainSummary.className = `privacy-sensitive-value text-sm font-bold ${oneTimeValue >= oneTimeInvested ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
             renderLiveAllocation();
             renderInvestmentReport();
+            scheduleNetWorthHistoryRefresh();
         }
 
         function renderLiveAllocation() {
