@@ -906,8 +906,8 @@
 
                 <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
                     <div class="flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-200"><i class="fa-solid fa-arrows-rotate"></i></span><div><h4 class="text-sm font-bold text-white">Market prices</h4><p class="text-[10px] text-slate-500">Daily AMFI NAV · automatic Upstox stock quotes</p></div></div>
-                        <button type="button" onclick="refreshInvestmentPrices()" class="shrink-0 px-3.5 py-2.5 rounded-xl bg-cyan-500/15 border border-cyan-400/20 text-cyan-100 text-xs font-bold hover:bg-cyan-500/25"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
+                        <div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-200"><i class="fa-solid fa-arrows-rotate"></i></span><div><h4 class="text-sm font-bold text-white">Market prices</h4><p class="text-[10px] text-slate-500">Daily AMFI NAV · live Upstox stock prices</p></div></div>
+                        <button type="button" onclick="refreshInvestmentPrices(); syncLiveStockPriceStream()" class="shrink-0 px-3.5 py-2.5 rounded-xl bg-cyan-500/15 border border-cyan-400/20 text-cyan-100 text-xs font-bold hover:bg-cyan-500/25" title="Refresh now and reconnect the live feed"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button>
                     </div>
                     <details class="rounded-2xl border border-white/5 bg-slate-950/25 p-3">
                         <summary class="cursor-pointer text-[11px] font-semibold text-slate-300">Connect free Upstox market data</summary>
@@ -917,7 +917,8 @@
                             <button type="button" onclick="saveUpstoxAnalyticsToken()" class="px-4 py-2.5 rounded-xl bg-teal-500/15 text-teal-200 text-xs font-bold hover:bg-teal-500/25">Save token</button>
                         </div>
                     </details>
-                    <p id="investment-price-status" aria-live="polite" class="text-[11px] text-slate-300">AMFI mutual fund NAVs update on trading days. NSE stock quotes refresh every 5 minutes while the app is open (read-only Upstox token required).</p>
+                    <p id="investment-price-status" aria-live="polite" class="text-[11px] text-slate-300">NSE stocks stream live while ExpenseFlow is open. AMFI mutual fund NAVs update on trading days; five-minute stock refresh is used if live streaming is unavailable.</p>
+                    <p id="stock-live-status" aria-live="polite" class="text-[10px] text-cyan-200">Live NSE feed: waiting for saved stock holdings.</p>
                     <p class="text-[10px] text-slate-500">Prices may be delayed or unavailable outside market hours. Each holding shows its source and latest retrieval time.</p>
                 </div>
 
@@ -1155,6 +1156,14 @@
         let smsWatching = false;
         let investmentRefreshTimer = null;
         let investmentRefreshInProgress = false;
+        let liveStockSocket = null;
+        let liveStockTargetMap = new Map();
+        let liveStockStreamKeys = new Set();
+        let liveStockSyncInProgress = false;
+        let liveStockSyncPending = false;
+        let liveStockRetryTimer = null;
+        let liveStockRetryDelay = 1500;
+        let liveStockSaveTimer = null;
         let privacyLockBackgroundedAt = 0;
 
         // Persistent Collections
@@ -1224,9 +1233,16 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     privacyLockBackgroundedAt = Date.now();
+                    if (liveStockSaveTimer) {
+                        clearTimeout(liveStockSaveTimer);
+                        liveStockSaveTimer = null;
+                        localStorage.setItem('ef_one_time_investments', JSON.stringify(oneTimeInvestments));
+                    }
+                    if (liveStockSocket && liveStockSocket.readyState < WebSocket.CLOSING) liveStockSocket.close(1000, 'ExpenseFlow in background');
                     return;
                 }
                 refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+                syncLiveStockPriceStream();
                 if (localStorage.getItem('ef_privacy_lock_enabled') === 'true' && privacyLockBackgroundedAt && Date.now() - privacyLockBackgroundedAt >= 30000) {
                     showPrivacyLockScreen();
                     unlockExpenseFlow();
@@ -2493,6 +2509,307 @@
             return Object.values(result.data);
         }
 
+        function readProtoVarint(bytes, cursor) {
+            let value = 0n;
+            let shift = 0n;
+            while (cursor.offset < bytes.length && shift <= 70n) {
+                const byte = bytes[cursor.offset++];
+                value |= BigInt(byte & 0x7f) << shift;
+                if ((byte & 0x80) === 0) return value;
+                shift += 7n;
+            }
+            throw new Error('Invalid live market data message.');
+        }
+
+        function forEachProtoField(bytes, callback) {
+            const cursor = { offset: 0 };
+            while (cursor.offset < bytes.length) {
+                const tag = readProtoVarint(bytes, cursor);
+                const field = Number(tag >> 3n);
+                const wire = Number(tag & 7n);
+                if (!field) throw new Error('Invalid live market data field.');
+                let value;
+                if (wire === 0) value = readProtoVarint(bytes, cursor);
+                else if (wire === 1) {
+                    if (cursor.offset + 8 > bytes.length) throw new Error('Incomplete live price value.');
+                    value = new DataView(bytes.buffer, bytes.byteOffset + cursor.offset, 8).getFloat64(0, true);
+                    cursor.offset += 8;
+                } else if (wire === 2) {
+                    const length = Number(readProtoVarint(bytes, cursor));
+                    if (!Number.isSafeInteger(length) || length < 0 || cursor.offset + length > bytes.length) throw new Error('Incomplete live market data field.');
+                    value = bytes.subarray(cursor.offset, cursor.offset + length);
+                    cursor.offset += length;
+                } else if (wire === 5) {
+                    if (cursor.offset + 4 > bytes.length) throw new Error('Incomplete live market data value.');
+                    value = new DataView(bytes.buffer, bytes.byteOffset + cursor.offset, 4).getFloat32(0, true);
+                    cursor.offset += 4;
+                } else throw new Error('Unsupported live market data field.');
+                callback(field, wire, value);
+            }
+        }
+
+        function decodeLiveLtpc(bytes) {
+            const price = { ltp: 0, ltt: '', cp: null };
+            forEachProtoField(bytes, (field, wire, value) => {
+                if (field === 1 && wire === 1) price.ltp = value;
+                else if (field === 2 && wire === 0) price.ltt = value.toString();
+                else if (field === 4 && wire === 1) price.cp = value;
+            });
+            return price;
+        }
+
+        function decodeLiveFeed(bytes) {
+            let price = null;
+            forEachProtoField(bytes, (field, wire, value) => {
+                if (wire !== 2) return;
+                if (field === 1) price = decodeLiveLtpc(value);
+                else if (field === 2) {
+                    forEachProtoField(value, (fullField, fullWire, fullBytes) => {
+                        if (fullWire !== 2 || (fullField !== 1 && fullField !== 2)) return;
+                        forEachProtoField(fullBytes, (marketField, marketWire, marketBytes) => {
+                            if (marketField === 1 && marketWire === 2) price = decodeLiveLtpc(marketBytes);
+                        });
+                    });
+                } else if (field === 3) {
+                    forEachProtoField(value, (greekField, greekWire, greekBytes) => {
+                        if (greekField === 1 && greekWire === 2) price = decodeLiveLtpc(greekBytes);
+                    });
+                }
+            });
+            return price;
+        }
+
+        function decodeLiveFeedResponse(bytes) {
+            const updates = [];
+            const decoder = new TextDecoder();
+            forEachProtoField(bytes, (field, wire, value) => {
+                if (field !== 2 || wire !== 2) return;
+                let instrumentKey = '';
+                let feed = null;
+                forEachProtoField(value, (entryField, entryWire, entryValue) => {
+                    if (entryField === 1 && entryWire === 2) instrumentKey = decoder.decode(entryValue);
+                    else if (entryField === 2 && entryWire === 2) feed = entryValue;
+                });
+                if (instrumentKey && feed) {
+                    const price = decodeLiveFeed(feed);
+                    if (price && Number.isFinite(price.ltp) && price.ltp > 0) updates.push({ instrumentKey, ...price });
+                }
+            });
+            return updates;
+        }
+
+        function setLiveStockStatus(message, state = 'info') {
+            const element = document.getElementById('stock-live-status');
+            if (!element) return;
+            element.innerText = message;
+            element.className = `text-[10px] ${state === 'connected' ? 'text-emerald-300' : state === 'error' ? 'text-amber-200' : 'text-cyan-200'}`;
+        }
+
+        function sendLiveStockSubscription(socket, method, keys) {
+            if (!keys.length || socket.readyState !== WebSocket.OPEN) return;
+            const guid = globalThis.crypto?.randomUUID?.() || `expenseflow-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const request = { guid, method, data: { instrumentKeys: keys } };
+            if (method === 'sub') request.data.mode = 'ltpc';
+            socket.send(new TextEncoder().encode(JSON.stringify(request)));
+        }
+
+        function queueLiveStockRetry(message) {
+            setLiveStockStatus(message, 'error');
+            if (document.hidden || liveStockRetryTimer) return;
+            const delay = liveStockRetryDelay;
+            liveStockRetryDelay = Math.min(30000, Math.round(liveStockRetryDelay * 1.7));
+            liveStockRetryTimer = setTimeout(() => {
+                liveStockRetryTimer = null;
+                syncLiveStockPriceStream();
+            }, delay);
+        }
+
+        async function syncLiveStockPriceStream() {
+            if (liveStockSyncInProgress) {
+                liveStockSyncPending = true;
+                return;
+            }
+            liveStockSyncInProgress = true;
+            try {
+                if (document.hidden) return setLiveStockStatus('Live feed paused while the app is in the background.');
+                const token = localStorage.getItem('ef_upstox_analytics_token') || '';
+                const stockTargets = oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock' && item.symbol);
+                if (typeof WebSocket === 'undefined') throw new Error('This app environment does not support live connections. Five-minute quote refresh remains available.');
+                if (!stockTargets.length) {
+                    if (liveStockSocket && liveStockSocket.readyState < WebSocket.CLOSING) liveStockSocket.close(1000, 'No stock holdings');
+                    liveStockSocket = null;
+                    liveStockStreamKeys.clear();
+                    liveStockTargetMap.clear();
+                    return setLiveStockStatus('Live NSE feed: add a stock ticker and share count to start.');
+                }
+                if (!token) {
+                    if (liveStockSocket && liveStockSocket.readyState < WebSocket.CLOSING) liveStockSocket.close(1000, 'Upstox token removed');
+                    liveStockSocket = null;
+                    liveStockStreamKeys.clear();
+                    liveStockTargetMap.clear();
+                    return setLiveStockStatus('Live NSE prices need your saved free Upstox Analytics Token.', 'error');
+                }
+
+                const desired = new Map();
+                const lookupErrors = [];
+                await Promise.all(stockTargets.map(async item => {
+                    try {
+                        const instrument = item.instrumentKey
+                            ? { instrumentKey: item.instrumentKey, tradingSymbol: item.symbol }
+                            : await getUpstoxInstrument(item.symbol, token);
+                        item.instrumentKey = instrument.instrumentKey;
+                        if (!desired.has(instrument.instrumentKey)) desired.set(instrument.instrumentKey, []);
+                        desired.get(instrument.instrumentKey).push(item);
+                    } catch (error) { lookupErrors.push(`${item.name}: ${error.message}`); }
+                }));
+                liveStockTargetMap = desired;
+                if (lookupErrors.length) setLiveStockStatus(`Could not link ${lookupErrors.slice(0, 2).join('; ')}.`, 'error');
+                localStorage.setItem('ef_one_time_investments', JSON.stringify(oneTimeInvestments));
+                if (!desired.size) return;
+
+                if (liveStockSocket && liveStockSocket.readyState === WebSocket.OPEN) {
+                    const nextKeys = new Set(desired.keys());
+                    const removed = [...liveStockStreamKeys].filter(key => !nextKeys.has(key));
+                    const added = [...nextKeys].filter(key => !liveStockStreamKeys.has(key));
+                    sendLiveStockSubscription(liveStockSocket, 'unsub', removed);
+                    sendLiveStockSubscription(liveStockSocket, 'sub', added);
+                    liveStockStreamKeys = nextKeys;
+                    setLiveStockStatus(`Live NSE feed connected · ${nextKeys.size} stock${nextKeys.size === 1 ? '' : 's'} subscribed.`, 'connected');
+                    return;
+                }
+                if (liveStockSocket && liveStockSocket.readyState === WebSocket.CONNECTING) return;
+                if (liveStockSocket) {
+                    liveStockSocket = null;
+                    liveStockStreamKeys.clear();
+                }
+
+                setLiveStockStatus('Connecting to the live NSE feed…');
+                const response = await marketGet('https://api.upstox.com/v3/feed/market-data-feed/authorize', {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json'
+                });
+                const authorization = typeof response === 'string' ? JSON.parse(response) : response;
+                const socketUrl = authorization?.data?.authorized_redirect_uri;
+                if (!socketUrl || !socketUrl.startsWith('wss://')) throw new Error('Upstox did not provide a live feed URL. Check the token and network.');
+                const socket = new WebSocket(socketUrl);
+                socket.binaryType = 'arraybuffer';
+                liveStockSocket = socket;
+                socket.onopen = () => {
+                    if (liveStockSocket !== socket) return socket.close();
+                    const keys = [...liveStockTargetMap.keys()];
+                    sendLiveStockSubscription(socket, 'sub', keys);
+                    liveStockStreamKeys = new Set(keys);
+                    liveStockRetryDelay = 1500;
+                    setLiveStockStatus(`Live NSE feed connected · ${keys.length} stock${keys.length === 1 ? '' : 's'} subscribed.`, 'connected');
+                };
+                socket.onmessage = async message => {
+                    if (liveStockSocket !== socket) return;
+                    try {
+                        const buffer = message.data instanceof ArrayBuffer ? message.data : message.data instanceof Blob ? await message.data.arrayBuffer() : null;
+                        if (!buffer) return;
+                        const updates = decodeLiveFeedResponse(new Uint8Array(buffer));
+                        if (!updates.length) return;
+                        updates.forEach(update => applyLiveStockPrice(update));
+                        setLiveStockStatus(`Live NSE prices · last tick ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`, 'connected');
+                    } catch (error) { console.warn('Could not decode live stock data:', error); }
+                };
+                socket.onerror = () => {
+                    if (liveStockSocket === socket) setLiveStockStatus('Live feed interrupted; five-minute quote refresh will be used while reconnecting.', 'error');
+                };
+                socket.onclose = () => {
+                    if (liveStockSocket !== socket) return;
+                    liveStockSocket = null;
+                    liveStockStreamKeys.clear();
+                    if (!document.hidden && localStorage.getItem('ef_upstox_analytics_token')) queueLiveStockRetry('Live feed disconnected; reconnecting. Five-minute quote refresh remains available.', 'error');
+                    else setLiveStockStatus('Live feed paused while the app is in the background.');
+                };
+            } catch (error) {
+                queueLiveStockRetry(`Live feed unavailable: ${error.message || String(error)}. Five-minute quote refresh remains available.`);
+            } finally {
+                liveStockSyncInProgress = false;
+                if (liveStockSyncPending) {
+                    liveStockSyncPending = false;
+                    setTimeout(() => syncLiveStockPriceStream(), 0);
+                }
+            }
+        }
+
+        function applyLiveStockPrice(update) {
+            const targets = liveStockTargetMap.get(update.instrumentKey) || [];
+            if (!targets.length) return;
+            const checkedAt = new Date();
+            const marketTime = Number(update.ltt) > 0 ? new Date(Number(update.ltt)) : checkedAt;
+            const marketTimeText = marketTime.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            targets.forEach(item => {
+                item.quote = update.ltp;
+                item.quoteDate = marketTimeText;
+                item.quoteSource = 'Upstox live';
+                item.quoteCheckedAt = checkedAt.toISOString();
+                item.changePercent = Number(update.cp) > 0 ? ((update.ltp - Number(update.cp)) / Number(update.cp)) * 100 : null;
+                if (Number(item.units) > 0) item.currentValue = Number(item.units) * update.ltp;
+                const id = Number(item.id);
+                const valueNode = document.querySelector(`[data-live-stock-value="${id}"]`);
+                if (valueNode && Number(item.units) > 0) valueNode.innerText = `${currSym}${Number(item.currentValue).toLocaleString()}`;
+                const returnNode = document.querySelector(`[data-live-stock-return="${id}"]`);
+                if (returnNode && Number(item.units) > 0) {
+                    const invested = Number(item.invested) || 0;
+                    const gain = Number(item.currentValue) - invested;
+                    const percent = invested > 0 ? gain / invested * 100 : 0;
+                    returnNode.innerText = `${gain >= 0 ? '+' : '-'}${currSym}${Math.abs(gain).toLocaleString()} (${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%)`;
+                    returnNode.className = `privacy-sensitive-value ${gain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold`;
+                }
+                const quoteNode = document.querySelector(`[data-live-stock-quote="${id}"]`);
+                if (quoteNode) {
+                    quoteNode.innerText = `Last traded ${currSym}${Number(update.ltp).toLocaleString()} · Upstox live${item.changePercent == null ? '' : ` · today ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%`} · ${marketTimeText}`;
+                    quoteNode.classList.remove('hidden');
+                }
+                const freshnessNode = document.querySelector(`[data-live-stock-freshness="${id}"]`);
+                if (freshnessNode) freshnessNode.innerText = `Live · received just now · market data ${marketTimeText}`;
+            });
+            updateLiveInvestmentSummary();
+            if (!liveStockSaveTimer) liveStockSaveTimer = setTimeout(() => {
+                localStorage.setItem('ef_one_time_investments', JSON.stringify(oneTimeInvestments));
+                liveStockSaveTimer = null;
+            }, 500);
+        }
+
+        function updateLiveInvestmentSummary() {
+            const sipInvested = sips.reduce((sum, item) => sum + (Number(item.invested) || 0), 0) + sipContributions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const invested = sipInvested + oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0) + fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
+            const oneTimeInvested = oneTimeInvestments.reduce((sum, item) => sum + (Number(item.invested) || 0), 0);
+            const oneTimeValue = oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const current = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeValue + fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const dividendsTotal = dividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const costs = investmentCosts.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const gain = current - invested + dividendsTotal;
+            const setText = (id, value) => { const node = document.getElementById(id); if (node) node.innerText = value; };
+            setText('sip-current-value', `${currSym}${current.toLocaleString()}`);
+            setText('sip-total-invested', `${currSym}${invested.toLocaleString()}`);
+            setText('sip-gain-loss', `${gain >= 0 ? '+' : '-'}${currSym}${Math.abs(gain).toLocaleString()}`);
+            setText('sip-gain-percent', invested > 0 ? `${gain >= 0 ? '+' : ''}${(gain / invested * 100).toFixed(2)}% overall return` : 'Add invested amount to calculate return');
+            setText('portfolio-net-after-costs', `Estimated return after logged dividends, fees, and taxes: ${gain - costs >= 0 ? '+' : '-'}${currSym}${Math.abs(gain - costs).toLocaleString()}`);
+            setText('one-time-invested-summary', `${currSym}${oneTimeInvested.toLocaleString()}`);
+            setText('one-time-value-summary', `${currSym}${oneTimeValue.toLocaleString()}`);
+            setText('one-time-gain-summary', `${oneTimeValue >= oneTimeInvested ? '+' : '-'}${currSym}${Math.abs(oneTimeValue - oneTimeInvested).toLocaleString()}`);
+            const gainSummary = document.getElementById('one-time-gain-summary');
+            if (gainSummary) gainSummary.className = `privacy-sensitive-value text-sm font-bold ${oneTimeValue >= oneTimeInvested ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
+            renderLiveAllocation();
+            renderInvestmentReport();
+        }
+
+        function renderLiveAllocation() {
+            const stock = oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const funds = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeInvestments.filter(item => item.marketType === 'mutualFund').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const fixed = fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
+            const total = stock + funds + fixed;
+            for (const [key, amount] of [['stock', stock], ['fund', funds], ['fixed', fixed]]) {
+                const valueNode = document.querySelector(`[data-live-allocation-value="${key}"]`);
+                const barNode = document.querySelector(`[data-live-allocation-bar="${key}"]`);
+                if (valueNode) valueNode.innerText = `${currSym}${amount.toLocaleString()} · ${total > 0 ? (amount / total * 100).toFixed(1) : '0.0'}%`;
+                if (barNode) barNode.style.width = `${total > 0 ? (amount / total * 100).toFixed(2) : '0'}%`;
+            }
+        }
+
         function shouldRefreshAmfiNav() {
             const lastChecked = Number(localStorage.getItem('ef_amfi_nav_last_check') || 0);
             return Date.now() - lastChecked >= 6 * 60 * 60 * 1000;
@@ -2514,18 +2831,22 @@
             }
             const marketDate = item.quoteDate ? ` · market data ${escapeHtml(item.quoteDate)}` : '';
             const quoteLabel = item.quote ? `${checkedLabel} · ${escapeHtml(source)}${marketDate}` : checkedLabel;
-            return `<p class="text-[10px] text-slate-500 mt-1">${quoteLabel}</p>`;
+            return `<p data-live-stock-freshness="${Number(item.id)}" class="text-[10px] text-slate-500 mt-1">${quoteLabel}</p>`;
         }
 
         function startInvestmentPriceAutoRefresh() {
             if (investmentRefreshTimer) clearInterval(investmentRefreshTimer);
             refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+            syncLiveStockPriceStream();
             investmentRefreshTimer = setInterval(() => {
-                if (!document.hidden) refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+                if (!document.hidden) {
+                    refreshInvestmentPrices({ automatic: true, includeNav: shouldRefreshAmfiNav() });
+                    if (!liveStockSocket || liveStockSocket.readyState !== WebSocket.OPEN) syncLiveStockPriceStream();
+                }
             }, 5 * 60 * 1000);
         }
 
-        async function refreshInvestmentPrices({ automatic = false, includeNav = true } = {}) {
+        async function refreshInvestmentPrices({ automatic = false, includeNav = true, includeStocks = true } = {}) {
             const status = document.getElementById('investment-price-status');
             if (investmentRefreshInProgress) return;
             const token = localStorage.getItem('ef_upstox_analytics_token') || '';
@@ -2533,8 +2854,10 @@
                 ...sips.filter(sip => sip.schemeCode).map(item => ({ type: 'mutualFund', item })),
                 ...oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'mutualFund' && item.symbol).map(item => ({ type: 'mutualFund', item }))
             ] : [];
-            const stockTargets = oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock' && item.symbol);
+            const liveConnected = liveStockSocket && liveStockSocket.readyState === WebSocket.OPEN;
+            const stockTargets = includeStocks && !(automatic && liveConnected) ? oneTimeInvestments.filter(item => (item.marketType || 'stock') === 'stock' && item.symbol) : [];
             if (!fundTargets.length && !stockTargets.length) {
+                if (automatic && liveConnected && !fundTargets.length) return;
                 status.innerText = sips.length || oneTimeInvestments.length
                     ? 'Your holdings use manual values. Add AMFI codes and units for fund NAVs, or NSE tickers and share counts for automatic prices.'
                     : 'Add a SIP, stock, or mutual fund to start tracking your portfolio.';
@@ -2606,7 +2929,7 @@
             const checkedAt = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
             status.innerText = errors.length
                 ? `${updatedText} at ${checkedAt}. ${errors.slice(0, 2).join(' ')}`
-                : `${updatedText} at ${checkedAt}. Stocks auto-refresh every 5 minutes while this app is open.`;
+                : `${updatedText} at ${checkedAt}. Stocks stream live while this app is open; five-minute refresh is the fallback.`;
             } catch (error) {
                 status.innerText = `Automatic price update failed: ${error.message || String(error)}`;
             } finally {
@@ -2629,11 +2952,13 @@
             document.getElementById('investment-date').valueAsDate = new Date();
             saveAndRender();
             refreshInvestmentPrices({ automatic: true, includeNav: true });
+            syncLiveStockPriceStream();
         }
 
         function deleteOneTimeInvestment(id) {
             oneTimeInvestments = oneTimeInvestments.filter(investment => investment.id !== id);
             saveAndRender();
+            syncLiveStockPriceStream();
         }
 
         function updateOneTimeInvestment(e, id) {
@@ -2662,6 +2987,7 @@
             investment.marketType = marketType;
             saveAndRender();
             refreshInvestmentPrices({ automatic: true, includeNav: true });
+            syncLiveStockPriceStream();
         }
 
         function renderOneTimeInvestments() {
@@ -2669,9 +2995,9 @@
             const currentValue = oneTimeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
             const gainLoss = currentValue - invested;
             document.getElementById('investment-summary').innerHTML = `
-                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time invested</p><p class="privacy-sensitive-value text-sm font-bold text-white mt-1">${currSym}${invested.toLocaleString()}</p></div>
-                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time market value</p><p class="privacy-sensitive-value text-sm font-bold text-cyan-300 mt-1">${currSym}${currentValue.toLocaleString()}</p></div>
-                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time gain / loss</p><p class="privacy-sensitive-value text-sm font-bold ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1">${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}</p></div>
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time invested</p><p id="one-time-invested-summary" class="privacy-sensitive-value text-sm font-bold text-white mt-1">${currSym}${invested.toLocaleString()}</p></div>
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time market value</p><p id="one-time-value-summary" class="privacy-sensitive-value text-sm font-bold text-cyan-300 mt-1">${currSym}${currentValue.toLocaleString()}</p></div>
+                <div class="glass-card p-3 rounded-2xl"><p class="text-[10px] uppercase tracking-wide text-slate-400">One-time gain / loss</p><p id="one-time-gain-summary" class="privacy-sensitive-value text-sm font-bold ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1">${gainLoss >= 0 ? '+' : '-'}${currSym}${Math.abs(gainLoss).toLocaleString()}</p></div>
             `;
             const container = document.getElementById('one-time-investment-list');
             const filter = document.getElementById('investment-list-filter')?.value || 'all';
@@ -2692,11 +3018,11 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-[10px]">
                             <p class="text-slate-400">Invested<br><span class="privacy-sensitive-value text-white font-bold">${currSym}${investedAmount.toLocaleString()}</span></p>
-                            <p class="text-slate-400">Market value<br><span class="privacy-sensitive-value text-cyan-300 font-bold">${currSym}${currentAmount.toLocaleString()}</span></p>
-                            <p class="text-slate-400">Return<br><span class="privacy-sensitive-value ${itemGain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${itemGain >= 0 ? '+' : '-'}${currSym}${Math.abs(itemGain).toLocaleString()} (${returnPercent >= 0 ? '+' : ''}${returnPercent.toFixed(2)}%)</span></p>
+                            <p class="text-slate-400">Market value<br><span data-live-stock-value="${Number(item.id)}" class="privacy-sensitive-value text-cyan-300 font-bold">${currSym}${currentAmount.toLocaleString()}</span></p>
+                            <p class="text-slate-400">Return<br><span data-live-stock-return="${Number(item.id)}" class="privacy-sensitive-value ${itemGain >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${itemGain >= 0 ? '+' : '-'}${currSym}${Math.abs(itemGain).toLocaleString()} (${returnPercent >= 0 ? '+' : ''}${returnPercent.toFixed(2)}%)</span></p>
                         </div>
                         <p class="text-[10px] text-slate-500">Bought ${escapeHtml(item.date || '')}${item.units ? ` · ${Number(item.units).toLocaleString()} units` : ''}</p>
-                        ${item.quote ? `<p class="text-[10px] text-slate-400">${item.quoteSource === 'AMFI' ? 'NAV' : 'Last traded'} ${currSym}${Number(item.quote).toLocaleString()} · ${escapeHtml(item.quoteSource || ((item.marketType || 'stock') === 'mutualFund' ? 'AMFI' : 'Upstox'))}${item.changePercent == null ? '' : ` · today ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%`} ${escapeHtml(item.quoteDate || '')}</p>` : ''}
+                        <p data-live-stock-quote="${Number(item.id)}" class="text-[10px] text-slate-400 ${item.quote ? '' : 'hidden'}">${item.quote ? `${item.quoteSource === 'AMFI' ? 'NAV' : 'Last traded'} ${currSym}${Number(item.quote).toLocaleString()} · ${escapeHtml(item.quoteSource || ((item.marketType || 'stock') === 'mutualFund' ? 'AMFI' : 'Upstox'))}${item.changePercent == null ? '' : ` · today ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%`} ${escapeHtml(item.quoteDate || '')}` : ''}</p>
                         ${investmentFreshnessMarkup(item)}
                         <details class="pt-2 border-t border-white/10">
                             <summary class="cursor-pointer text-[11px] font-semibold text-teal-300">Edit holding details</summary>
@@ -2947,10 +3273,10 @@
             const fundValue = sips.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0) + oneTimeInvestments.filter(item => item.marketType === 'mutualFund').reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
             const fixedValue = fixedIncomeInvestments.reduce((sum, item) => sum + (Number(item.currentValue) || 0), 0);
             const allocationTotal = stockValue + fundValue + fixedValue;
-            const allocations = [{ label: 'Stocks', value: stockValue, color: 'bg-cyan-400' }, { label: 'Mutual funds (including SIPs)', value: fundValue, color: 'bg-violet-400' }, { label: 'Fixed income', value: fixedValue, color: 'bg-amber-400' }];
+            const allocations = [{ key: 'stock', label: 'Stocks', value: stockValue, color: 'bg-cyan-400' }, { key: 'fund', label: 'Mutual funds (including SIPs)', value: fundValue, color: 'bg-violet-400' }, { key: 'fixed', label: 'Fixed income', value: fixedValue, color: 'bg-amber-400' }];
             document.getElementById('investment-allocation').innerHTML = allocationTotal > 0 ? allocations.map(item => {
                 const percent = item.value > 0 ? item.value / allocationTotal * 100 : 0;
-                return `<div><div class="mb-1 flex items-center justify-between gap-3 text-[10px]"><span class="flex items-center gap-2 text-slate-300"><i class="h-2 w-2 rounded-full ${item.color}"></i>${item.label}</span><span class="privacy-sensitive-value text-slate-400">${currSym}${item.value.toLocaleString()} · ${percent.toFixed(1)}%</span></div><div class="h-2 overflow-hidden rounded-full bg-white/5"><div class="h-full rounded-full ${item.color}" style="width:${percent.toFixed(2)}%"></div></div></div>`;
+                return `<div><div class="mb-1 flex items-center justify-between gap-3 text-[10px]"><span class="flex items-center gap-2 text-slate-300"><i class="h-2 w-2 rounded-full ${item.color}"></i>${item.label}</span><span data-live-allocation-value="${item.key}" class="privacy-sensitive-value text-slate-400">${currSym}${item.value.toLocaleString()} · ${percent.toFixed(1)}%</span></div><div class="h-2 overflow-hidden rounded-full bg-white/5"><div data-live-allocation-bar="${item.key}" class="h-full rounded-full ${item.color}" style="width:${percent.toFixed(2)}%"></div></div></div>`;
             }).join('') : '<p class="rounded-xl border border-dashed border-white/10 p-3 text-[10px] text-slate-500">Add current values to see how your portfolio is split.</p>';
 
             const dividendTotal = dividends.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
