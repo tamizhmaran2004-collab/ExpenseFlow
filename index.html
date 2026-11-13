@@ -60,11 +60,27 @@
             --ef-violet: #a78bfa;
             --ef-violet-strong: #8b5cf6;
             --ef-blue: #60a5fa;
+            --ef-accent-100: #ede9fe;
+            --ef-accent-200: #ddd6fe;
+            --ef-accent-300: #c4b5fd;
+            --ef-accent-400: #a78bfa;
+            --ef-accent-strong: #8b5cf6;
+            --ef-accent-solid: #7c3aed;
+            --ef-accent-soft: rgba(139, 92, 246, .14);
+            --ef-accent-border: rgba(167, 139, 250, .22);
+            --ef-secondary-300: #93c5fd;
+            --ef-secondary-400: #60a5fa;
+            --ef-secondary-strong: #2563eb;
+            --ef-secondary-soft: rgba(59, 130, 246, .14);
+            --ef-glow: rgba(91, 33, 182, .14);
         }
+        :root[data-accent="ocean"] { --ef-violet:#7dd3fc; --ef-violet-strong:#0ea5e9; --ef-accent-100:#e0f2fe; --ef-accent-200:#bae6fd; --ef-accent-300:#7dd3fc; --ef-accent-400:#38bdf8; --ef-accent-strong:#0ea5e9; --ef-accent-solid:#0284c7; --ef-accent-soft:rgba(14,165,233,.15); --ef-accent-border:rgba(56,189,248,.25); --ef-secondary-300:#a5f3fc; --ef-secondary-400:#22d3ee; --ef-secondary-strong:#0891b2; --ef-secondary-soft:rgba(34,211,238,.14); --ef-glow:rgba(3,105,161,.18); }
+        :root[data-accent="mint"] { --ef-violet:#6ee7b7; --ef-violet-strong:#10b981; --ef-accent-100:#d1fae5; --ef-accent-200:#a7f3d0; --ef-accent-300:#6ee7b7; --ef-accent-400:#34d399; --ef-accent-strong:#10b981; --ef-accent-solid:#059669; --ef-accent-soft:rgba(16,185,129,.15); --ef-accent-border:rgba(52,211,153,.24); --ef-secondary-300:#a5f3fc; --ef-secondary-400:#22d3ee; --ef-secondary-strong:#0891b2; --ef-secondary-soft:rgba(34,211,238,.14); --ef-glow:rgba(5,150,105,.16); }
+        :root[data-accent="rose"] { --ef-violet:#fda4af; --ef-violet-strong:#f43f5e; --ef-accent-100:#ffe4e6; --ef-accent-200:#fecdd3; --ef-accent-300:#fda4af; --ef-accent-400:#fb7185; --ef-accent-strong:#f43f5e; --ef-accent-solid:#e11d48; --ef-accent-soft:rgba(244,63,94,.15); --ef-accent-border:rgba(251,113,133,.24); --ef-secondary-300:#fdba74; --ef-secondary-400:#fb923c; --ef-secondary-strong:#ea580c; --ef-secondary-soft:rgba(251,146,60,.14); --ef-glow:rgba(190,24,93,.16); }
 
         body {
             background-color: var(--ef-bg);
-            background-image: radial-gradient(ellipse at 12% 0%, rgba(91, 33, 182, .14), transparent 35%), radial-gradient(ellipse at 90% 12%, rgba(37, 99, 235, .10), transparent 32%);
+            background-image: radial-gradient(ellipse at 12% 0%, var(--ef-glow), transparent 35%), radial-gradient(ellipse at 90% 12%, var(--ef-secondary-soft), transparent 32%);
             color: #f3f4f6;
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
@@ -88,8 +104,8 @@
         }
 
         .glass-card:hover {
-            border-color: rgba(167, 139, 250, .34);
-            box-shadow: 0 12px 28px -14px rgba(139, 92, 246, .34);
+            border-color: var(--ef-accent-border);
+            box-shadow: 0 12px 28px -14px var(--ef-accent-soft);
             transform: translateY(-1px);
         }
 
@@ -103,7 +119,7 @@
         .glass-input:focus {
             outline: none;
             border-color: var(--ef-violet);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, .16);
+            box-shadow: 0 0 0 3px var(--ef-accent-soft);
             background-color: rgba(12, 16, 31, .96);
         }
 
@@ -129,7 +145,7 @@
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(167, 139, 250, .72);
+            background: var(--ef-violet);
         }
 
         /* Dynamic Island Glow */
@@ -137,13 +153,13 @@
             background: rgba(9, 12, 24, .94);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(148, 163, 184, .18);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .6), 0 0 22px rgba(139, 92, 246, .14);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .6), 0 0 22px var(--ef-accent-soft);
         }
 
         /* Shared violet and blue accents across every screen */
-        [class~="text-teal-100"] { color: #ede9fe !important; }
-        [class~="text-teal-200"], [class~="text-teal-200/70"] { color: #ddd6fe !important; }
-        [class~="text-teal-300"] { color: #c4b5fd !important; }
+        [class~="text-teal-100"] { color: var(--ef-accent-100) !important; }
+        [class~="text-teal-200"], [class~="text-teal-200/70"] { color: var(--ef-accent-200) !important; }
+        [class~="text-teal-300"] { color: var(--ef-accent-300) !important; }
         [class~="text-teal-400"], [class~="text-teal-400/90"] { color: var(--ef-violet) !important; }
         [class~="text-teal-500/10"] { color: rgba(167, 139, 250, .10) !important; }
         [class~="text-cyan-100"], [class~="text-cyan-100/60"], [class~="text-cyan-100/70"] { color: #dbeafe !important; }
@@ -151,42 +167,54 @@
         [class~="text-cyan-300"] { color: #93c5fd !important; }
         [class~="text-cyan-400"] { color: var(--ef-blue) !important; }
         [class~="text-cyan-500/10"] { color: rgba(96, 165, 250, .10) !important; }
-        [class~="bg-teal-400"] { background-color: #8b5cf6 !important; }
-        [class~="bg-teal-500"] { background-color: #7c3aed !important; }
-        [class~="bg-teal-400/10"], [class~="bg-teal-500/10"] { background-color: rgba(139, 92, 246, .12) !important; }
-        [class~="bg-teal-400/5"], [class~="bg-teal-500/15"], [class~="bg-teal-500/20"] { background-color: rgba(139, 92, 246, .14) !important; }
-        [class~="bg-teal-600/30"] { background-color: rgba(124, 58, 237, .25) !important; }
-        [class~="bg-cyan-400"] { background-color: #3b82f6 !important; }
-        [class~="bg-cyan-300/10"], [class~="bg-cyan-400/10"], [class~="bg-cyan-500/15"], [class~="bg-cyan-500/20"] { background-color: rgba(59, 130, 246, .14) !important; }
-        [class~="bg-cyan-400/5"], [class~="bg-cyan-500/5"], [class~="bg-cyan-600/20"] { background-color: rgba(59, 130, 246, .07) !important; }
-        [class~="bg-cyan-500"] { background-color: #2563eb !important; }
-        [class~="bg-cyan-600/25"] { background-color: rgba(37, 99, 235, .18) !important; }
-        [class~="border-teal-400/10"], [class~="border-teal-400/20"], [class~="border-teal-500/30"], [class~="border-teal-500/40"] { border-color: rgba(167, 139, 250, .22) !important; }
-        [class~="border-cyan-300/20"], [class~="border-cyan-400/10"], [class~="border-cyan-400/15"], [class~="border-cyan-400/20"], [class~="border-cyan-500/30"] { border-color: rgba(96, 165, 250, .20) !important; }
-        [class~="hover:bg-teal-500/25"]:hover, [class~="hover:bg-teal-500/30"]:hover, [class~="hover:bg-teal-500/40"]:hover, [class~="hover:bg-teal-600"]:hover { background-color: rgba(124, 58, 237, .28) !important; }
-        [class~="hover:bg-cyan-400"]:hover, [class~="hover:bg-cyan-500/25"]:hover, [class~="hover:bg-cyan-500/30"]:hover, [class~="hover:bg-cyan-600"]:hover { background-color: rgba(37, 99, 235, .28) !important; }
-        [class~="from-teal-500"] { --tw-gradient-from: #8b5cf6 var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(139 92 246 / 0) var(--tw-gradient-to-position) !important; }
-        [class~="to-cyan-600"] { --tw-gradient-to: #2563eb var(--tw-gradient-to-position) !important; }
-        [class~="hover:from-teal-600"]:hover { --tw-gradient-from: #7c3aed var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(124 58 237 / 0) var(--tw-gradient-to-position) !important; }
-        [class~="hover:to-cyan-700"]:hover { --tw-gradient-to: #1d4ed8 var(--tw-gradient-to-position) !important; }
+        [class~="text-violet-200"] { color: var(--ef-accent-200) !important; }
+        [class~="text-violet-300"] { color: var(--ef-accent-300) !important; }
+        [class~="text-violet-400"] { color: var(--ef-accent-400) !important; }
+        [class~="text-cyan-100"], [class~="text-cyan-100/60"], [class~="text-cyan-100/70"] { color: var(--ef-accent-100) !important; }
+        [class~="text-cyan-200"], [class~="text-cyan-200/70"] { color: var(--ef-accent-200) !important; }
+        [class~="text-cyan-300"] { color: var(--ef-secondary-300) !important; }
+        [class~="text-cyan-400"] { color: var(--ef-blue) !important; }
+        [class~="bg-teal-400"] { background-color: var(--ef-accent-strong) !important; }
+        [class~="bg-teal-500"] { background-color: var(--ef-accent-solid) !important; }
+        [class~="bg-teal-400/10"], [class~="bg-teal-500/10"] { background-color: var(--ef-accent-soft) !important; }
+        [class~="bg-teal-400/5"], [class~="bg-teal-500/15"], [class~="bg-teal-500/20"] { background-color: var(--ef-accent-soft) !important; }
+        [class~="bg-teal-600/30"] { background-color: var(--ef-accent-soft) !important; }
+        [class~="bg-violet-500/15"], [class~="bg-violet-500/20"], [class~="bg-violet-600/30"] { background-color: var(--ef-accent-soft) !important; }
+        [class~="bg-cyan-400"] { background-color: var(--ef-secondary-400) !important; }
+        [class~="bg-cyan-300/10"], [class~="bg-cyan-400/10"], [class~="bg-cyan-500/15"], [class~="bg-cyan-500/20"] { background-color: var(--ef-secondary-soft) !important; }
+        [class~="bg-cyan-400/5"], [class~="bg-cyan-500/5"], [class~="bg-cyan-600/20"] { background-color: var(--ef-secondary-soft) !important; }
+        [class~="bg-cyan-500"] { background-color: var(--ef-secondary-strong) !important; }
+        [class~="bg-cyan-600/25"] { background-color: var(--ef-secondary-soft) !important; }
+        [class~="border-teal-400/10"], [class~="border-teal-400/20"], [class~="border-teal-500/30"], [class~="border-teal-500/40"] { border-color: var(--ef-accent-border) !important; }
+        [class~="border-violet-400/20"], [class~="border-violet-500/40"] { border-color: var(--ef-accent-border) !important; }
+        [class~="border-cyan-300/20"], [class~="border-cyan-400/10"], [class~="border-cyan-400/15"], [class~="border-cyan-400/20"], [class~="border-cyan-500/30"] { border-color: var(--ef-accent-border) !important; }
+        [class~="hover:bg-teal-500/25"]:hover, [class~="hover:bg-teal-500/30"]:hover, [class~="hover:bg-teal-500/40"]:hover, [class~="hover:bg-teal-600"]:hover { background-color: var(--ef-accent-soft) !important; }
+        [class~="hover:bg-cyan-400"]:hover, [class~="hover:bg-cyan-500/25"]:hover, [class~="hover:bg-cyan-500/30"]:hover, [class~="hover:bg-cyan-600"]:hover { background-color: var(--ef-secondary-soft) !important; }
+        [class~="from-teal-500"] { --tw-gradient-from: var(--ef-accent-strong) var(--tw-gradient-from-position) !important; --tw-gradient-to: color-mix(in srgb, var(--ef-accent-strong), transparent) var(--tw-gradient-to-position) !important; }
+        [class~="to-cyan-600"] { --tw-gradient-to: var(--ef-secondary-strong) var(--tw-gradient-to-position) !important; }
+        [class~="hover:from-teal-600"]:hover { --tw-gradient-from: var(--ef-accent-solid) var(--tw-gradient-from-position) !important; --tw-gradient-to: color-mix(in srgb, var(--ef-accent-solid), transparent) var(--tw-gradient-to-position) !important; }
+        [class~="hover:to-cyan-700"]:hover { --tw-gradient-to: var(--ef-secondary-strong) var(--tw-gradient-to-position) !important; }
         button, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
-        button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid rgba(167, 139, 250, .82); outline-offset: 2px; }
+        button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--ef-violet); outline-offset: 2px; }
         input, select, textarea { accent-color: var(--ef-violet-strong); }
         select option { background-color: #111628; color: #eef2ff; }
         #app-sidebar .nav-item { border-radius: 15px; }
         .nav-label-mobile { display: none; }
+        .category-badge { color: var(--category-color); background: rgba(255,255,255,.035); border-color: rgba(255,255,255,.12); }
+        @supports (background: color-mix(in srgb, red, transparent)) { .category-badge { background: color-mix(in srgb, var(--category-color) 12%, transparent); border-color: color-mix(in srgb, var(--category-color) 28%, transparent); } }
+        .progress-ring { width: 74px; height: 74px; flex: 0 0 74px; }
         #quick-add-fab { position: fixed; right: 28px; bottom: 28px; z-index: 45; }
         @media(max-width:767px) {
             #quick-add-fab { right: 18px; bottom: calc(94px + env(safe-area-inset-bottom)); }
         }
         #app-sidebar .nav-item:hover { background-color: rgba(148, 163, 184, .07); }
-        #app-sidebar .nav-item[class~="bg-violet-600/30"] { background-color: rgba(124, 58, 237, .23) !important; border-color: rgba(167, 139, 250, .34) !important; }
-        #app-sidebar .nav-item[class~="bg-violet-600/30"] > i { color: #c4b5fd !important; }
+        #app-sidebar .nav-item[class~="bg-violet-600/30"] { background-color: var(--ef-accent-soft) !important; border-color: var(--ef-accent-border) !important; }
+        #app-sidebar .nav-item[class~="bg-violet-600/30"] > i { color: var(--ef-violet) !important; }
         button { transition: filter .18s ease, transform .18s ease; }
         button:active { transform: scale(.985); }
         #app-sidebar { background: rgba(13, 17, 31, .92); border-color: rgba(148, 163, 184, .13); }
         #app-main > header { background: rgba(15, 19, 34, .88); border-color: rgba(148, 163, 184, .13); }
-        #app-sidebar-brand > div:first-child { background-image: linear-gradient(135deg, #8b5cf6, #3b82f6) !important; box-shadow: 0 10px 28px rgba(99, 102, 241, .24) !important; }
+        #app-sidebar-brand > div:first-child { background-image: linear-gradient(135deg, var(--ef-accent-strong), var(--ef-secondary-strong)) !important; box-shadow: 0 10px 28px var(--ef-accent-soft) !important; }
         .ambient-orb[class~="bg-teal-600/30"] { background-color: rgba(124, 58, 237, .22) !important; }
         .ambient-orb[class~="bg-cyan-600/25"], .ambient-orb[class~="bg-cyan-600/20"] { background-color: rgba(37, 99, 235, .18) !important; }
         html.privacy-start-locked #app-shell, html.privacy-start-locked .ambient-orb, html.privacy-start-locked #mobile-more-menu { visibility: hidden !important; }
@@ -372,6 +400,10 @@
                         <i class="fa-solid fa-piggy-bank text-teal-400 w-5"></i>
                         <span>Savings Goals</span>
                     </button>
+                    <button onclick="switchTab('monthlyreview')" id="nav-monthlyreview" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-calendar-check text-emerald-300 w-5"></i>
+                        <span>Monthly Review</span>
+                    </button>
                     <button onclick="toggleMobileMore()" id="nav-more" aria-expanded="false" aria-controls="mobile-more-menu" class="nav-item w-full items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5">
                         <i class="fa-solid fa-ellipsis text-slate-300 w-5"></i><span>More</span>
                     </button>
@@ -389,12 +421,14 @@
                     <button onclick="switchTab('goals')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-piggy-bank text-teal-300 mr-2"></i>Savings Goals</button>
                     <button onclick="switchTab('insights')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-triangle-exclamation text-amber-300 mr-2"></i>Spending Insights</button>
                     <button onclick="switchTab('debtplanner')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-arrow-down-wide-short text-rose-300 mr-2"></i>Debt Payoff Planner</button>
+                    <button onclick="switchTab('monthlyreview')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-calendar-check text-emerald-300 mr-2"></i>Monthly Review</button>
                 </div>
                 <div class="mt-3 border-t border-white/10 pt-3 flex items-center justify-between gap-3">
                     <label for="mobile-currency-select" class="text-xs text-slate-400">Currency</label>
                     <select id="mobile-currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white"><option value="₹">₹ INR</option><option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option></select>
                     <button onclick="exportToCSV()" class="rounded-xl glass-card px-3 py-2 text-xs text-slate-200"><i class="fa-solid fa-file-csv text-teal-300 mr-1"></i>Export</button>
                 </div>
+                <label class="mt-3 flex items-center justify-between gap-3 text-xs text-slate-400">Accent theme<select id="mobile-accent-theme" onchange="applyAccentTheme(this.value)" class="glass-input rounded-xl px-2.5 py-2 text-xs text-white"><option value="violet">Violet</option><option value="ocean">Ocean</option><option value="mint">Mint</option><option value="rose">Rose</option></select></label>
                 <div class="mt-3 grid grid-cols-2 gap-2">
                     <button onclick="exportDataBackup()" class="more-nav-item rounded-xl bg-teal-500/15 border border-teal-400/20 px-3 py-2.5 text-xs font-semibold text-teal-100"><i class="fa-solid fa-cloud-arrow-down mr-1.5"></i>Back up data</button>
                     <button onclick="document.getElementById('restore-backup-input').click()" class="more-nav-item rounded-xl glass-card px-3 py-2.5 text-xs font-semibold text-slate-200"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Restore backup</button>
@@ -405,6 +439,7 @@
 
             <!-- Sidebar Bottom Settings -->
             <div id="app-sidebar-settings" class="pt-6 border-t border-white/10 space-y-3">
+                <div class="flex items-center justify-between text-xs font-medium text-slate-400"><label for="accent-theme">Accent theme</label><select id="accent-theme" onchange="applyAccentTheme(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white"><option value="violet">Violet</option><option value="ocean">Ocean</option><option value="mint">Mint</option><option value="rose">Rose</option></select></div>
                 <div class="flex items-center justify-between text-xs font-medium text-slate-400">
                     <span>Currency</span>
                     <select id="currency-select" onchange="changeCurrency(this.value)" class="glass-input rounded-xl px-2.5 py-1 text-xs text-white">
@@ -655,9 +690,9 @@
                 <!-- Ledger Table -->
                 <div id="dashboard-ledger" data-dashboard-widget="true" class="glass-panel p-6 rounded-3xl space-y-4">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <h3 class="font-display font-bold text-lg text-white">Recent Transactions</h3>
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <input type="text" id="search-tx" oninput="renderApp()" placeholder="Search description..." class="glass-input rounded-2xl px-4 py-2 text-xs w-full sm:w-64">
+                        <h3 class="font-display font-bold text-lg text-white">Transactions</h3>
+                        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <input type="search" id="search-tx" oninput="renderApp()" placeholder="Search merchant, note, account..." aria-label="Search transactions" class="glass-input rounded-xl px-3 py-2.5 text-xs col-span-2 sm:w-56">
                             <select id="filter-category" onchange="renderApp()" class="glass-input rounded-2xl px-3 py-2 text-xs">
                                 <option value="ALL" class="bg-slate-900">All Categories</option>
                                 <option value="Groceries" class="bg-slate-900">Groceries</option>
@@ -670,8 +705,14 @@
                                 <option value="Loan EMI" class="bg-slate-900">Loan EMI</option>
                                 <option value="General" class="bg-slate-900">General</option>
                             </select>
+                            <select id="filter-type" onchange="renderApp()" aria-label="Filter by transaction type" class="glass-input rounded-xl px-3 py-2.5 text-xs"><option value="ALL">All types</option><option value="expense">Expenses</option><option value="income">Income</option></select>
+                            <select id="filter-account" onchange="renderApp()" aria-label="Filter by account" class="glass-input rounded-xl px-3 py-2.5 text-xs"><option value="ALL">All accounts</option><option>UPI / Wallet</option><option>Bank Account</option><option>Credit Card</option><option>Cash</option></select>
+                            <input type="date" id="filter-date-from" onchange="renderApp()" aria-label="Transactions from date" class="glass-input rounded-xl px-2.5 py-2.5 text-xs">
+                            <input type="date" id="filter-date-to" onchange="renderApp()" aria-label="Transactions to date" class="glass-input rounded-xl px-2.5 py-2.5 text-xs">
+                            <button type="button" onclick="clearTransactionFilters()" class="col-span-2 sm:col-span-1 rounded-xl bg-white/5 px-3 py-2.5 text-xs font-semibold text-slate-300">Clear filters</button>
                         </div>
                     </div>
+                    <p id="transaction-result-count" aria-live="polite" class="-mt-2 text-[10px] text-slate-500"></p>
 
                     <div class="overflow-x-auto rounded-2xl border border-white/10">
                         <table class="w-full text-left text-xs">
@@ -990,6 +1031,7 @@
                             <div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-400/10 text-teal-200"><i class="fa-solid fa-repeat"></i></span><div><h4 class="text-sm font-bold text-white">Monthly SIPs</h4><p class="text-[10px] text-slate-500">Entries are saved in this app when due; correct paid amounts in history.</p></div></div>
                             <span id="sip-count" class="text-[10px] text-slate-400"></span>
                         </div>
+                        <div id="sip-monthly-progress" class="rounded-2xl border border-white/5 bg-slate-950/25 p-3"></div>
                         <form onsubmit="addSipItem(event)" class="rounded-2xl border border-white/5 bg-slate-950/25 p-3.5 space-y-3">
                             <p class="text-[11px] font-bold text-slate-200">Add a monthly SIP</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1186,6 +1228,20 @@
                 </div>
             </section>
 
+            <section id="tab-page-monthlyreview" class="tab-page hidden space-y-6">
+                <div class="flex flex-col gap-3 rounded-3xl border border-white/5 bg-gradient-to-br from-slate-900/90 to-slate-950/70 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+                    <div><p class="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">Your money, this month</p><h3 id="monthly-review-title" class="mt-1 font-display text-2xl font-bold text-white">Monthly Review</h3><p class="mt-1 text-xs text-slate-400">A simple recap of cash flow, spending patterns, and investing.</p></div>
+                    <label class="text-xs font-semibold text-slate-300">Choose month<input id="monthly-review-month" type="month" aria-label="Monthly review month" onchange="document.getElementById('dashboard-month').value=this.value; renderApp()" class="mt-1 block glass-input rounded-xl px-3 py-2 text-sm"></label>
+                </div>
+                <div id="monthly-review-stats" class="grid grid-cols-2 xl:grid-cols-4 gap-3"></div>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <article class="glass-panel rounded-3xl p-4 sm:p-5"><div class="mb-3 flex items-center justify-between"><div><h4 class="text-sm font-bold text-white">Where it went</h4><p class="text-[10px] text-slate-500 mt-1">Spending by category</p></div><i class="fa-solid fa-chart-pie text-teal-300"></i></div><div id="monthly-review-categories" class="space-y-3"></div></article>
+                    <article class="glass-panel rounded-3xl p-4 sm:p-5"><div class="mb-3 flex items-center justify-between"><div><h4 class="text-sm font-bold text-white">Month over month</h4><p class="text-[10px] text-slate-500 mt-1">Compared with the previous calendar month</p></div><i class="fa-solid fa-arrow-right-arrow-left text-cyan-300"></i></div><div id="monthly-review-comparison" class="space-y-3"></div></article>
+                </div>
+                <article class="glass-panel rounded-3xl p-4 sm:p-5"><div class="mb-3 flex items-center justify-between"><div><h4 class="text-sm font-bold text-white">Savings goals snapshot</h4><p class="text-[10px] text-slate-500 mt-1">A quick look at your progress</p></div><button type="button" onclick="switchTab('goals')" class="rounded-xl bg-white/5 px-3 py-2 text-[10px] font-semibold text-slate-200">Manage goals</button></div><div id="monthly-review-goals" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div></article>
+                <button type="button" onclick="exportMonthlyReport()" class="rounded-xl bg-teal-500/15 px-4 py-3 text-xs font-bold text-teal-100"><i class="fa-solid fa-file-arrow-down mr-2"></i>Export this month</button>
+            </section>
+
         </main>
     </div>
 
@@ -1301,6 +1357,7 @@
             document.getElementById('reconcile-balance-date').value = localDateString(new Date());
             document.getElementById('upstox-analytics-token').value = localStorage.getItem('ef_upstox_analytics_token') || '';
             initializePrivacyControls();
+            applyAccentTheme(localStorage.getItem('ef_accent_theme') || 'violet');
             sips.forEach(sip => { if (!sip.startDate) sip.startDate = localDateString(new Date()); });
             processDueSipContributions();
             updateLiveClock();
@@ -1345,6 +1402,57 @@
             const now = new Date();
             document.getElementById('live-date-str').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
             document.getElementById('live-time-str').innerText = now.toLocaleTimeString('en-US', { hour12: false }) + ' IST';
+        }
+
+        const accentThemeSettings = {
+            violet: { violet: '#a78bfa', strong: '#8b5cf6', blue: '#60a5fa', accentStrong: '#8b5cf6', accentSolid: '#7c3aed', accent100: '#ede9fe', accent200: '#ddd6fe', accent300: '#c4b5fd', accent400: '#a78bfa', accentSoft: 'rgba(139,92,246,.14)', accentBorder: 'rgba(167,139,250,.22)', secondary300: '#93c5fd', secondary400: '#60a5fa', secondaryStrong: '#2563eb', secondarySoft: 'rgba(59,130,246,.14)', glow: 'rgba(91,33,182,.14)' },
+            ocean: { violet: '#7dd3fc', strong: '#0ea5e9', blue: '#22d3ee', accentStrong: '#0ea5e9', accentSolid: '#0284c7', accent100: '#e0f2fe', accent200: '#bae6fd', accent300: '#7dd3fc', accent400: '#38bdf8', accentSoft: 'rgba(14,165,233,.15)', accentBorder: 'rgba(56,189,248,.25)', secondary300: '#a5f3fc', secondary400: '#22d3ee', secondaryStrong: '#0891b2', secondarySoft: 'rgba(34,211,238,.14)', glow: 'rgba(3,105,161,.18)' },
+            mint: { violet: '#6ee7b7', strong: '#10b981', blue: '#22d3ee', accentStrong: '#10b981', accentSolid: '#059669', accent100: '#d1fae5', accent200: '#a7f3d0', accent300: '#6ee7b7', accent400: '#34d399', accentSoft: 'rgba(16,185,129,.15)', accentBorder: 'rgba(52,211,153,.24)', secondary300: '#a5f3fc', secondary400: '#22d3ee', secondaryStrong: '#0891b2', secondarySoft: 'rgba(34,211,238,.14)', glow: 'rgba(5,150,105,.16)' },
+            rose: { violet: '#fda4af', strong: '#f43f5e', blue: '#fb923c', accentStrong: '#f43f5e', accentSolid: '#e11d48', accent100: '#ffe4e6', accent200: '#fecdd3', accent300: '#fda4af', accent400: '#fb7185', accentSoft: 'rgba(244,63,94,.15)', accentBorder: 'rgba(251,113,133,.24)', secondary300: '#fdba74', secondary400: '#fb923c', secondaryStrong: '#ea580c', secondarySoft: 'rgba(251,146,60,.14)', glow: 'rgba(190,24,93,.16)' }
+        };
+
+        function applyAccentTheme(theme) {
+            const selected = Object.prototype.hasOwnProperty.call(accentThemeSettings, theme) ? theme : 'violet';
+            const settings = accentThemeSettings[selected];
+            const root = document.documentElement;
+            root.dataset.accent = selected;
+            root.style.setProperty('--ef-violet', settings.violet);
+            root.style.setProperty('--ef-violet-strong', settings.strong);
+            root.style.setProperty('--ef-blue', settings.blue);
+            root.style.setProperty('--ef-accent-100', settings.accent100);
+            root.style.setProperty('--ef-accent-200', settings.accent200);
+            root.style.setProperty('--ef-accent-300', settings.accent300);
+            root.style.setProperty('--ef-accent-400', settings.accent400);
+            root.style.setProperty('--ef-accent-strong', settings.accentStrong);
+            root.style.setProperty('--ef-accent-solid', settings.accentSolid);
+            root.style.setProperty('--ef-accent-soft', settings.accentSoft);
+            root.style.setProperty('--ef-accent-border', settings.accentBorder);
+            root.style.setProperty('--ef-secondary-300', settings.secondary300);
+            root.style.setProperty('--ef-secondary-400', settings.secondary400);
+            root.style.setProperty('--ef-secondary-strong', settings.secondaryStrong);
+            root.style.setProperty('--ef-secondary-soft', settings.secondarySoft);
+            root.style.setProperty('--ef-glow', settings.glow);
+            localStorage.setItem('ef_accent_theme', selected);
+            ['accent-theme', 'mobile-accent-theme'].forEach(id => { const input = document.getElementById(id); if (input) input.value = selected; });
+        }
+
+        const categoryVisuals = {
+            'Groceries': ['fa-basket-shopping', '#34d399'], 'Dining Out': ['fa-utensils', '#fb923c'], 'Salary': ['fa-money-bill-wave', '#4ade80'],
+            'Transport': ['fa-car-side', '#38bdf8'], 'Utilities': ['fa-bolt', '#facc15'], 'Entertainment': ['fa-film', '#c084fc'],
+            'Shopping': ['fa-bag-shopping', '#f472b6'], 'Loan EMI': ['fa-house-chimney', '#fb7185'], 'General': ['fa-receipt', '#a1a1aa']
+        };
+
+        function categoryBadgeMarkup(category) {
+            const name = String(category || 'General');
+            const visual = categoryVisuals[name] || ['fa-tag', '#a1a1aa'];
+            return `<span class="category-badge inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold" style="--category-color:${visual[1]}"><i class="fa-solid ${visual[0]}" aria-hidden="true"></i>${escapeHtml(name)}</span>`;
+        }
+
+        function progressRing(percent, label) {
+            const bounded = Math.max(0, Math.min(100, Number(percent) || 0));
+            const circumference = 188.5;
+            const offset = circumference * (1 - bounded / 100);
+            return `<svg class="progress-ring" viewBox="0 0 72 72" role="img" aria-label="${escapeHtml(label || `${Math.round(bounded)} percent complete`)}"><circle cx="36" cy="36" r="30" fill="none" stroke="rgba(148,163,184,.16)" stroke-width="6"></circle><circle cx="36" cy="36" r="30" fill="none" stroke="var(--ef-violet)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" transform="rotate(-90 36 36)"></circle><text x="36" y="40" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="700">${Math.round(bounded)}%</text></svg>`;
         }
 
         const dashboardWidgets = [
@@ -1492,7 +1600,7 @@
                 moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
                 moreButton.setAttribute('aria-current', 'page');
             }
-            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', debtplanner: 'Debt Payoff Planner', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
+            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', debtplanner: 'Debt Payoff Planner', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals', monthlyreview: 'Monthly Review' };
             document.getElementById('mobile-screen-title').innerText = titles[tabId] || 'ExpenseFlow';
         }
 
@@ -1936,22 +2044,32 @@
 
             // Ledger Table
             const tbody = document.getElementById('tx-table-body');
-            const search = document.getElementById('search-tx').value.toLowerCase();
+            const search = document.getElementById('search-tx').value.trim().toLowerCase();
             const catFilter = document.getElementById('filter-category').value;
+            const typeFilter = document.getElementById('filter-type').value;
+            const accountFilter = document.getElementById('filter-account').value;
+            const dateFrom = document.getElementById('filter-date-from').value;
+            const dateTo = document.getElementById('filter-date-to').value;
 
             const filtered = transactions.filter(t => {
-                const matchSearch = t.desc.toLowerCase().includes(search);
+                const searchable = [t.desc, t.category, t.account, t.type].map(value => String(value || '')).join(' ').toLowerCase();
+                const matchSearch = searchable.includes(search);
                 const matchCat = catFilter === 'ALL' || t.category === catFilter;
-                return matchSearch && matchCat;
+                const matchType = typeFilter === 'ALL' || t.type === typeFilter;
+                const matchAccount = accountFilter === 'ALL' || t.account === accountFilter;
+                const matchStartDate = !dateFrom || String(t.date || '') >= dateFrom;
+                const matchEndDate = !dateTo || String(t.date || '') <= dateTo;
+                return matchSearch && matchCat && matchType && matchAccount && matchStartDate && matchEndDate;
             });
+            document.getElementById('transaction-result-count').innerText = `Showing ${filtered.length} of ${transactions.length} transactions`;
 
             tbody.innerHTML = filtered.map(t => `
                 <tr class="hover:bg-white/5 transition-all">
-                    <td class="p-3.5 text-slate-400 font-mono">${t.date}</td>
-                    <td class="p-3.5 font-semibold text-white">${t.desc}</td>
-                    <td class="dashboard-secondary-column p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10">${t.category}</span></td>
-                    <td class="dashboard-secondary-column p-3.5 text-slate-400">${t.account}</td>
-                    <td class="p-3.5 font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">${t.type === 'income' ? '+' : '-'}${currSym}${t.amount.toLocaleString()}</td>
+                    <td class="p-3.5 text-slate-400 font-mono">${escapeHtml(t.date || '')}</td>
+                    <td class="p-3.5 font-semibold text-white">${escapeHtml(t.desc || '')}</td>
+                    <td class="dashboard-secondary-column p-3.5">${categoryBadgeMarkup(t.category)}</td>
+                    <td class="dashboard-secondary-column p-3.5 text-slate-400">${escapeHtml(t.account || '')}</td>
+                    <td class="p-3.5 font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">${t.type === 'income' ? '+' : '-'}${currSym}${(Number(t.amount) || 0).toLocaleString()}</td>
                     <td class="p-3.5 text-right"><div class="flex justify-end gap-3">${t.receiptId ? `<button onclick="viewReceipt(${Number(t.receiptId)})" aria-label="View receipt" class="text-amber-300 hover:text-amber-100"><i class="fa-solid fa-receipt"></i></button>` : ''}<button onclick="deleteTx(${Number(t.id)})" aria-label="Delete transaction" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></div></td>
                 </tr>
             `).join('');
@@ -1974,9 +2092,55 @@
             renderCashflowForecast();
             renderMerchantCategoryRules();
             updateDashboardPrivacyButton();
+            renderMonthlyReview();
         }
 
         function saveAndRender() { renderApp(); }
+
+        function clearTransactionFilters() {
+            ['search-tx', 'filter-date-from', 'filter-date-to'].forEach(id => { document.getElementById(id).value = ''; });
+            ['filter-category', 'filter-type', 'filter-account'].forEach(id => { document.getElementById(id).value = 'ALL'; });
+            renderApp();
+        }
+
+        function renderMonthlyReview() {
+            const month = document.getElementById('dashboard-month').value || getCurrentMonth();
+            const monthInput = document.getElementById('monthly-review-month');
+            if (monthInput && monthInput.value !== month) monthInput.value = month;
+            const monthDate = new Date(`${month}-01T12:00:00`);
+            const monthLabel = monthDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+            document.getElementById('monthly-review-title').innerText = `${monthLabel} review`;
+            const current = transactions.filter(item => String(item.date || '').startsWith(`${month}-`));
+            const priorDate = new Date(monthDate); priorDate.setMonth(priorDate.getMonth() - 1);
+            const priorMonth = localDateString(priorDate).slice(0, 7);
+            const prior = transactions.filter(item => String(item.date || '').startsWith(`${priorMonth}-`));
+            const sumType = (items, type) => items.filter(item => item.type === type).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const income = sumType(current, 'income'), expense = sumType(current, 'expense'), priorIncome = sumType(prior, 'income'), priorExpense = sumType(prior, 'expense');
+            const net = income - expense;
+            const savingsRate = income > 0 ? `${Math.round(net / income * 100)}%` : '—';
+            const investmentReport = getInvestmentReportData(month);
+            document.getElementById('monthly-review-stats').innerHTML = [
+                ['Income', income, 'fa-arrow-down-to-line', 'text-emerald-300'], ['Spent', expense, 'fa-arrow-up-from-line', 'text-rose-300'], ['Net cash flow', net, 'fa-scale-balanced', net >= 0 ? 'text-teal-200' : 'text-rose-300'], ['Invested', investmentReport.sipContributions + investmentReport.purchases, 'fa-arrow-trend-up', 'text-cyan-200']
+            ].map(([label, amount, icon, color]) => `<div class="glass-panel rounded-2xl p-3 sm:p-4"><div class="flex items-center justify-between text-[10px] uppercase tracking-wide text-slate-500"><span>${label}</span><i class="fa-solid ${icon} ${color}"></i></div><p class="privacy-sensitive-value mt-2 text-lg font-bold ${color}">${currSym}${Number(amount).toLocaleString()}</p>${label === 'Net cash flow' ? `<p class="text-[10px] text-slate-500 mt-1">Savings rate ${savingsRate}</p>` : ''}</div>`).join('');
+
+            const categories = Object.entries(current.filter(item => item.type === 'expense').reduce((totals, item) => {
+                const category = item.category || 'General'; totals[category] = (totals[category] || 0) + (Number(item.amount) || 0); return totals;
+            }, {})).sort((a, b) => b[1] - a[1]);
+            const largestCategory = Math.max(1, ...categories.map(([, amount]) => amount));
+            document.getElementById('monthly-review-categories').innerHTML = categories.length ? categories.slice(0, 6).map(([category, amount]) => `<div><div class="flex items-center justify-between gap-3"><span>${categoryBadgeMarkup(category)}</span><span class="privacy-sensitive-value text-xs font-bold text-slate-200">${currSym}${amount.toLocaleString()}</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/5"><div class="h-full rounded-full" style="width:${Math.round(amount / largestCategory * 100)}%;background:var(--ef-violet)"></div></div></div>`).join('') : '<p class="rounded-xl border border-dashed border-white/10 p-4 text-xs text-slate-500">No expenses recorded for this month yet.</p>';
+
+            const expenseDelta = priorExpense > 0 ? Math.round((expense - priorExpense) / priorExpense * 100) : null;
+            const incomeDelta = priorIncome > 0 ? Math.round((income - priorIncome) / priorIncome * 100) : null;
+            const deltaMarkup = (label, currentValue, previousValue, delta, lowerIsBetter) => `<div class="flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-slate-950/25 p-3"><div><p class="text-[10px] uppercase tracking-wide text-slate-500">${label}</p><p class="privacy-sensitive-value mt-1 text-sm font-bold text-white">${currSym}${currentValue.toLocaleString()}</p><p class="privacy-sensitive-value text-[10px] text-slate-500">Previous: ${currSym}${previousValue.toLocaleString()}</p></div><span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${delta === null ? 'bg-white/5 text-slate-400' : (lowerIsBetter ? delta <= 0 : delta >= 0) ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'}">${delta === null ? 'No baseline' : `${delta > 0 ? '+' : ''}${delta}%`}</span></div>`;
+            document.getElementById('monthly-review-comparison').innerHTML = `${deltaMarkup('Expenses', expense, priorExpense, expenseDelta, true)}${deltaMarkup('Income', income, priorIncome, incomeDelta, false)}<p class="rounded-xl bg-white/[.03] p-3 text-[10px] leading-relaxed text-slate-500">${current.length} transaction${current.length === 1 ? '' : 's'} recorded this month. ${expenseDelta === null ? 'Add data from another month to see a spending trend.' : expenseDelta < 0 ? 'Spending is lower than last month.' : expenseDelta > 0 ? 'Spending is higher than last month.' : 'Spending is unchanged from last month.'}</p>`;
+
+            const goalsContainer = document.getElementById('monthly-review-goals');
+            goalsContainer.innerHTML = goals.length ? goals.slice(0, 3).map(goal => {
+                const target = Math.max(0, Number(goal.target) || 0), saved = Math.max(0, Number(goal.saved) || 0);
+                const percent = target > 0 ? Math.min(100, saved / target * 100) : 0;
+                return `<div class="flex items-center gap-3 rounded-2xl border border-white/5 bg-slate-950/25 p-3">${progressRing(percent, `${goal.name}: ${Math.round(percent)} percent complete`)}<div class="min-w-0"><p class="truncate text-xs font-bold text-white">${escapeHtml(goal.name)}</p><p class="privacy-sensitive-value mt-1 text-[10px] text-slate-400">${currSym}${saved.toLocaleString()} of ${currSym}${target.toLocaleString()}</p></div></div>`;
+            }).join('') : '<p class="text-xs text-slate-500">No savings goals yet. Create one to track a target here.</p>';
+        }
 
         function normalizeMerchantKey(value) {
             return String(value || '').replace(/^\s*\[sms\]\s*/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -2816,6 +2980,14 @@
 
             const sipCount = document.getElementById('sip-count');
             if (sipCount) sipCount.innerText = `${sips.length} ${sips.length === 1 ? 'active SIP' : 'active SIPs'}`;
+            const selectedMonth = document.getElementById('dashboard-month').value || getCurrentMonth();
+            const lastDay = new Date(Number(selectedMonth.slice(0, 4)), Number(selectedMonth.slice(5, 7)), 0).getDate();
+            const cutoffDay = selectedMonth === getCurrentMonth() ? new Date().getDate() : lastDay;
+            const cutoffDate = `${selectedMonth}-${String(cutoffDay).padStart(2, '0')}`;
+            const monthlyTarget = sips.filter(sip => (!sip.startDate || sip.startDate <= cutoffDate) && (Number(sip.date) || 1) <= cutoffDay).reduce((sum, sip) => sum + (Number(sip.amount) || 0), 0);
+            const monthlyPaid = sipContributions.filter(item => String(item.date || '').startsWith(`${selectedMonth}-`)).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+            const sipPercent = monthlyTarget > 0 ? Math.min(100, monthlyPaid / monthlyTarget * 100) : 0;
+            document.getElementById('sip-monthly-progress').innerHTML = `<div class="flex items-center gap-3">${progressRing(sipPercent, `${Math.round(sipPercent)} percent of due SIP contributions recorded for ${selectedMonth}`)}<div><p class="text-xs font-bold text-white">This month’s SIP progress</p><p class="privacy-sensitive-value mt-1 text-[11px] text-slate-300">${currSym}${monthlyPaid.toLocaleString()} paid <span class="text-slate-500">of</span> ${currSym}${monthlyTarget.toLocaleString()} due so far</p><p class="text-[10px] text-slate-500 mt-0.5">Based on installments due by day ${cutoffDay}</p></div></div>`;
             const container = document.getElementById('sip-list');
             const contributionFund = document.getElementById('sip-contribution-fund');
             if (contributionFund) {
@@ -4022,7 +4194,7 @@
                 const saved = Math.max(0, Number(g.saved) || 0);
                 const monthlyContribution = Math.max(0, Number(g.monthlyContribution) || 0);
                 const remaining = Math.max(0, target - saved);
-                const pct = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
+                const pct = target > 0 ? (saved >= target ? 100 : Math.floor((saved / target) * 100)) : 0;
                 let forecast = 'Add a monthly saving amount to estimate your target date.';
                 if (remaining === 0) forecast = 'Goal reached 🎉';
                 else if (monthlyContribution > 0) {
@@ -4036,13 +4208,7 @@
                 const safeName = escapeHtml(g.name);
                 return `
                     <div class="glass-card p-4 rounded-2xl space-y-3">
-                        <div class="flex justify-between text-xs font-bold">
-                            <span class="text-white">${safeName}</span>
-                            <span class="text-teal-400">${currSym}${saved.toLocaleString()} / ${currSym}${target.toLocaleString()} (${pct}%)</span>
-                        </div>
-                        <div class="w-full h-2.5 rounded-full bg-slate-900 overflow-hidden">
-                            <div class="h-full bg-teal-400 rounded-full" style="width: ${pct}%"></div>
-                        </div>
+                        <div class="flex items-center justify-between gap-3">${progressRing(pct, `${safeName}: ${pct} percent complete`)}<div class="min-w-0 flex-1"><h4 class="truncate text-sm font-bold text-white">${safeName}</h4><p class="privacy-sensitive-value mt-1 text-xs font-semibold text-teal-200">${currSym}${saved.toLocaleString()} <span class="text-slate-500">of</span> ${currSym}${target.toLocaleString()}</p><p class="mt-1 text-[10px] text-slate-500">${remaining > 0 ? `${currSym}${remaining.toLocaleString()} remaining` : 'Target reached'}</p></div></div>
                         <div class="rounded-xl border border-teal-400/10 bg-teal-400/5 p-3"><p class="text-[11px] font-semibold text-teal-100">${forecast}</p><p class="text-[10px] text-slate-500 mt-1">Estimate assumes the monthly amount stays the same; investment growth is not included.</p></div>
                         <details class="border-t border-white/10 pt-2"><summary class="cursor-pointer text-[11px] font-semibold text-slate-300">Update saved amount or monthly pace</summary>
                             <form onsubmit="updateSavingsGoal(event, ${Number(g.id)})" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
