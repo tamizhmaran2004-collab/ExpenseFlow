@@ -174,6 +174,11 @@
         input, select, textarea { accent-color: var(--ef-violet-strong); }
         select option { background-color: #111628; color: #eef2ff; }
         #app-sidebar .nav-item { border-radius: 15px; }
+        .nav-label-mobile { display: none; }
+        #quick-add-fab { position: fixed; right: 28px; bottom: 28px; z-index: 45; }
+        @media(max-width:767px) {
+            #quick-add-fab { right: 18px; bottom: calc(94px + env(safe-area-inset-bottom)); }
+        }
         #app-sidebar .nav-item:hover { background-color: rgba(148, 163, 184, .07); }
         #app-sidebar .nav-item[class~="bg-violet-600/30"] { background-color: rgba(124, 58, 237, .23) !important; border-color: rgba(167, 139, 250, .34) !important; }
         #app-sidebar .nav-item[class~="bg-violet-600/30"] > i { color: #c4b5fd !important; }
@@ -210,7 +215,7 @@
                 inset: auto 10px max(10px, env(safe-area-inset-bottom)) 10px;
                 z-index: 50;
                 width: auto;
-                padding: 6px;
+                padding: 6px 8px max(6px, env(safe-area-inset-bottom));
                 border-radius: 22px;
                 background: rgba(12, 16, 29, .98);
                 border: 1px solid rgba(148, 163, 184, .16);
@@ -243,6 +248,10 @@
             }
             #nav-container .nav-item > i { width: auto; font-size: 17px; }
             #nav-container .nav-item > span { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+            #nav-container .nav-label-desktop { display: none; }
+            #nav-container .nav-label-mobile { display: inline; }
+            #nav-container .nav-item[aria-current="page"] { background: rgba(20, 184, 166, .14); border-color: rgba(45, 212, 191, .28); color: #f8fafc; }
+            #nav-container .nav-item[aria-current="page"] > i { color: #5eead4 !important; }
             #nav-sms .ml-auto { display: none; }
             #app-main { width: 100%; gap: 14px; }
             #app-main > header { border-radius: 22px; padding: 14px; gap: 12px; align-items: stretch; background: rgba(15, 19, 34, .96); }
@@ -322,9 +331,9 @@
 
                 <!-- Navigation Links -->
                 <nav class="space-y-1.5" id="nav-container">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" data-mobile-primary="true" aria-current="page" aria-label="Dashboard and transaction ledger" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10">
                         <i class="fa-solid fa-chart-pie text-teal-400 w-5"></i>
-                        <span>Dashboard & Ledger</span>
+                        <span class="nav-label-desktop">Dashboard &amp; Ledger</span><span class="nav-label-mobile">Home</span>
                     </button>
                     <button onclick="switchTab('tools')" id="nav-tools" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
                         <i class="fa-solid fa-screwdriver-wrench text-violet-300 w-5"></i>
@@ -341,11 +350,11 @@
                     </button>
                     <button onclick="switchTab('sip')" id="nav-sip" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
                         <i class="fa-solid fa-chart-line text-cyan-400 w-5"></i>
-                        <span>Investments</span>
+                        <span class="nav-label-desktop">Investments</span><span class="nav-label-mobile">Invest</span>
                     </button>
                     <button onclick="switchTab('calendar')" id="nav-calendar" data-mobile-primary="true" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
                         <i class="fa-solid fa-calendar-days text-teal-400 w-5"></i>
-                        <span>Bill Calendar</span>
+                        <span class="nav-label-desktop">Bill Calendar</span><span class="nav-label-mobile">Bills</span>
                     </button>
                     <button onclick="switchTab('splitter')" id="nav-splitter" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5">
                         <i class="fa-solid fa-users-viewfinder text-amber-400 w-5"></i>
@@ -468,11 +477,17 @@
                         </label>
                         <button id="dashboard-hide-balances" type="button" onclick="toggleDashboardPrivacy()" class="rounded-2xl glass-card px-3 py-2 text-xs font-semibold text-slate-200"><i class="fa-solid fa-eye-slash mr-1.5"></i>Hide balances</button>
                         <button type="button" onclick="exportMonthlyReport()" class="rounded-2xl bg-teal-500/15 border border-teal-400/20 px-3 py-2 text-xs font-bold text-teal-200 hover:bg-teal-500/25"><i class="fa-solid fa-file-arrow-down mr-1.5"></i>Export report</button>
+                        <button id="dashboard-customize-toggle" type="button" onclick="toggleDashboardCustomize()" aria-expanded="false" aria-controls="dashboard-customize-panel" class="rounded-2xl glass-card px-3 py-2 text-xs font-semibold text-slate-200"><i class="fa-solid fa-sliders mr-1.5 text-cyan-300"></i>Customize</button>
                     </div>
+                </div>
+
+                <div id="dashboard-customize-panel" class="hidden glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+                    <div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-bold text-white">Customize dashboard</h3><p class="text-[10px] text-slate-500 mt-1">Hide sections you rarely use or change their order.</p></div><button type="button" onclick="toggleDashboardCustomize(false)" class="rounded-xl bg-white/5 px-3 py-2 text-[10px] font-semibold text-slate-300">Done</button></div>
+                    <div id="dashboard-customize-list" class="space-y-2"></div>
                 </div>
                 
                 <!-- KPI Financial Grid -->
-                <div id="dashboard-kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div id="dashboard-kpis" data-dashboard-widget="true" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="dashboard-kpi glass-card p-5 rounded-3xl relative overflow-hidden">
                         <div class="absolute -right-2 -bottom-2 text-emerald-500/10 text-6xl font-bold"><i class="fa-solid fa-arrow-trend-up"></i></div>
                         <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Monthly Income</p>
@@ -499,14 +514,14 @@
                     </div>
                 </div>
 
-                <div id="dashboard-insights" class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                <div id="dashboard-insights" data-dashboard-widget="true" class="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-piggy-bank text-teal-300"></i> Savings rate</div><p id="insight-savings-rate" class="text-lg font-bold text-white mt-2">—</p><p id="insight-savings-note" class="text-[10px] text-slate-500 mt-1">Based on monthly income</p></div>
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-fire text-amber-300"></i> Top category</div><p id="insight-top-category" class="text-sm font-bold text-white mt-2 truncate">No spending yet</p><p id="insight-top-category-amount" class="text-[10px] text-slate-500 mt-1">Selected month</p></div>
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-calendar-day text-cyan-300"></i> Daily average</div><p id="insight-daily-average" class="text-lg font-bold text-white mt-2">₹0</p><p id="insight-days-note" class="text-[10px] text-slate-500 mt-1">Daily spend this month</p></div>
                     <div class="dashboard-insight glass-panel p-4 rounded-2xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-receipt text-violet-300"></i> Activity</div><p id="insight-transaction-count" class="text-lg font-bold text-white mt-2">0</p><p class="text-[10px] text-slate-500 mt-1">Transactions this month</p></div>
                 </div>
 
-                <div class="glass-panel rounded-3xl p-4 sm:p-5">
+                <div id="dashboard-weekly-recap" data-dashboard-widget="true" class="glass-panel rounded-3xl p-4 sm:p-5">
                     <div class="flex items-center gap-2 mb-3"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300"><i class="fa-solid fa-calendar-week"></i></span><div><h3 class="text-sm font-bold text-white">Weekly spending recap</h3><p id="weekly-recap-range" class="text-[10px] text-slate-500 mt-0.5">Last 7 days</p></div></div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="rounded-2xl border border-white/5 bg-slate-950/30 p-3"><p class="text-[10px] uppercase tracking-wide text-slate-500">Spent this week</p><p id="weekly-recap-total" class="text-lg font-bold text-white mt-1">₹0</p></div>
@@ -516,7 +531,7 @@
                 </div>
 
                 <!-- One-Tap Smart Presets Bar -->
-                <div class="glass-panel p-4 rounded-3xl">
+                <div id="dashboard-presets-section" data-dashboard-widget="true" class="glass-panel p-4 rounded-3xl">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <i class="fa-solid fa-bolt text-amber-400"></i>
                         <span>One-Tap Smart Micro-Expense Presets</span>
@@ -546,7 +561,7 @@
                 </div>
 
                 <!-- Quick Entry Form & Charts Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+                <div id="dashboard-entry-analytics" data-dashboard-widget="true" class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
                     
                     <!-- Quick Add Form -->
                     <div class="lg:col-span-5 glass-panel p-6 rounded-3xl flex flex-col justify-between">
@@ -638,7 +653,7 @@
                 </div>
 
                 <!-- Ledger Table -->
-                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div id="dashboard-ledger" data-dashboard-widget="true" class="glass-panel p-6 rounded-3xl space-y-4">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <h3 class="font-display font-bold text-lg text-white">Recent Transactions</h3>
                         <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -1174,6 +1189,19 @@
         </main>
     </div>
 
+    <button id="quick-add-fab" type="button" onclick="openQuickAdd()" aria-label="Add a transaction" class="flex h-14 items-center gap-2 rounded-full bg-teal-400 px-5 text-sm font-bold text-slate-950 shadow-xl shadow-teal-950/40 transition hover:bg-teal-300 active:scale-95"><i class="fa-solid fa-plus text-lg"></i><span>Quick add</span></button>
+
+    <div id="quick-add-modal" class="hidden fixed inset-0 z-[105] items-end justify-center bg-slate-950/75 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="quick-add-title" onclick="if(event.target===this) closeQuickAdd()">
+        <form id="quick-add-form" onsubmit="quickAddTransaction(event)" class="w-full max-w-lg space-y-4 rounded-t-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl">
+            <div class="flex items-center justify-between"><div><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">Fast entry</p><h2 id="quick-add-title" class="mt-1 text-lg font-bold text-white">Add transaction</h2></div><button type="button" onclick="closeQuickAdd()" aria-label="Close quick add" class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-slate-300"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="grid grid-cols-2 gap-2" role="group" aria-label="Transaction type"><button id="quick-add-expense-type" type="button" onclick="setQuickAddType('expense')" class="rounded-xl border border-rose-400/30 bg-rose-500/15 px-3 py-2.5 text-sm font-semibold text-rose-200">Expense</button><button id="quick-add-income-type" type="button" onclick="setQuickAddType('income')" class="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-semibold text-slate-300">Income</button></div>
+            <input id="quick-add-description" type="text" required maxlength="100" placeholder="What was it for?" aria-label="Description" class="w-full glass-input rounded-2xl px-4 py-3 text-sm">
+            <div class="grid grid-cols-2 gap-3"><label class="text-xs text-slate-400">Amount<input id="quick-add-amount" type="number" min="0.01" step="0.01" required placeholder="₹0.00" class="mt-1 w-full glass-input rounded-xl px-3 py-3 text-sm"></label><label class="text-xs text-slate-400">Category<select id="quick-add-category" class="mt-1 w-full glass-input rounded-xl px-3 py-3 text-sm"><option>Groceries</option><option>Dining Out</option><option>Salary</option><option>Transport</option><option>Utilities</option><option>Entertainment</option><option>Shopping</option><option>Loan EMI</option><option>General</option></select></label></div>
+            <div class="grid grid-cols-2 gap-3"><label class="text-xs text-slate-400">Account<select id="quick-add-account" class="mt-1 w-full glass-input rounded-xl px-3 py-3 text-sm"><option>UPI / Wallet</option><option>Bank Account</option><option>Credit Card</option><option>Cash</option></select></label><label class="text-xs text-slate-400">Date<input id="quick-add-date" type="date" required class="mt-1 w-full glass-input rounded-xl px-3 py-3 text-sm"></label></div>
+            <div class="flex gap-2 pt-1"><button type="button" onclick="closeQuickAdd()" class="flex-1 rounded-xl bg-white/5 px-4 py-3 text-sm font-semibold text-slate-300">Cancel</button><button type="submit" class="flex-1 rounded-xl bg-teal-400 px-4 py-3 text-sm font-bold text-slate-950">Save transaction</button></div>
+        </form>
+    </div>
+
     <div id="receipt-viewer" class="hidden fixed inset-0 z-[110] items-center justify-center bg-slate-950/95 p-4" role="dialog" aria-modal="true" aria-label="Transaction receipt">
         <div class="w-full max-w-2xl rounded-3xl border border-white/10 bg-slate-900 p-4 shadow-2xl">
             <div class="mb-3 flex items-center justify-between"><h2 class="text-sm font-bold text-white">Receipt</h2><button type="button" onclick="closeReceiptViewer()" class="rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">Close</button></div>
@@ -1279,6 +1307,9 @@
             setInterval(updateLiveClock, 1000);
             initCharts();
             renderApp();
+            initializeDashboardCustomization();
+            document.getElementById('quick-add-date').valueAsDate = new Date();
+            document.addEventListener('keydown', event => { if (event.key === 'Escape') closeQuickAdd(); });
             startInvestmentPriceAutoRefresh();
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
@@ -1316,6 +1347,128 @@
             document.getElementById('live-time-str').innerText = now.toLocaleTimeString('en-US', { hour12: false }) + ' IST';
         }
 
+        const dashboardWidgets = [
+            { id: 'dashboard-kpis', label: 'Monthly totals' },
+            { id: 'dashboard-insights', label: 'Spending insights' },
+            { id: 'dashboard-weekly-recap', label: 'Weekly recap' },
+            { id: 'dashboard-presets-section', label: 'Quick expense presets' },
+            { id: 'dashboard-entry-analytics', label: 'Add transaction and charts' },
+            { id: 'dashboard-ledger', label: 'Transaction history' }
+        ];
+        let dashboardWidgetOrder = dashboardWidgets.map(widget => widget.id);
+        let dashboardWidgetVisibility = Object.fromEntries(dashboardWidgets.map(widget => [widget.id, true]));
+        let quickAddType = 'expense';
+
+        function initializeDashboardCustomization() {
+            try {
+                const storedOrder = JSON.parse(localStorage.getItem('ef_dashboard_widget_order') || '[]');
+                const savedOrder = Array.isArray(storedOrder) ? storedOrder : [];
+                dashboardWidgetOrder = [...savedOrder.filter(id => dashboardWidgets.some(widget => widget.id === id)), ...dashboardWidgets.map(widget => widget.id).filter(id => !savedOrder.includes(id))];
+                const savedVisibility = JSON.parse(localStorage.getItem('ef_dashboard_widget_visibility') || '{}');
+                dashboardWidgetVisibility = Object.fromEntries(dashboardWidgets.map(widget => [widget.id, savedVisibility[widget.id] !== false]));
+            } catch (_) {
+                dashboardWidgetOrder = dashboardWidgets.map(widget => widget.id);
+                dashboardWidgetVisibility = Object.fromEntries(dashboardWidgets.map(widget => [widget.id, true]));
+            }
+            applyDashboardCustomization();
+        }
+
+        function applyDashboardCustomization() {
+            const dashboard = document.getElementById('tab-page-dashboard');
+            const list = document.getElementById('dashboard-customize-list');
+            if (!dashboard || !list) return;
+            dashboardWidgetOrder.forEach(id => {
+                const widget = document.getElementById(id);
+                if (widget) {
+                    dashboard.appendChild(widget);
+                    widget.style.display = dashboardWidgetVisibility[id] ? '' : 'none';
+                }
+            });
+            localStorage.setItem('ef_dashboard_widget_order', JSON.stringify(dashboardWidgetOrder));
+            localStorage.setItem('ef_dashboard_widget_visibility', JSON.stringify(dashboardWidgetVisibility));
+            list.replaceChildren();
+            dashboardWidgetOrder.forEach((id, index) => {
+                const definition = dashboardWidgets.find(widget => widget.id === id);
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 rounded-2xl border border-white/5 bg-slate-950/25 px-3 py-2';
+                const label = document.createElement('label');
+                label.className = 'flex min-w-0 flex-1 items-center gap-2 text-xs font-medium text-slate-200';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox'; checkbox.checked = dashboardWidgetVisibility[id]; checkbox.className = 'h-4 w-4 accent-teal-400';
+                checkbox.setAttribute('aria-label', `Show ${definition.label}`);
+                checkbox.addEventListener('change', () => setDashboardWidgetVisible(id, checkbox.checked));
+                const text = document.createElement('span'); text.textContent = definition.label;
+                label.append(checkbox, text);
+                const up = document.createElement('button');
+                up.type = 'button'; up.textContent = '↑'; up.disabled = index === 0; up.setAttribute('aria-label', `Move ${definition.label} up`);
+                up.className = 'h-9 w-9 rounded-xl bg-white/5 text-slate-200 disabled:opacity-30'; up.onclick = () => moveDashboardWidget(id, -1);
+                const down = document.createElement('button');
+                down.type = 'button'; down.textContent = '↓'; down.disabled = index === dashboardWidgetOrder.length - 1; down.setAttribute('aria-label', `Move ${definition.label} down`);
+                down.className = 'h-9 w-9 rounded-xl bg-white/5 text-slate-200 disabled:opacity-30'; down.onclick = () => moveDashboardWidget(id, 1);
+                row.append(label, up, down); list.appendChild(row);
+            });
+            requestAnimationFrame(() => { if (cashflowChart) cashflowChart.resize(); if (categoryChart) categoryChart.resize(); });
+        }
+
+        function setDashboardWidgetVisible(id, visible) {
+            if (!Object.prototype.hasOwnProperty.call(dashboardWidgetVisibility, id)) return;
+            dashboardWidgetVisibility[id] = Boolean(visible);
+            applyDashboardCustomization();
+        }
+
+        function moveDashboardWidget(id, direction) {
+            const from = dashboardWidgetOrder.indexOf(id), to = from + direction;
+            if (from < 0 || to < 0 || to >= dashboardWidgetOrder.length) return;
+            [dashboardWidgetOrder[from], dashboardWidgetOrder[to]] = [dashboardWidgetOrder[to], dashboardWidgetOrder[from]];
+            applyDashboardCustomization();
+        }
+
+        function toggleDashboardCustomize(force) {
+            const panel = document.getElementById('dashboard-customize-panel');
+            const button = document.getElementById('dashboard-customize-toggle');
+            const open = typeof force === 'boolean' ? force : panel.classList.contains('hidden');
+            panel.classList.toggle('hidden', !open);
+            button.setAttribute('aria-expanded', String(open));
+            if (open) applyDashboardCustomization();
+        }
+
+        function setQuickAddType(type) {
+            quickAddType = type === 'income' ? 'income' : 'expense';
+            const expense = document.getElementById('quick-add-expense-type');
+            const income = document.getElementById('quick-add-income-type');
+            const category = document.getElementById('quick-add-category');
+            category.value = quickAddType === 'income' ? 'Salary' : 'Groceries';
+            expense.className = quickAddType === 'expense' ? 'rounded-xl border border-rose-400/30 bg-rose-500/15 px-3 py-2.5 text-sm font-semibold text-rose-200' : 'rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-semibold text-slate-300';
+            income.className = quickAddType === 'income' ? 'rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-3 py-2.5 text-sm font-semibold text-emerald-200' : 'rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-semibold text-slate-300';
+        }
+
+        function openQuickAdd() {
+            const modal = document.getElementById('quick-add-modal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('quick-add-date').value = localDateString(new Date());
+            setQuickAddType('expense');
+            requestAnimationFrame(() => document.getElementById('quick-add-description').focus());
+        }
+
+        function closeQuickAdd() {
+            const modal = document.getElementById('quick-add-modal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+        }
+
+        function quickAddTransaction(event) {
+            event.preventDefault();
+            const desc = document.getElementById('quick-add-description').value.trim();
+            const amount = Number(document.getElementById('quick-add-amount').value);
+            const date = document.getElementById('quick-add-date').value;
+            if (!desc || !Number.isFinite(amount) || amount <= 0 || !date) return;
+            transactions.unshift({ id: Date.now(), desc, amount, type: quickAddType, category: document.getElementById('quick-add-category').value, account: document.getElementById('quick-add-account').value, date });
+            saveAndRender();
+            document.getElementById('quick-add-form').reset();
+            document.getElementById('quick-add-date').value = localDateString(new Date());
+            closeQuickAdd();
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-page').forEach(page => page.classList.add('hidden'));
             document.getElementById(`tab-page-${tabId}`).classList.remove('hidden');
@@ -1326,14 +1479,19 @@
 
             document.querySelectorAll('#nav-container button').forEach(btn => {
                 btn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-slate-400 hover:text-white hover:bg-white/5";
+                btn.removeAttribute('aria-current');
             });
 
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if (activeBtn) {
                 activeBtn.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
+                activeBtn.setAttribute('aria-current', 'page');
             }
             const isPrimary = ['dashboard', 'networth', 'sip', 'calendar'].includes(tabId);
-            if (!isPrimary) moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
+            if (!isPrimary) {
+                moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
+                moreButton.setAttribute('aria-current', 'page');
+            }
             const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', debtplanner: 'Debt Payoff Planner', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
             document.getElementById('mobile-screen-title').innerText = titles[tabId] || 'ExpenseFlow';
         }
