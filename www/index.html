@@ -379,6 +379,7 @@
                     <button onclick="switchTab('subscriptions')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-rotate text-blue-300 mr-2"></i>Subscriptions</button>
                     <button onclick="switchTab('goals')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-piggy-bank text-teal-300 mr-2"></i>Savings Goals</button>
                     <button onclick="switchTab('insights')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-triangle-exclamation text-amber-300 mr-2"></i>Spending Insights</button>
+                    <button onclick="switchTab('debtplanner')" class="more-nav-item glass-card rounded-2xl px-3 py-2 text-left text-xs font-semibold text-white"><i class="fa-solid fa-arrow-down-wide-short text-rose-300 mr-2"></i>Debt Payoff Planner</button>
                 </div>
                 <div class="mt-3 border-t border-white/10 pt-3 flex items-center justify-between gap-3">
                     <label for="mobile-currency-select" class="text-xs text-slate-400">Currency</label>
@@ -732,6 +733,24 @@
                     <p class="text-[10px] text-slate-500 mt-2">Categories you chose to remember from transaction entry.</p>
                     <div id="merchant-category-rules" class="mt-3 space-y-2"></div>
                 </details>
+            </section>
+
+            <!-- Debt payoff planning -->
+            <section id="tab-page-debtplanner" class="tab-page hidden space-y-6">
+                <div class="px-1">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-rose-300">Choose a payoff order</p>
+                    <h3 class="font-display font-bold text-2xl text-white mt-1">Debt Payoff Planner</h3>
+                    <p class="text-xs text-slate-400 mt-1">Compare the snowball and avalanche methods using your saved loan balances, EMIs, and interest rates.</p>
+                </div>
+                <div class="glass-panel rounded-3xl p-4 sm:p-5 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="glass-card rounded-2xl p-4"><p class="text-[10px] uppercase tracking-wide text-slate-500">Total outstanding</p><p id="debt-planner-total" class="privacy-sensitive-value mt-1 text-xl font-bold text-white">₹0</p></div>
+                        <label class="glass-card rounded-2xl p-4"><span class="block text-[10px] uppercase tracking-wide text-slate-500">Extra payment each month</span><span class="mt-2 flex items-center gap-2 text-sm font-bold text-rose-200">₹<input id="debt-extra-payment" type="number" min="0" step="100" value="0" oninput="updateDebtPlanner()" aria-label="Extra monthly debt payment" class="glass-input min-w-0 flex-1 rounded-xl px-3 py-2 text-sm"></span></label>
+                    </div>
+                    <div id="debt-planner-empty" class="hidden rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-xs text-slate-500">Add a loan or EMI in Money Tools to compare payoff plans.</div>
+                    <div id="debt-planner-results" aria-live="polite" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+                    <p class="text-[10px] leading-relaxed text-slate-500">Estimates assume rates and monthly payments stay the same. They exclude fees, penalties, and lender-specific payment rules. Check with your lender before making extra payments.</p>
+                </div>
             </section>
 
             <!-- TAB 3: AUTOMATIC BANK SMS DETECTION -->
@@ -1230,6 +1249,7 @@
         let accountReconciliations = JSON.parse(localStorage.getItem('ef_account_reconciliations') || '[]');
         let merchantCategoryRules = JSON.parse(localStorage.getItem('ef_merchant_category_rules') || '{}');
         let loans = JSON.parse(localStorage.getItem('ef_loans') || '[]');
+        let debtExtraPayment = Math.max(0, Number(localStorage.getItem('ef_debt_extra_payment')) || 0);
         let dividends = JSON.parse(localStorage.getItem('ef_dividends') || '[]');
         let investmentCosts = JSON.parse(localStorage.getItem('ef_investment_costs') || '[]');
         let fixedIncomeInvestments = JSON.parse(localStorage.getItem('ef_fixed_income') || '[]');
@@ -1314,7 +1334,7 @@
             }
             const isPrimary = ['dashboard', 'networth', 'sip', 'calendar'].includes(tabId);
             if (!isPrimary) moreButton.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-white bg-violet-600/30 border border-violet-500/40 shadow-lg shadow-violet-500/10";
-            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
+            const titles = { dashboard: 'Dashboard & Ledger', tools: 'Money Tools', sms: 'SMS Auto-Parser', insights: 'Spending Insights', debtplanner: 'Debt Payoff Planner', networth: 'Net Worth', sip: 'Investments', calendar: 'Bill Calendar', splitter: 'Expense Splitter', budgets: 'Budget Caps', subscriptions: 'Subscriptions', goals: 'Savings Goals' };
             document.getElementById('mobile-screen-title').innerText = titles[tabId] || 'ExpenseFlow';
         }
 
@@ -1520,6 +1540,94 @@
             }).join('') : '<p class="rounded-2xl border border-dashed border-white/10 p-4 text-[11px] text-slate-500 sm:col-span-2">No bills or EMIs added yet.</p>';
         }
 
+        function updateDebtPlanner() {
+            const input = document.getElementById('debt-extra-payment');
+            debtExtraPayment = Math.max(0, Number(input?.value) || 0);
+            localStorage.setItem('ef_debt_extra_payment', String(debtExtraPayment));
+            renderDebtPlanner();
+        }
+
+        function simulateDebtPayoff(strategy) {
+            const balances = loans.map(loan => ({
+                id: loan.id,
+                name: String(loan.name || 'Loan'),
+                balance: Math.max(0, Number(loan.remaining) || 0),
+                emi: Math.max(0, Number(loan.emi) || 0),
+                rate: Math.max(0, Number(loan.rate) || 0)
+            })).filter(loan => loan.balance > 0);
+            if (!balances.length) return null;
+            const initialDebt = balances.reduce((sum, loan) => sum + loan.balance, 0);
+            const baseMonthly = balances.reduce((sum, loan) => sum + loan.emi, 0);
+            const priority = items => strategy === 'snowball'
+                ? items.sort((a, b) => a.balance - b.balance || b.rate - a.rate)
+                : items.sort((a, b) => b.rate - a.rate || a.balance - b.balance);
+            const order = priority(balances.slice()).map(loan => loan.name);
+            let totalInterest = 0;
+            let months = 0;
+
+            while (balances.some(loan => loan.balance > 0.01) && months < 600) {
+                months++;
+                let extraPool = debtExtraPayment;
+                balances.forEach(loan => {
+                    if (loan.balance <= 0) {
+                        extraPool += loan.emi;
+                        return;
+                    }
+                    const interest = loan.balance * loan.rate / 1200;
+                    totalInterest += interest;
+                    const due = loan.balance + interest;
+                    const minimum = Math.min(due, loan.emi);
+                    loan.balance = Math.max(0, due - minimum);
+                    extraPool += Math.max(0, loan.emi - minimum);
+                });
+                for (const loan of priority(balances.filter(item => item.balance > 0.01))) {
+                    if (extraPool <= 0) break;
+                    const payment = Math.min(loan.balance, extraPool);
+                    loan.balance = Math.max(0, loan.balance - payment);
+                    extraPool -= payment;
+                }
+                if (baseMonthly + debtExtraPayment <= 0) return null;
+            }
+            if (balances.some(loan => loan.balance > 0.01)) return null;
+            const payoffDate = new Date();
+            payoffDate.setDate(1);
+            payoffDate.setMonth(payoffDate.getMonth() + months);
+            return { months, totalInterest, totalPaid: initialDebt + totalInterest, monthlyBudget: baseMonthly + debtExtraPayment, payoffDate: payoffDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }), order };
+        }
+
+        function renderDebtPlanner() {
+            const input = document.getElementById('debt-extra-payment');
+            const totalNode = document.getElementById('debt-planner-total');
+            const emptyNode = document.getElementById('debt-planner-empty');
+            const resultsNode = document.getElementById('debt-planner-results');
+            if (!input || !totalNode || !emptyNode || !resultsNode) return;
+            if (document.activeElement !== input) input.value = String(debtExtraPayment);
+            const activeLoans = loans.filter(loan => (Number(loan.remaining) || 0) > 0);
+            const totalDebt = activeLoans.reduce((sum, loan) => sum + (Number(loan.remaining) || 0), 0);
+            totalNode.innerText = `${currSym}${totalDebt.toLocaleString()}`;
+            emptyNode.classList.toggle('hidden', activeLoans.length > 0);
+            resultsNode.classList.toggle('hidden', activeLoans.length === 0);
+            if (!activeLoans.length) {
+                resultsNode.innerHTML = '';
+                return;
+            }
+            const plans = [
+                { key: 'snowball', title: 'Snowball', subtitle: 'Smallest balance first', icon: 'fa-snowflake', style: 'border-cyan-400/15 bg-cyan-400/5' },
+                { key: 'avalanche', title: 'Avalanche', subtitle: 'Highest interest rate first', icon: 'fa-mountain-sun', style: 'border-violet-400/15 bg-violet-400/5' }
+            ].map(plan => ({ ...plan, result: simulateDebtPayoff(plan.key) }));
+            const validPlans = plans.filter(plan => plan.result);
+            const bestInterest = validPlans.length ? Math.min(...validPlans.map(plan => plan.result.totalInterest)) : null;
+            resultsNode.innerHTML = plans.map(plan => {
+                const result = plan.result;
+                const order = result ? result.order.slice(0, 3).map((name, index) => `<li class="truncate">${index + 1}. ${escapeHtml(name)}</li>`).join('') : '';
+                const details = result
+                    ? `<div class="mt-3 grid grid-cols-2 gap-3"><div><p class="text-[9px] uppercase text-slate-500">Estimated payoff</p><p class="privacy-sensitive-value mt-1 text-sm font-bold text-white">${result.months} months</p><p class="text-[10px] text-slate-400">Around ${result.payoffDate}</p></div><div><p class="text-[9px] uppercase text-slate-500">Estimated interest</p><p class="privacy-sensitive-value mt-1 text-sm font-bold text-amber-200">${currSym}${Math.round(result.totalInterest).toLocaleString()}</p><p class="text-[10px] text-slate-400">Total paid ${currSym}${Math.round(result.totalPaid).toLocaleString()}</p></div></div><div class="mt-3"><p class="text-[9px] uppercase text-slate-500">Payoff order</p><ol class="mt-1 space-y-0.5 text-[10px] text-slate-300">${order}${result.order.length > 3 ? `<li class="text-slate-500">+ ${result.order.length - 3} more</li>` : ''}</ol></div><p class="mt-3 text-[10px] text-slate-500">Monthly payment budget: ${currSym}${Math.round(result.monthlyBudget).toLocaleString()}</p>`
+                    : '<p class="mt-3 text-[11px] text-amber-200">Could not estimate payoff with these EMI and rate values. Check the loan details or increase the monthly payment.</p>';
+                const badge = result && Math.abs(result.totalInterest - bestInterest) < 0.01 ? '<span class="rounded-full bg-emerald-400/10 px-2 py-1 text-[9px] font-bold text-emerald-200">Lowest interest</span>' : '';
+                return `<article class="rounded-2xl border ${plan.style} p-4"><div class="flex items-start justify-between gap-2"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-slate-200"><i class="fa-solid ${plan.icon}"></i></span><div><h4 class="text-sm font-bold text-white">${plan.title}</h4><p class="text-[10px] text-slate-400">${plan.subtitle}</p></div></div>${badge}</div>${details}</article>`;
+            }).join('');
+        }
+
         function deleteLoan(id) {
             loans = loans.filter(loan => loan.id !== id);
             saveAndRender();
@@ -1704,6 +1812,7 @@
             updateCharts(inc, exp, monthTransactions);
             renderAccountReconciliations();
             renderLoans();
+            renderDebtPlanner();
             renderCashflowForecast();
             renderMerchantCategoryRules();
             updateDashboardPrivacyButton();
